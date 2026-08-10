@@ -20,13 +20,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # Actions are pinned to exact release tags, not floating majors, and
+      # each was checked against the same 7-day release-age gate applied to
+      # npm dependencies.
+      - uses: actions/checkout@v7.0.1
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.33.0
+      # No `version` input: the action reads `packageManager` from
+      # package.json, keeping the pnpm version in exactly one place.
+      - uses: pnpm/action-setup@v6.0.10
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7.0.0
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -52,7 +55,7 @@ jobs:
         # makes a hard refresh on a client-side route resolve instead of 404.
         run: cp dist/index.html dist/404.html
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5.0.0
         with:
           path: dist
 
@@ -64,4 +67,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5.0.0
