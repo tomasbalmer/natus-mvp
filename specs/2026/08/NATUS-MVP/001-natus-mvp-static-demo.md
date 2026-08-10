@@ -222,7 +222,7 @@ Status: ADDRESSED
     if something enforces it. It also gives Phase 0 a real test suite instead
     of setting `passWithNoTests`, which would have let a later misconfigured
     test glob pass CI silently._
-- [ ] Step 0.6: Deployment
+- [x] Step 0.6: Deployment
   - ADD `.github/workflows/deploy.yml` — pnpm install, typecheck, test, build with `VITE_BASE=/natus-mvp/`, publish to Pages on push to `main`.
   - ADD `public/robots.txt` — `Disallow: /`.
   - ADD `README.md`, `docs/HANDOFF.md` — the five-step ownership transfer checklist.
@@ -231,11 +231,24 @@ Status: ADDRESSED
     dist/404.html`) rather than committed to `public/`. A committed copy would
     reference stale hashed asset filenames after every build._
 
-**Verification**
+**Verification** — passed 2026-08-10
 
-`pnpm typecheck` and `pnpm build` succeed. The Actions run is green and
-`https://tomasbalmer.github.io/natus-mvp/` renders the shell with the correct
-fonts and palette. A hard refresh on a nested route does not 404.
+- `pnpm typecheck` clean, `pnpm test` 16 passing, `pnpm build` succeeds.
+- Actions run green with no annotations.
+- `https://tomasbalmer.github.io/natus-mvp/` renders the shell: Cormorant
+  Garamond headline, DM Sans UI, forest backdrop, verde CTA, glass banner.
+  Screenshot-verified at 900px viewport.
+- Assets resolve under the `/natus-mvp/` base path; `img/forest.avif` serves
+  as `image/avif`.
+- A nested route serves the application HTML through the `404.html` fallback.
+  Pages returns status 404 with that body, which is inherent to the technique
+  — the browser renders it and the router takes over.
+- Console clean after adding the favicon.
+
+[UNPLANNED] `.github/workflows/deploy.yml` actions were several majors behind
+and running under a forced Node 24 shim. Bumped to current releases and pinned
+to exact tags, each checked against the same 7-day release-age gate applied to
+npm packages.
 
 ### Phase 1: Content seed and contracts
 
