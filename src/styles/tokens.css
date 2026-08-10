@@ -1,0 +1,107 @@
+/*
+ * Design tokens recovered from natus-mockups.html.
+ *
+ * These are the visual source of truth. Values are transcribed verbatim from
+ * the mockup so the demo and the mockup cannot drift. Do not "improve" a
+ * number here without changing the mockup too.
+ */
+
+:root {
+  /* Brand palette */
+  --natus-verde: #1c3829;
+  --natus-azul: #0d2137;
+  --natus-negro: #1a1a1e;
+  --natus-crema: #e8dcc8;
+  --natus-blanco: #fafaf8;
+  --natus-tierra: #8b6f52;
+
+  /* Page ground, behind the photographic layer */
+  --natus-fondo: #0e0e0e;
+
+  /* Crisis is the one place the palette breaks on purpose: it must not read
+     as part of the calm brand language. */
+  --natus-alerta: #e05a5a;
+
+  /* Glassmorphism */
+  --glass-bg: rgb(255 255 255 / 0.08);
+  --glass-border: rgb(255 255 255 / 0.15);
+  --glass-hover: rgb(255 255 255 / 0.13);
+  --glass-blur-chip: 12px;
+  --glass-blur-card: 20px;
+
+  /* Text on photography */
+  --text-primary: var(--natus-blanco);
+  --text-accent: var(--natus-crema);
+  --text-muted: rgb(232 220 200 / 0.65);
+  --text-faint: rgb(232 220 200 / 0.45);
+  --text-eyebrow: rgb(232 220 200 / 0.55);
+
+  /* Geometry */
+  --radius-frame: 48px;
+  --radius-cta: 27px;
+  --radius-option: 14px;
+  --radius-pill: 23px;
+
+  --h-cta: 54px;
+  --h-option: 52px;
+
+  --pad-screen: 24px;
+
+  /* Type scale */
+  --font-serif: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+  --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --track-eyebrow: 0.22em;
+  --track-cta: 0.12em;
+}
+
+/*
+ * Reusable surfaces. Kept as plain CSS classes rather than Tailwind
+ * components because they carry backdrop-filter, which is easy to get
+ * subtly wrong when composed from utilities.
+ */
+
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur-card));
+  -webkit-backdrop-filter: blur(var(--glass-blur-card));
+}
+
+.glass-chip {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur-chip));
+  -webkit-backdrop-filter: blur(var(--glass-blur-chip));
+}
+
+.glass:hover {
+  background: var(--glass-hover);
+}
+
+/* The photographic backdrop and its legibility gradient. Every screen in the
+   mockup uses this pairing; the gradient stops differ per screen. */
+.photo-layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.photo-scrim {
+  position: absolute;
+  inset: 0;
+}
+
+/* Respect the user's motion preference. The pulse and generating animations
+   are decorative; nothing depends on them to convey state. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

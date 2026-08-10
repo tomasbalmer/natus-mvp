@@ -1,0 +1,8 @@
+# This is a prototype that presents crisis resources and asks about suicidal
+# ideation. Someone in distress finding it through a search engine, and taking
+# it for a real service, is a harm worth preventing.
+#
+# Reinforced by <meta name="robots" content="noindex, nofollow"> in index.html.
+
+User-agent: *
+Disallow: /

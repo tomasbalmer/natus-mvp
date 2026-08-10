@@ -1,0 +1,97 @@
+@import 'tailwindcss';
+@import './tokens.css';
+
+/*
+ * Map the mockup tokens onto Tailwind's theme so utilities read in the
+ * project's own vocabulary: text-crema, bg-verde, font-serif.
+ */
+@theme {
+  --color-verde: var(--natus-verde);
+  --color-azul: var(--natus-azul);
+  --color-negro: var(--natus-negro);
+  --color-crema: var(--natus-crema);
+  --color-blanco: var(--natus-blanco);
+  --color-tierra: var(--natus-tierra);
+  --color-fondo: var(--natus-fondo);
+  --color-alerta: var(--natus-alerta);
+
+  --font-serif: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+  --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --radius-frame: 48px;
+  --radius-cta: 27px;
+  --radius-option: 14px;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--natus-fondo);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    font-weight: 300;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+  }
+
+  /* Focus must stay visible against photography, where a default outline
+     disappears. Accessibility criterion of Phase 10. */
+  :focus-visible {
+    outline: 2px solid var(--natus-crema);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+}
+
+@layer components {
+  /* Small uppercase label above a heading. Mockup calls it "eyebrow". */
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-eyebrow);
+  }
+
+  .cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    height: var(--h-cta);
+    border-radius: var(--radius-cta);
+    background: var(--natus-verde);
+    border: 1px solid rgb(232 220 200 / 0.2);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: var(--track-cta);
+    text-transform: uppercase;
+    color: var(--natus-crema);
+  }
+
+  .cta:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
