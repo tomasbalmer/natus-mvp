@@ -51,6 +51,11 @@
      start their content below this rather than each guessing a padding. */
   --top-inset: 62px;
 
+  /* Clearance for the bottom navigation, which floats over the screens that
+     carry it. Same reasoning as `--top-inset`: one number, not a guess per
+     screen. */
+  --bottom-inset: 80px;
+
   /* Type scale */
   --font-serif: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
   --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;

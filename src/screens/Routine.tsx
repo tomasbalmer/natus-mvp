@@ -50,7 +50,7 @@ export function Routine() {
 
   return (
     <Screen backdrop="forest" scrim="heavy" opacity={0.45}>
-      <div className="flex min-h-dvh flex-col overflow-y-auto px-5 pt-[var(--top-inset)] pb-9 sm:min-h-0">
+      <div className="flex min-h-dvh flex-col overflow-y-auto px-5 pt-[var(--top-inset)] pb-[var(--bottom-inset)] sm:min-h-0">
         <p className="eyebrow mb-3">Mi rutina</p>
         <h1 className="mb-2 text-[28px] leading-[1.15] text-blanco">
           Cosas concretas,
@@ -110,15 +110,9 @@ export function Routine() {
           })}
         </div>
 
-        <div className="mt-7 flex flex-col gap-2.5">
+        <div className="mt-7">
           <Link to="/recomendaciones" className="cta no-underline">
             Volver a las terapias
-          </Link>
-          <Link
-            to="/"
-            className="glass-chip rounded-full px-3 py-2.5 text-center text-[11px] tracking-wide text-crema/60 uppercase no-underline"
-          >
-            Inicio
           </Link>
         </div>
       </div>

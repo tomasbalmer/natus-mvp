@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Screen } from '@/components/Screen';
 import { generateSoulMap } from '@/ai/soul-map';
 import { saveSynthesis } from '@/store/soulMap';
+import { attachSoulMap } from '@/store/session';
+import { attachSoulMapToClient } from '@/store/account';
 import { AiError } from '@/ai/client';
 import type { Numerology } from '@/lib/schemas';
 import type { OnboardingDraft } from '@/store/session';
@@ -57,13 +59,18 @@ export function Generating({
       const floor = new Promise((resolve) => setTimeout(resolve, MINIMUM_MS));
       try {
         const [result] = await Promise.all([generateSoulMap({ draft, numerology }), floor]);
-        saveSynthesis({
+        const stored = saveSynthesis({
           synthesis: result.value,
           numerology,
           promptVersion: SOUL_MAP_PROMPT_VERSION,
           mode: result.mode,
           latencyMs: result.latencyMs,
         });
+        // Both records point at the synthesis, so a signup that happens after
+        // this carries the map with it — and one that happened before still
+        // ends up on the current map rather than the one it was created with.
+        attachSoulMap(stored.id);
+        attachSoulMapToClient(stored.id);
         onDone();
       } catch (error) {
         await floor;

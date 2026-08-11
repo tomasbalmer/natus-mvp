@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Screen } from '@/components/Screen';
 import { NUMBER_LABELS } from '@/lib/numerology';
-import { getSession } from '@/store/session';
+import { activeProfile, isSignedIn } from '@/store/account';
 import { currentSynthesis } from '@/store/soulMap';
 import type { Numerology } from '@/lib/schemas';
 
@@ -67,9 +67,9 @@ function Numbers({ numerology }: { numerology: Numerology }) {
 }
 
 export function SoulMap() {
-  const session = getSession();
+  const profile = activeProfile();
   const stored = currentSynthesis();
-  const firstName = (session?.draft.legal_birth_name ?? '').trim().split(/\s+/)[0] ?? '';
+  const firstName = (profile?.draft.legal_birth_name ?? '').trim().split(/\s+/)[0] ?? '';
 
   if (!stored) {
     return (
@@ -90,7 +90,7 @@ export function SoulMap() {
 
   return (
     <Screen backdrop="palm" scrim="heavy" opacity={0.45}>
-      <div className="flex min-h-dvh flex-col overflow-y-auto px-6 pt-[var(--top-inset)] pb-9 sm:min-h-0">
+      <div className="flex min-h-dvh flex-col overflow-y-auto px-6 pt-[var(--top-inset)] pb-[var(--bottom-inset)] sm:min-h-0">
         <p className="eyebrow mb-3">Tu mapa del alma</p>
 
         <h1 className="mb-7 text-[30px] leading-[1.15] text-blanco">
@@ -161,17 +161,22 @@ export function SoulMap() {
             <span aria-hidden="true">→</span>
           </Link>
 
+          {/* PDR section 3: the account is offered here and nowhere earlier —
+              the person now has something they would rather not lose. It is a
+              secondary control, not a gate; the flow continues without it. */}
+          {!isSignedIn() && (
+            <Link
+              to="/registro"
+              className="glass-chip rounded-full px-3 py-2.5 text-center text-[11px] tracking-wide text-crema/60 uppercase no-underline"
+            >
+              Guardar mi mapa
+            </Link>
+          )}
+
           <p className="px-1 text-[10px] tracking-wide text-crema/25 uppercase">
             {stored.mode === 'fixture' ? 'Modo demo · guion curado' : 'Generado con Claude'} ·{' '}
             {stored.prompt_version}
           </p>
-
-          <Link
-            to="/"
-            className="glass-chip rounded-full px-3 py-2.5 text-center text-[11px] tracking-wide text-crema/60 uppercase no-underline"
-          >
-            Inicio
-          </Link>
         </div>
       </div>
     </Screen>

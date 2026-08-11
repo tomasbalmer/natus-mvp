@@ -8,7 +8,7 @@ import { filterModalities, poolFraming } from '@/lib/matching';
 import { isClinicallyVulnerable } from '@/lib/safety';
 import { matchModalities } from '@/ai/match';
 import { currentSynthesis } from '@/store/soulMap';
-import { getSession } from '@/store/session';
+import { activeProfile } from '@/store/account';
 import { hadCrisisWithin30Days } from '@/store/crisis';
 import {
   clearReaction,
@@ -43,8 +43,10 @@ export function Recommendations() {
 
   const run = useCallback(async () => {
     const stored = currentSynthesis();
-    const session = getSession();
-    if (!stored || !session) {
+    // Not `getSession`: after signup the anonymous record is claimed and stops
+    // answering reads, which would empty the pool for anyone with an account.
+    const profile = activeProfile();
+    if (!stored || !profile) {
       setLoading(false);
       return;
     }
@@ -52,10 +54,10 @@ export function Recommendations() {
     setLoading(true);
 
     const outcome = filterModalities({
-      openness: session.draft.openness_to_modalities,
+      openness: profile.draft.openness_to_modalities,
       inferredTopics: stored.synthesis.inferred_topics,
       clinicallyVulnerable: isClinicallyVulnerable({
-        clinicalBasics: session.draft.clinical_basics,
+        clinicalBasics: profile.draft.clinical_basics,
         recentCrisisWithin30Days: hadCrisisWithin30Days(),
       }),
       dismissedSlugs: recentlyDismissedSlugs(),
@@ -73,7 +75,7 @@ export function Recommendations() {
     const result = await matchModalities({
       synthesis: stored.synthesis,
       outcome,
-      presentingNeedText: session.draft.presenting_need_text,
+      presentingNeedText: profile.draft.presenting_need_text,
     });
 
     setMatch(
@@ -135,7 +137,7 @@ export function Recommendations() {
 
   return (
     <Screen backdrop="grass" scrim="heavy" opacity={0.4}>
-      <div className="flex min-h-dvh flex-col overflow-y-auto px-5 pt-[var(--top-inset)] pb-9 sm:min-h-0">
+      <div className="flex min-h-dvh flex-col overflow-y-auto px-5 pt-[var(--top-inset)] pb-[var(--bottom-inset)] sm:min-h-0">
         <p className="eyebrow mb-3 text-center">Tu constelación</p>
 
         <Constellation modalities={cards.map((c) => c.modality)} />

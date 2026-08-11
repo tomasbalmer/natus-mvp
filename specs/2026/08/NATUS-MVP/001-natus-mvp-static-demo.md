@@ -1,7 +1,7 @@
 # Natus MVP — Static User-Product Demo
 
 Stage: `Act`
-Last Updated: 2026-08-10
+Last Updated: 2026-08-11
 
 ## High-Level Objective
 
@@ -498,22 +498,80 @@ Three defects found by walking it, all fixed:
 
 ### Phase 6: Account, dashboard and library
 
-- [ ] Step 6.1: Simulated account
+- [x] Step 6.1: Simulated account
   - ADD `src/store/account.ts` — signup claims the anonymous session, transfers the Soul Map, and invalidates the anonymous record.
   - ADD `src/screens/Signup.tsx` — presented after the Soul Map, never before.
-- [ ] Step 6.2: Dashboard
+  - ADD `src/store/account.test.ts` — the claim, the idempotency, and the fallback below.
+  - _Deviation, and the one that mattered: `account.ts` also exports
+    `activeProfile()`. `claimSession` expires the anonymous record, so every
+    screen still reading `getSession()` — the Soul Map heading, the whole
+    recommendation pool — went blank the moment someone signed up. The
+    accessor returns the client's profile if there is one and the session
+    otherwise; `SoulMap.tsx` and `Recommendations.tsx` now go through it._
+- [x] [UNPLANNED] Step 6.1b: Actually attach the Soul Map
+  - MODIFY `src/screens/onboarding/Generating.tsx` — call `attachSoulMap` and `attachSoulMapToClient` after `saveSynthesis`.
+  - _Rationale: `session.soul_map_id` was written by nothing. `attachSoulMap`
+    existed and was tested since Phase 3, and no screen ever called it, so
+    every session carried `soul_map_id: null` — which is exactly the field the
+    claim is supposed to transfer. The phase's own verification criterion
+    would have passed on a null._
+- [x] Step 6.2: Dashboard
   - ADD `src/screens/Dashboard.tsx` — the seven sections of PDR section 11.1.
   - ADD `src/components/BottomNav.tsx` — the mockup's glass nav, extended past three icons.
-- [ ] Step 6.3: Data rights
+  - _Deviation: PDR 11.1 names the dashboard's sections and that part of the
+    document was not to hand. The seven are derived from the product's own
+    destinations — map, paths, routine, conversation, meditations, comparison,
+    account — which is the same list from the other direction. They live in
+    one array, so a differing PDR ordering is one edit. The three surfaces
+    that land in Phases 7 to 9 render dimmed and say so rather than linking
+    nowhere._
+  - _Deviation: a `--bottom-inset` token, mirroring `--top-inset`. The nav
+    floats over the screens that carry it and one number is better than five
+    guessed paddings. `tokens.test.ts` covers it under demo chrome, not under
+    mockup geometry._
+- [x] [UNPLANNED] Step 6.2b: A way back in
+  - MODIFY `src/screens/Landing.tsx` — with a synthesis present the CTA reads "Volver a mi espacio" and points at the dashboard, with "Empezar de nuevo" underneath.
+  - _Rationale: the dashboard was otherwise reachable only by signing up. A
+    returning visitor was met by a first-run screen whose only button restarted
+    onboarding over the top of their existing map._
+- [x] Step 6.3: Data rights
   - ADD `src/lib/export.ts` — assemble the full local record as downloadable JSON.
+  - ADD `src/lib/export.test.ts`, `src/store/blobs.ts`, `src/store/preferences.ts`.
   - ADD `src/screens/Account.tsx` — export, two-step delete that also clears IndexedDB blobs, and language preference.
+  - _`export.ts` stays pure, like the rest of `src/lib`: it takes a snapshot
+    and returns a document, and the caller reads storage and hands the browser
+    a file._
+  - _The redaction is the part with teeth. A BYOK viewer's Anthropic key lives
+    in the same storage as everything else, and `src/ai/mode.ts` already
+    claimed the key "is never included in an export". It is now enforced by a
+    deep walk over the snapshot rather than promised in a comment._
+  - _Nothing writes IndexedDB blobs yet — the chart PDF stays in session state
+    and meditation audio lands in Phase 8. The sweep is written against the
+    names Phase 8 will use, because a delete that quietly misses a store is
+    the failure nobody notices._
 
-**Verification**
+**Verification** — passed 2026-08-11
 
-`pnpm typecheck` and `pnpm test` green. Signing up preserves the Soul Map
-generated anonymously. Export produces valid JSON containing every entity.
-Delete removes all namespaces and stored blobs, verified by an empty
-`localStorage` and IndexedDB afterwards.
+- `pnpm test` 270 passing across 12 files, `pnpm typecheck` clean, build
+  succeeds.
+- Walked the whole flow in a browser, console clean, no warnings: onboarding
+  through the Soul Map, signup, dashboard, recommendations, account.
+- Signing up preserves the map generated anonymously — the dashboard still
+  greets "María" and the recommendations still generate afterwards, which is
+  the case the `activeProfile` fallback exists for and which would have been
+  invisible to the type checker.
+- Export downloaded as `natus-export-2026-08-11.json`, containing the client
+  with its email and `soul_map_id`, the claimed anonymous session, the
+  synthesis and the matches. Namespaces never written to are absent rather
+  than emitted empty, which is what the snapshot honestly holds.
+- With BYOK enabled and a key stored, the downloaded file carries
+  `"apiKey": "[redactado]"` and the string `sk-ant-` appears nowhere in it.
+  Verified on the real file, not only in the unit test.
+- Two-step delete returns the app to first run: the landing reverts to
+  "Comenzar" and the AI mode falls back to fixture, both of which are reads
+  from the storage that was cleared.
+- [UNPLANNED] The nav glyph for the routine was `❯`, which read as "next" and
+  made a destination look like a step in a flow. Changed to `≡`.
 
 ### Phase 7: Chat and paywall
 

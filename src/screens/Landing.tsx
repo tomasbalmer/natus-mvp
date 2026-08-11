@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Screen } from '@/components/Screen';
 import { AiModeToggle } from '@/components/AiModeToggle';
+import { currentSynthesis } from '@/store/soulMap';
 import type { AiMode } from '@/ai/mode';
 
 /** Screen 1 of PDR 6.1, built from mockup screen 01. */
@@ -12,6 +13,8 @@ export function Landing({
 }) {
   const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
+  // Someone who already has a map should not be met by a first-run screen.
+  const returning = currentSynthesis() !== undefined;
 
   return (
     <Screen backdrop="forest" scrim="bottom" opacity={0.9} focus="center 20%">
@@ -42,8 +45,12 @@ export function Landing({
           Un espejo para lo que estás atravesando. Sin cuenta, sin diagnóstico.
         </p>
 
-        <button type="button" className="cta" onClick={() => navigate('/onboarding')}>
-          <span>Comenzar</span>
+        <button
+          type="button"
+          className="cta"
+          onClick={() => navigate(returning ? '/inicio' : '/onboarding')}
+        >
+          <span>{returning ? 'Volver a mi espacio' : 'Comenzar'}</span>
           <span
             aria-hidden="true"
             className="flex size-7 items-center justify-center rounded-full bg-crema/15 text-sm"
@@ -51,6 +58,16 @@ export function Landing({
             →
           </span>
         </button>
+
+        {returning && (
+          <button
+            type="button"
+            onClick={() => navigate('/onboarding')}
+            className="mt-3 px-2 py-1 text-[11px] text-crema/40 underline underline-offset-4 hover:text-crema/70"
+          >
+            Empezar de nuevo
+          </button>
+        )}
 
         {showSettings && (
           <div className="mt-4 w-full text-left">

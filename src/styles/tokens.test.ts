@@ -39,6 +39,7 @@ const MOCKUP_GEOMETRY = {
  */
 const DEMO_CHROME = {
   '--top-inset': '62px',
+  '--bottom-inset': '80px',
 } as const;
 
 function readTokens(): Map<string, string> {
