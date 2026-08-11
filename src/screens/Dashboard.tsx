@@ -129,8 +129,8 @@ export function Dashboard() {
       key: 'comparacion',
       eyebrow: 'Comparar cartas',
       title: 'Mirar un vínculo desde los dos lados',
-      body: 'Todavía no está en esta demo.',
-      to: null,
+      body: 'Con permiso de la otra persona, y sin veredicto sobre la relación.',
+      to: '/comparacion',
     },
     {
       key: 'cuenta',

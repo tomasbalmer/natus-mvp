@@ -15,7 +15,11 @@ import { Account } from '@/screens/Account';
 import { Chat } from '@/screens/Chat';
 import { Meditation } from '@/screens/Meditation';
 import { Library } from '@/screens/Library';
+import { ExternalProfile } from '@/screens/comparison/ExternalProfile';
+import { Consent } from '@/screens/comparison/Consent';
+import { Result } from '@/screens/comparison/Result';
 import { getAiMode, type AiMode } from '@/ai/mode';
+import { activeHighSeverityEvent } from '@/store/crisis';
 
 /**
  * Where the navigation belongs. Onboarding, the landing and the signup are
@@ -23,7 +27,7 @@ import { getAiMode, type AiMode } from '@/ai/mode';
  * half-answered — so the nav appears only once there is something to navigate
  * between.
  */
-const NAV_ROUTES = new Set([
+const NAV_ROUTES = [
   '/inicio',
   '/mapa',
   '/recomendaciones',
@@ -32,7 +36,14 @@ const NAV_ROUTES = new Set([
   '/chat',
   '/meditaciones',
   '/biblioteca',
-]);
+  '/comparacion',
+];
+
+/** Prefixes, not exact paths: the comparison flow has nested routes and losing
+ *  the nav halfway through it strands the person on a sub-screen. */
+function showsNav(pathname: string): boolean {
+  return NAV_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
+}
 
 export function App() {
   // The banner has to tell the truth about where typed text goes, so it reads
@@ -57,10 +68,19 @@ export function App() {
         <Route path="/chat" element={<Chat />} />
         <Route path="/meditaciones" element={<Meditation />} />
         <Route path="/biblioteca" element={<Library />} />
+        <Route path="/comparacion" element={<ExternalProfile />} />
+        <Route path="/comparacion/consentimiento/:id" element={<Consent />} />
+        <Route path="/comparacion/resultado/:id" element={<Result />} />
         <Route path="/lab/safety" element={<SafetyLab />} />
         <Route path="*" element={<Landing onAiModeChange={setAiMode} />} />
       </Routes>
-      {NAV_ROUTES.has(pathname) && (
+      {/*
+        A crisis takeover has to actually take the screen over. Leaving a glass
+        bar offering "Caminos" and "Chat" across the bottom of it turns the
+        takeover into a page with a way around it, which is the opposite of
+        what PDR 1.6 asks for.
+      */}
+      {showsNav(pathname) && !activeHighSeverityEvent() && (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 p-3">
           <BottomNav />
         </div>

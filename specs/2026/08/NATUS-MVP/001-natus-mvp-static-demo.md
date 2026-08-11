@@ -691,21 +691,64 @@ Three defects found by walking it, all fixed:
 
 ### Phase 9: Chart comparison
 
-- [ ] Step 9.1: Payload isolation
+- [x] Step 9.1: Payload isolation
   - ADD `src/lib/comparison-payload.ts` — build the model payload from an explicit allow-list of fields.
   - ADD `src/lib/comparison-payload.test.ts` — assert the constructed payload contains neither `presenting_need_text` nor `clinical_basics` for either subject, under every scope combination.
-- [ ] Step 9.2: Consent
+  - _An allow-list rather than a trim. A deny-list has to be updated every time
+    a field is added upstream, and the failure mode of forgetting is that
+    private data ships; here a new field is invisible until someone names it in
+    this file. The sources are typed open (`[extra: string]: unknown`) so the
+    test can load them with clinical material and prove it cannot be found._
+- [x] Step 9.2: Consent
   - ADD `src/screens/comparison/ExternalProfile.tsx` — the mandatory warning about loading another person's data before saving, and deletion by the owner.
   - ADD `src/screens/comparison/Consent.tsx` — simulated request and response between two local profiles, with scope, 14-day expiry, and revocation.
-- [ ] Step 9.3: Result
+  - ADD `src/store/comparison.ts`, `src/store/comparison.test.ts`.
+  - _`readableComparison` re-checks the consent on every read rather than
+    trusting a flag written at generation time, and no component holds the
+    result in state. That is what makes revocation immediate instead of
+    eventual._
+  - _`isConsentActive` is deliberately not a type predicate. Typed as a guard,
+    it narrowed the falsy branch to `never` — which is exactly the branch that
+    has to explain *why* a consent is inactive, since a granted-but-expired one
+    is both present and unusable._
+- [x] [UNPLANNED] Step 9.2b: `src/screens/comparison/Gate.tsx`
+  - _Rule 6 in front of all three screens rather than in front of the model
+    call. Reaching the consent screen, loading someone else's date of birth and
+    only then being refused would be worse than the feature not being offered._
+- [x] Step 9.3: Result
   - ADD `src/ai/prompts/comparison.ts` — the six hard rules of PDR section 8.5: no verdict on the relationship, no pathologising the other person, mandatory symmetry, close on questions, never invent chart positions, and refuse the feature entirely while the requester is in active crisis.
   - ADD `src/screens/comparison/Result.tsx` — the section 8.4 contract ending in `questions_to_explore` and the disclaimer.
+  - ADD `src/ai/fixtures/comparison.ts` and its test; `src/ai/comparison.ts` re-checks rule 5 over the result.
+  - _Rule 5 is checked rather than trusted: no chart is parsed anywhere in this
+    demo, so a model returning aspects has invented them and the reader has no
+    way to tell._
 
-**Verification**
+**Verification** — passed 2026-08-11
 
-`pnpm test` green including the payload isolation test. Revoking consent makes
-the comparison unreadable on the next render with no client-side cache. The
-feature is unavailable while a crisis event is active.
+- `pnpm test` 490 passing across 19 files, `pnpm typecheck` clean, build
+  succeeds. 16 of those are the payload isolation test, one per scope
+  combination and one per forbidden field, so a failure names what leaked.
+- Walked it in a browser, console clean: loading Nico, the warning between the
+  form and the save button, requesting with the numbers and themes in scope,
+  granting from the simulated other side, and a reading that ends on three
+  questions with no verdict anywhere.
+- Retiring the permission made the reading unreadable on the very next render —
+  the row is still in storage and nothing will hand it over.
+- With an active high-severity event, `/comparacion` shows the crisis takeover
+  instead of the feature.
+
+Three findings, all fixed:
+
+- **My own rule tests caught the fixture twice.** A symmetry line read "en una
+  y no en la otra" without naming both sides, and the filler used when the
+  scope leaves almost nothing produced one entry where the contract needs two.
+- **The verdict scan flagged the disclaimer.** "ni una opinión sobre si les
+  conviene" is the disclaimer naming what this is not, which is its whole job.
+  The test now scans the body and asserts the disclaimer separately.
+- **[UNPLANNED] The bottom nav sat on top of the crisis takeover.** A glass bar
+  offering "Caminos" and "Chat" across the bottom turns a takeover into a page
+  with a way around it. The nav is now hidden while a high-severity event is
+  active.
 
 ### Phase 10: Hardening and handover
 
