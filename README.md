@@ -80,4 +80,4 @@ modalities, not people.
 | `docs/DECISIONS.md` | Why things are the way they are, and what was rejected |
 | `docs/ASSETS.md` | Image origin and licensing |
 | `docs/HANDOFF.md` | Transferring the repository to a new owner |
-| `docs/MIGRATION.md` | Mapping this code onto Supabase |
+| `docs/MIGRATION.md` | Mapping this code onto Supabase — _lands in phase 10_ |
