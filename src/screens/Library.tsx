@@ -61,7 +61,7 @@ export function Library() {
                   <h2 className="text-[14px] leading-snug text-blanco">
                     {meditation.script.title}
                   </h2>
-                  <span className="shrink-0 text-[10px] tracking-wide text-crema/40 uppercase">
+                  <span className="shrink-0 text-[10px] tracking-wide text-crema/55 uppercase">
                     {meditation.estimated_minutes} min
                   </span>
                 </div>
@@ -69,7 +69,7 @@ export function Library() {
                 <p className="mb-1 text-[12px] leading-relaxed text-crema/55">
                   “{meditation.intent}”
                 </p>
-                <p className="mb-3 text-[10.5px] tracking-wide text-crema/30 uppercase">
+                <p className="mb-3 text-[10.5px] tracking-wide text-crema/55 uppercase">
                   {dayOf(meditation.created_at)} · {bedName(meditation.script.bed_track_id)}
                 </p>
 
@@ -105,7 +105,7 @@ export function Library() {
                     <button
                       type="button"
                       onClick={() => setConfirming(meditation.id)}
-                      className="glass-chip rounded-full px-3.5 py-2 text-[11px] tracking-wide text-crema/45 uppercase"
+                      className="glass-chip rounded-full px-3.5 py-2 text-[11px] tracking-wide text-crema/55 uppercase"
                     >
                       Borrar
                     </button>

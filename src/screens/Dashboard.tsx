@@ -170,7 +170,7 @@ export function Dashboard() {
             className="glass mb-5 block rounded-[var(--radius-option)] px-4 py-3.5 no-underline"
           >
             <p className="text-[13px] leading-snug text-blanco">Guardá tu mapa</p>
-            <p className="mt-1 text-[11.5px] leading-relaxed text-crema/50">
+            <p className="mt-1 text-[11.5px] leading-relaxed text-crema/55">
               Sin cuenta, esto vive siete días en este navegador y después se va.
             </p>
           </Link>

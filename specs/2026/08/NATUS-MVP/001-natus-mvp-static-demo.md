@@ -3,6 +3,10 @@
 Stage: `Act`
 Last Updated: 2026-08-11
 
+All ten phases are built and verified except two checks that need a real
+browser on a real machine, both listed under Phase 10. The stage stays at
+`Act` until someone runs them.
+
 ## High-Level Objective
 
 Build a navigable, publicly shareable demo of the Natus user product — the
@@ -752,24 +756,55 @@ Three findings, all fixed:
 
 ### Phase 10: Hardening and handover
 
-- [ ] Step 10.1: Accessibility
+- [x] Step 10.1: Accessibility
   - MODIFY components — AA contrast against the photographic backgrounds, visible focus rings, labelled controls, respect for `prefers-reduced-motion` on the pulse and generating animations.
-- [ ] Step 10.2: Honest framing
+  - ADD `src/styles/contrast.test.ts` — the contrast floor as a lint over every `.tsx`.
+  - _77 usages of `crema` below 0.55 alpha, mostly 10-12px metadata: the
+    smallest text on the page set in the faintest ink, at 1.9-3.6:1 against the
+    scrim. Raised to a floor of 0.55 (≈4.7:1). Hierarchy now comes from size
+    and weight, which is where it belongs. The delete-confirm button was dark
+    text on `alerta/85` at 3.8:1; solid `alerta` gives 4.8._
+  - _Focus rings and the `prefers-reduced-motion` block already landed in
+    Phase 0's `index.css` and `tokens.css`; re-checked rather than rewritten._
+- [x] Step 10.2: Honest framing
   - MODIFY `src/components/DemoBanner.tsx` — state that data stays in the browser in fixture mode and is sent to Anthropic in BYOK mode.
   - MODIFY `src/screens/CrisisScreen.tsx` — verify the unverified-hotline notice reads correctly and the international fallback is always present.
-- [ ] Step 10.3: Documentation
+  - ADD `src/lib/crisis-resources.test.ts` — both properties, for every MVP country and for the countries that are not one.
+  - _The banner already carried the mode-aware disclosure from Phase 4, so this
+    step was a verification rather than a change. The crisis screen's two
+    promises are now tests: there is always somewhere to call, and the
+    unverified notice stays true until `verified_at` changes in the data._
+- [x] Step 10.3: Documentation
   - MODIFY `README.md` — what this is, what is real versus simulated, how to run, how to enable BYOK.
-  - ADD `docs/PDR.md` — the source document committed for provenance.
-  - MODIFY `docs/HANDOFF.md` — transfer checklist including removing account-level domain verification.
+  - MODIFY `docs/HANDOFF.md` — transfer checklist including removing account-level domain verification. _Already complete from Phase 0; re-read, no change needed._
   - ADD `docs/MIGRATION.md` — the mapping from `src/lib` and `src/store` to Supabase Edge Functions and tables.
+- [~] Step 10.3b: `docs/PDR.md`
+  - _Skipped: blocked, not descoped. The source document is in `~/Downloads`,
+    which this environment cannot read. `docs/DECISIONS.md` distils what the
+    code depends on and `README.md` now says the PDR is not committed and why.
+    Committing it is a copy-and-commit whenever someone with access does it._
 
-**Verification**
+**Verification** — partially passed 2026-08-11
 
-`pnpm typecheck`, `pnpm test` and `pnpm build` all pass. Lighthouse
-accessibility at or above 90 on the Soul Map and Recommendations screens. The
-deployed URL shows the demo banner, `robots.txt` disallows crawling, and a
-reviewer reading `README.md` can tell within a minute what is real and what is
-staged.
+- `pnpm typecheck` clean, `pnpm test` 565 passing across 21 files, `pnpm build`
+  succeeds.
+- Contrast verified by computation (crema over the scrim range, per alpha) and
+  held by a test that fails on the next faint caption anyone adds.
+- Screenshot-checked after the change: the secondary text is legible and the
+  register survives — the hierarchy still reads because it was never really
+  carried by the opacity.
+- `robots.txt` disallows crawling and the demo banner is on every screen.
+
+Two things this phase did not verify:
+
+- **Lighthouse was not run.** It needs a Chrome install this environment does
+  not have. Contrast, focus visibility, control labelling and reduced-motion
+  were checked directly instead; the score itself is unconfirmed.
+- **Audible meditation playback**, carried over from Phase 8. Headless
+  Chromium has no speech voices and no audio device.
+
+Both need one pass in a real browser on a real machine. Neither is a code
+change; both are a person looking and listening.
 
 ## Success Criteria
 

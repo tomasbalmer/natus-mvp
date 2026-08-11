@@ -160,7 +160,7 @@ export function Chat() {
 
         <div className="-mx-1 flex-1 overflow-y-auto px-1">
           {messages.length === 0 && (
-            <p className="mt-4 text-[12.5px] leading-relaxed text-crema/50">
+            <p className="mt-4 text-[12.5px] leading-relaxed text-crema/55">
               Preguntale algo a tu mapa. Funciona mejor con una situación concreta que con una
               pregunta grande.
             </p>
@@ -212,7 +212,7 @@ export function Chat() {
             )}
 
             {thinking && (
-              <p aria-live="polite" className="text-[12px] text-crema/40">
+              <p aria-live="polite" className="text-[12px] text-crema/55">
                 Pensando…
               </p>
             )}
@@ -239,7 +239,7 @@ export function Chat() {
                   markFalsePositive(containment);
                   setContainment(null);
                 }}
-                className="text-[11px] text-crema/40 underline underline-offset-4 hover:text-crema/70"
+                className="text-[11px] text-crema/55 underline underline-offset-4 hover:text-crema/70"
               >
                 Esto no aplica a mi caso
               </button>
@@ -270,7 +270,7 @@ export function Chat() {
                 }}
                 placeholder="Escribí lo que se te venga…"
                 aria-label="Tu mensaje"
-                className="glass max-h-28 min-h-[52px] flex-1 resize-none rounded-[var(--radius-option)] px-3.5 py-3 text-[12.5px] text-blanco placeholder:text-crema/25"
+                className="glass max-h-28 min-h-[52px] flex-1 resize-none rounded-[var(--radius-option)] px-3.5 py-3 text-[12.5px] text-blanco placeholder:text-crema/55"
               />
               <button
                 type="button"

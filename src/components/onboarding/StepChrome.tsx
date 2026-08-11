@@ -51,7 +51,7 @@ export function StepBody({
   return (
     <>
       <h2 className="mb-2 text-[28px] leading-[1.18] text-blanco">{title}</h2>
-      {helper && <p className="mb-5 text-[12px] leading-relaxed text-crema/50">{helper}</p>}
+      {helper && <p className="mb-5 text-[12px] leading-relaxed text-crema/55">{helper}</p>}
       {!helper && <div className="mb-5" />}
 
       <div className="-mx-1 flex-1 overflow-y-auto px-1 pb-2">{children}</div>

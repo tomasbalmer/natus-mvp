@@ -38,7 +38,7 @@ export function AiModeToggle({
           <p className="text-[13px] text-blanco">
             {mode === 'fixture' ? 'Modo demo' : 'Modo IA'}
           </p>
-          <p className="mt-0.5 text-[11px] text-crema/45">
+          <p className="mt-0.5 text-[11px] text-crema/55">
             {mode === 'fixture'
               ? 'Guiones curados. Nada sale de este navegador.'
               : 'Generación real con tu clave de Anthropic.'}
@@ -72,7 +72,7 @@ export function AiModeToggle({
             value={key}
             onChange={(e) => setKey(e.target.value)}
             placeholder="sk-ant-…"
-            className="glass w-full rounded-[var(--radius-option)] px-3.5 py-2.5 font-mono text-[12px] text-blanco placeholder:text-crema/25"
+            className="glass w-full rounded-[var(--radius-option)] px-3.5 py-2.5 font-mono text-[12px] text-blanco placeholder:text-crema/55"
           />
 
           <div className="flex gap-2">

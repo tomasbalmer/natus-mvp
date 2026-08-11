@@ -63,7 +63,7 @@ export function Landing({
           <button
             type="button"
             onClick={() => navigate('/onboarding')}
-            className="mt-3 px-2 py-1 text-[11px] text-crema/40 underline underline-offset-4 hover:text-crema/70"
+            className="mt-3 px-2 py-1 text-[11px] text-crema/55 underline underline-offset-4 hover:text-crema/70"
           >
             Empezar de nuevo
           </button>
@@ -79,14 +79,14 @@ export function Landing({
           <button
             type="button"
             onClick={() => setShowSettings((v) => !v)}
-            className="text-crema/30 hover:text-crema/60"
+            className="text-crema/55 hover:text-crema/60"
           >
             Modo IA
           </button>
-          <span aria-hidden="true" className="text-crema/15">
+          <span aria-hidden="true" className="text-crema/55">
             ·
           </span>
-          <Link to="/lab/safety" className="text-crema/30 no-underline hover:text-crema/60">
+          <Link to="/lab/safety" className="text-crema/55 no-underline hover:text-crema/60">
             Safety
           </Link>
         </div>

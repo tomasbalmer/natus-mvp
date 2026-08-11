@@ -15,7 +15,7 @@ import { currentSynthesis } from '@/store/soulMap';
  */
 
 const fieldClass =
-  'glass w-full rounded-[var(--radius-option)] px-4 py-3 text-sm text-blanco placeholder:text-crema/25';
+  'glass w-full rounded-[var(--radius-option)] px-4 py-3 text-sm text-blanco placeholder:text-crema/55';
 
 export function Signup() {
   const navigate = useNavigate();
@@ -81,7 +81,7 @@ export function Signup() {
           días.
         </p>
 
-        <label className="mb-1.5 block text-[11px] tracking-wide text-crema/50 uppercase" htmlFor="email">
+        <label className="mb-1.5 block text-[11px] tracking-wide text-crema/55 uppercase" htmlFor="email">
           Tu correo
         </label>
         <input
@@ -109,7 +109,7 @@ export function Signup() {
           </p>
         )}
 
-        <p id="email-note" className="mt-2.5 text-[11px] leading-relaxed text-crema/35">
+        <p id="email-note" className="mt-2.5 text-[11px] leading-relaxed text-crema/55">
           En esta demo no se envía ningún correo ni se crea ninguna cuenta en ningún servidor.
           La dirección queda escrita en este navegador y nada más. Podés borrar todo en un
           clic desde Mi cuenta.

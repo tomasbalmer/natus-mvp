@@ -30,7 +30,7 @@ export function DemoBanner({ aiMode }: { aiMode: 'fixture' | 'byok' }) {
           <span className="font-medium tracking-wide uppercase">Demo</span> — prototipo, no es
           un servicio de salud
         </span>
-        <span aria-hidden="true" className="shrink-0 text-[11px] text-crema/40">
+        <span aria-hidden="true" className="shrink-0 text-[11px] text-crema/55">
           {open ? '−' : '+'}
         </span>
       </button>

@@ -107,7 +107,7 @@ export function Generating({
           <p className="font-serif text-[22px] leading-snug font-light text-blanco">
             {STAGES[stage]}
           </p>
-          <p className="mt-2 text-[11px] tracking-wide text-crema/40">
+          <p className="mt-2 text-[11px] tracking-wide text-crema/55">
             Esto puede tardar un momento
           </p>
         </div>

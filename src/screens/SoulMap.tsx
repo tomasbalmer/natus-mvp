@@ -58,7 +58,7 @@ function Numbers({ numerology }: { numerology: Numerology }) {
         </p>
       )}
 
-      <p className="mt-3 px-1 text-[11px] leading-relaxed text-crema/35">
+      <p className="mt-3 px-1 text-[11px] leading-relaxed text-crema/55">
         Calculados en tu navegador a partir de tu nombre de nacimiento y tu fecha. Son un
         lenguaje simbólico para pensarte, no una medición.
       </p>
@@ -126,7 +126,7 @@ export function SoulMap() {
             <article key={tip.title} className="glass rounded-[var(--radius-option)] px-4 py-3.5">
               <div className="mb-1.5 flex items-baseline justify-between gap-3">
                 <h3 className="text-[13px] text-blanco">{tip.title}</h3>
-                <span className="shrink-0 text-[10px] tracking-wide text-crema/40 uppercase">
+                <span className="shrink-0 text-[10px] tracking-wide text-crema/55 uppercase">
                   {CADENCE_LABEL[tip.cadence]}
                 </span>
               </div>
@@ -146,7 +146,7 @@ export function SoulMap() {
         {numerology ? (
           <Numbers numerology={numerology} />
         ) : (
-          <p className="text-[12px] leading-relaxed text-crema/50">
+          <p className="text-[12px] leading-relaxed text-crema/55">
             No pudimos calcular los números con el nombre que ingresaste.
           </p>
         )}
@@ -173,7 +173,7 @@ export function SoulMap() {
             </Link>
           )}
 
-          <p className="px-1 text-[10px] tracking-wide text-crema/25 uppercase">
+          <p className="px-1 text-[10px] tracking-wide text-crema/55 uppercase">
             {stored.mode === 'fixture' ? 'Modo demo · guion curado' : 'Generado con Claude'} ·{' '}
             {stored.prompt_version}
           </p>

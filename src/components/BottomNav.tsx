@@ -37,7 +37,7 @@ export function BottomNav() {
           className={({ isActive }) =>
             [
               'flex flex-1 flex-col items-center gap-1 rounded-[18px] px-1 py-2 no-underline transition-colors',
-              isActive ? 'bg-crema/12 text-crema' : 'text-crema/45 hover:text-crema/75',
+              isActive ? 'bg-crema/12 text-crema' : 'text-crema/55 hover:text-crema/75',
             ].join(' ')
           }
         >

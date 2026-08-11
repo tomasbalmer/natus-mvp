@@ -62,7 +62,7 @@ export function ModalityCard({
       ].join(' ')}
     >
       <div className="mb-2 flex items-baseline gap-2.5">
-        <span aria-hidden="true" className="font-serif text-[15px] text-crema/35 italic">
+        <span aria-hidden="true" className="font-serif text-[15px] text-crema/55 italic">
           {rank}
         </span>
         <h3 className="flex-1 font-serif text-[19px] leading-tight font-light text-blanco">
@@ -98,7 +98,7 @@ export function ModalityCard({
           recommendation is useless — most people have no idea what EMDR or
           constelaciones involve. */}
       <details className="group mb-3">
-        <summary className="cursor-pointer list-none text-[11px] tracking-wide text-crema/50 uppercase hover:text-crema/80">
+        <summary className="cursor-pointer list-none text-[11px] tracking-wide text-crema/55 uppercase hover:text-crema/80">
           Qué pasa en una sesión
           <span aria-hidden="true" className="ml-1.5 group-open:hidden">
             +

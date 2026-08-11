@@ -24,8 +24,8 @@ import {
  */
 
 const fieldClass =
-  'glass w-full rounded-[var(--radius-option)] px-4 py-3 text-sm text-blanco placeholder:text-crema/25 [color-scheme:dark]';
-const labelClass = 'mb-1.5 block text-[11px] tracking-wide text-crema/50 uppercase';
+  'glass w-full rounded-[var(--radius-option)] px-4 py-3 text-sm text-blanco placeholder:text-crema/55 [color-scheme:dark]';
+const labelClass = 'mb-1.5 block text-[11px] tracking-wide text-crema/55 uppercase';
 
 const STATUS_LABEL = {
   pending: 'Esperando respuesta',
@@ -81,11 +81,11 @@ export function ExternalProfile() {
                   <article key={profile.id} className="glass rounded-[var(--radius-option)] px-4 py-3.5">
                     <div className="mb-1 flex items-baseline justify-between gap-3">
                       <h2 className="text-[14px] text-blanco">{profile.display_name}</h2>
-                      <span className="shrink-0 text-[10px] tracking-wide text-crema/40 uppercase">
+                      <span className="shrink-0 text-[10px] tracking-wide text-crema/55 uppercase">
                         {consent ? STATUS_LABEL[consent.status] : 'Sin pedir'}
                       </span>
                     </div>
-                    <p className="mb-3 text-[11.5px] text-crema/40">{profile.birth_date}</p>
+                    <p className="mb-3 text-[11.5px] text-crema/55">{profile.birth_date}</p>
 
                     {confirming === profile.id ? (
                       <div className="flex gap-2">
@@ -123,7 +123,7 @@ export function ExternalProfile() {
                         <button
                           type="button"
                           onClick={() => setConfirming(profile.id)}
-                          className="glass-chip rounded-full px-3.5 py-2 text-[11px] tracking-wide text-crema/45 uppercase"
+                          className="glass-chip rounded-full px-3.5 py-2 text-[11px] tracking-wide text-crema/55 uppercase"
                         >
                           Borrar
                         </button>

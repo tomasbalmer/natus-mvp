@@ -29,7 +29,7 @@ export function CrisisBanner({ country }: { country: string | undefined }) {
         <span className="flex-1 text-[12px] leading-snug text-crema/80">
           Si en algún momento se pone difícil, hay a quién llamar.
         </span>
-        <span aria-hidden="true" className="shrink-0 text-xs text-crema/50">
+        <span aria-hidden="true" className="shrink-0 text-xs text-crema/55">
           {open ? '−' : '+'}
         </span>
       </button>

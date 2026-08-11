@@ -82,7 +82,7 @@ export function ClinicalBasics({
           más daño que bien. No es un diagnóstico y no hay respuestas mejores que otras.
           <br />
           <br />
-          <span className="text-crema/45">
+          <span className="text-crema/55">
             Lo que escribas queda guardado con tu cuenta. Si aparece una señal de riesgo, un
             responsable de Natus recibe un aviso con el fragmento que la disparó.
           </span>
@@ -152,7 +152,7 @@ export function ClinicalBasics({
           <textarea
             id="clinical-notes"
             rows={2}
-            className="glass w-full resize-none rounded-[var(--radius-option)] px-4 py-3 text-sm text-blanco placeholder:text-crema/25"
+            className="glass w-full resize-none rounded-[var(--radius-option)] px-4 py-3 text-sm text-blanco placeholder:text-crema/55"
             placeholder="Opcional"
           />
         </div>

@@ -18,9 +18,11 @@ server-held secret — GitHub Pages serves static files and nothing else.
 | Numerology (5 Pythagorean numbers) | **Real** | `src/lib/numerology.ts`, unit tested |
 | Crisis detection, Layer 1 | **Real** | `src/lib/safety.ts`, unit tested |
 | Modality hard filter | **Real** | `src/lib/matching.ts`, unit tested |
+| Chart-comparison payload isolation | **Real** | `src/lib/comparison-payload.ts`, unit tested per scope |
 | Onboarding, dashboard, library | **Real** | `localStorage` in place of Postgres |
 | Meditation voice and sound bed | **Real** | Web Speech API + `OscillatorNode` |
-| Soul Map, matching prose, chat, comparison | Fixtures or BYOK | see below |
+| Consent, quota, two-step delete, export | **Real** | Enforced in code, not only in the UI |
+| Soul Map, matching prose, chat, meditations, comparison | Fixtures or BYOK | see below |
 | Natal chart PDF parsing | Stubbed | needs Vision, BYOK only |
 | Payments, transactional email | Simulated | no charge, no mail is sent |
 
@@ -80,4 +82,9 @@ modalities, not people.
 | `docs/DECISIONS.md` | Why things are the way they are, and what was rejected |
 | `docs/ASSETS.md` | Image origin and licensing |
 | `docs/HANDOFF.md` | Transferring the repository to a new owner |
-| `docs/MIGRATION.md` | Mapping this code onto Supabase — _lands in phase 10_ |
+| `docs/MIGRATION.md` | Mapping this code onto Supabase, table by table |
+
+The PDR itself is not committed. It lives in Nico's vault; `docs/DECISIONS.md`
+distils the parts the code depends on, and every prompt reconstructed from it
+carries a `-reconstructed` suffix so nothing here can be mistaken for the
+original text.

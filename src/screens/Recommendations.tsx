@@ -150,13 +150,13 @@ export function Recommendations() {
         </p>
 
         {notice && (
-          <p className="mb-4 rounded-[var(--radius-option)] border border-crema/10 px-3.5 py-2.5 text-[11px] leading-relaxed text-crema/45">
+          <p className="mb-4 rounded-[var(--radius-option)] border border-crema/10 px-3.5 py-2.5 text-[11px] leading-relaxed text-crema/55">
             {notice}
           </p>
         )}
 
         {match.used_fallback && (
-          <p className="mb-4 rounded-[var(--radius-option)] border border-crema/10 px-3.5 py-2.5 text-[11px] leading-relaxed text-crema/45">
+          <p className="mb-4 rounded-[var(--radius-option)] border border-crema/10 px-3.5 py-2.5 text-[11px] leading-relaxed text-crema/55">
             No pudimos generar las explicaciones personalizadas, así que estas descripciones
             vienen del catálogo. El orden sigue basándose en lo que contaste.
           </p>
@@ -190,7 +190,7 @@ export function Recommendations() {
             Volver a buscar
           </button>
 
-          <p className="px-1 text-[10px] tracking-wide text-crema/25 uppercase">
+          <p className="px-1 text-[10px] tracking-wide text-crema/55 uppercase">
             {match.result.prompt_version} · pool {match.strategy}
           </p>
         </div>

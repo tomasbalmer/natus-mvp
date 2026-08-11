@@ -77,14 +77,14 @@ export function NatalChart({
         {draft.natal_chart ? (
           <div className="glass rounded-[var(--radius-option)] px-4 py-3.5">
             <p className="truncate text-sm text-blanco">{draft.natal_chart.file_name}</p>
-            <p className="mt-1 text-[11px] text-crema/45">
+            <p className="mt-1 text-[11px] text-crema/55">
               {(draft.natal_chart.size_bytes / 1024 / 1024).toFixed(1)} MB · guardada en este
               navegador
             </p>
             <button
               type="button"
               onClick={() => onChange({ natal_chart: null })}
-              className="mt-2.5 text-[11px] text-crema/45 underline underline-offset-4 hover:text-crema/80"
+              className="mt-2.5 text-[11px] text-crema/55 underline underline-offset-4 hover:text-crema/80"
             >
               Quitar
             </button>
@@ -99,7 +99,7 @@ export function NatalChart({
               ＋
             </span>
             <span className="text-[13px] text-blanco/85">Subir PDF</span>
-            <span className="text-[11px] text-crema/40">Máximo 10 MB</span>
+            <span className="text-[11px] text-crema/55">Máximo 10 MB</span>
           </button>
         )}
 
@@ -109,7 +109,7 @@ export function NatalChart({
           <p className="px-1 text-[11px] leading-relaxed text-crema/60">{error}</p>
         )}
 
-        <p className="px-1 text-[11px] leading-relaxed text-crema/35">
+        <p className="px-1 text-[11px] leading-relaxed text-crema/55">
           En esta demo el archivo queda en tu navegador y no se sube a ningún servidor. La
           lectura por visión necesita una clave de API, así que se activa sólo en modo IA.
         </p>

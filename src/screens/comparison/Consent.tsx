@@ -100,7 +100,7 @@ export function Consent() {
                 </span>
                 <span>
                   <span className="block text-[13px] text-blanco">{label}</span>
-                  <span className="mt-0.5 block text-[11.5px] leading-relaxed text-crema/50">
+                  <span className="mt-0.5 block text-[11.5px] leading-relaxed text-crema/55">
                     {detail}
                   </span>
                 </span>
@@ -108,7 +108,7 @@ export function Consent() {
             ))}
           </div>
 
-          <p className="mb-6 rounded-[var(--radius-option)] border border-crema/10 px-3.5 py-2.5 text-[11px] leading-relaxed text-crema/45">
+          <p className="mb-6 rounded-[var(--radius-option)] border border-crema/10 px-3.5 py-2.5 text-[11px] leading-relaxed text-crema/55">
             Lo que ninguna de las dos partes puede compartir, aunque quiera: lo que escribió en
             el onboarding y sus respuestas clínicas. No hay una casilla para eso porque no
             existe el camino.
@@ -120,7 +120,7 @@ export function Consent() {
            */}
           <div className="rounded-[var(--radius-option)] border border-crema/15 px-4 py-4">
             <p className="eyebrow mb-2">Del lado de {profile.display_name}</p>
-            <p className="mb-3.5 text-[11.5px] leading-relaxed text-crema/50">
+            <p className="mb-3.5 text-[11.5px] leading-relaxed text-crema/55">
               En el producto real esto llega por correo y lo responde la otra persona. Acá no se
               envía ningún correo: respondés vos, desde este panel, para poder ver cómo sigue.
             </p>

@@ -49,7 +49,7 @@ function Verdict({ verdict }: { verdict: SafetyVerdict }) {
       <p className="text-[11px] leading-relaxed text-crema/55">
         Términos: {verdict.matched.join(' · ')}
       </p>
-      <p className="mt-2 text-[11px] leading-relaxed text-crema/40">
+      <p className="mt-2 text-[11px] leading-relaxed text-crema/55">
         {verdict.severity === 'high'
           ? 'Bloquea Mapa del Alma, recomendaciones y meditaciones.'
           : 'No bloquea. Excluye modalidades removedoras y prioriza la familia psicológica.'}
@@ -79,7 +79,7 @@ export function SafetyLab() {
         <div>
           <p className="eyebrow mb-2">Laboratorio</p>
           <h1 className="text-[26px] text-blanco">Capa 1 de safety</h1>
-          <p className="mt-2 text-[12px] leading-relaxed text-crema/50">
+          <p className="mt-2 text-[12px] leading-relaxed text-crema/55">
             Determinística, sin modelo. Corre antes de gastar un token.
           </p>
         </div>
@@ -92,7 +92,7 @@ export function SafetyLab() {
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={3}
-          className="glass w-full resize-none rounded-[var(--radius-option)] px-4 py-3 text-sm text-blanco placeholder:text-crema/30"
+          className="glass w-full resize-none rounded-[var(--radius-option)] px-4 py-3 text-sm text-blanco placeholder:text-crema/55"
           placeholder="Escribí algo…"
         />
 

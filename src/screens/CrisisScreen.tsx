@@ -63,7 +63,7 @@ export function CrisisScreen({
             <button
               type="button"
               onClick={onNotMyCase}
-              className="self-center px-2 py-1 text-[11px] text-crema/40 underline underline-offset-4 hover:text-crema/70"
+              className="self-center px-2 py-1 text-[11px] text-crema/55 underline underline-offset-4 hover:text-crema/70"
             >
               Esto no aplica a mi caso
             </button>

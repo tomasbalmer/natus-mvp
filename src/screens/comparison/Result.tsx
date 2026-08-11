@@ -219,7 +219,7 @@ export function Result() {
             </div>
           </section>
 
-          <p className="mb-6 rounded-[var(--radius-option)] border border-crema/10 px-3.5 py-3 text-[11px] leading-relaxed text-crema/45">
+          <p className="mb-6 rounded-[var(--radius-option)] border border-crema/10 px-3.5 py-3 text-[11px] leading-relaxed text-crema/55">
             {result.disclaimer}
           </p>
 
@@ -230,7 +230,7 @@ export function Result() {
             >
               Permisos y alcance
             </Link>
-            <p className="px-1 text-[10px] tracking-wide text-crema/25 uppercase">
+            <p className="px-1 text-[10px] tracking-wide text-crema/55 uppercase">
               {stored.mode === 'fixture' ? 'Modo demo · guion curado' : 'Generado con Claude'} ·{' '}
               {stored.prompt_version}
             </p>

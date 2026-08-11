@@ -122,7 +122,7 @@ export function Meditation() {
           una intención.
         </p>
 
-        <label className="mb-1.5 block text-[11px] tracking-wide text-crema/50 uppercase" htmlFor="intent">
+        <label className="mb-1.5 block text-[11px] tracking-wide text-crema/55 uppercase" htmlFor="intent">
           ¿Con qué llegás?
         </label>
         <textarea
@@ -131,10 +131,10 @@ export function Meditation() {
           value={intent}
           onChange={(e) => setIntent(e.target.value)}
           placeholder="Escribí lo que se te venga…"
-          className="glass w-full resize-none rounded-[var(--radius-option)] px-3.5 py-3 text-[13px] text-blanco placeholder:text-crema/25"
+          className="glass w-full resize-none rounded-[var(--radius-option)] px-3.5 py-3 text-[13px] text-blanco placeholder:text-crema/55"
         />
 
-        <p className="mt-5 mb-2 text-[11px] tracking-wide text-crema/50 uppercase">Cuánto tiempo</p>
+        <p className="mt-5 mb-2 text-[11px] tracking-wide text-crema/55 uppercase">Cuánto tiempo</p>
         <div className="flex gap-2">
           {LENGTHS.map((length) => (
             <button
@@ -153,7 +153,7 @@ export function Meditation() {
         </div>
 
         {!isPlaybackAvailable() && (
-          <p className="mt-4 rounded-[var(--radius-option)] border border-crema/10 px-3.5 py-2.5 text-[11px] leading-relaxed text-crema/45">
+          <p className="mt-4 rounded-[var(--radius-option)] border border-crema/10 px-3.5 py-2.5 text-[11px] leading-relaxed text-crema/55">
             Este navegador no tiene síntesis de voz, así que vas a poder leer el guion pero no
             escucharlo.
           </p>
@@ -231,7 +231,7 @@ function Player({ meditation, onLeave }: { meditation: StoredMeditation; onLeave
       <div className="flex min-h-dvh flex-col overflow-y-auto px-5 pt-[var(--top-inset)] pb-[var(--bottom-inset)] sm:min-h-0">
         <p className="eyebrow mb-3">{bedTrack?.name ?? 'Solo voz'}</p>
         <h1 className="mb-1.5 text-[28px] leading-[1.15] text-blanco">{meditation.script.title}</h1>
-        <p className="mb-5 text-[11.5px] leading-relaxed text-crema/45">
+        <p className="mb-5 text-[11.5px] leading-relaxed text-crema/55">
           {meditation.estimated_minutes} min aproximados · pediste {meditation.requested_minutes}
         </p>
 
@@ -295,7 +295,7 @@ function Player({ meditation, onLeave }: { meditation: StoredMeditation; onLeave
           >
             Armar otra
           </button>
-          <p className="px-1 text-[10px] tracking-wide text-crema/25 uppercase">
+          <p className="px-1 text-[10px] tracking-wide text-crema/55 uppercase">
             {meditation.mode === 'fixture' ? 'Modo demo · guion curado' : 'Generado con Claude'} ·{' '}
             {meditation.prompt_version}
           </p>
@@ -318,7 +318,7 @@ function VolumeSlider({
 }) {
   return (
     <div className="flex items-center gap-3">
-      <label htmlFor={id} className="w-12 shrink-0 text-[10px] tracking-wide text-crema/50 uppercase">
+      <label htmlFor={id} className="w-12 shrink-0 text-[10px] tracking-wide text-crema/55 uppercase">
         {label}
       </label>
       <input

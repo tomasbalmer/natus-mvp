@@ -57,7 +57,7 @@ export function Routine() {
           <br />
           no consejos.
         </h1>
-        <p className="mb-6 text-[12.5px] leading-relaxed text-crema/50">
+        <p className="mb-6 text-[12.5px] leading-relaxed text-crema/55">
           Marcá lo que hiciste si te sirve tenerlo a la vista. Nadie te va a decir nada si
           dejás de marcar.
         </p>
@@ -71,7 +71,7 @@ export function Routine() {
               <article key={practice.title} className="glass rounded-[var(--radius-option)] px-4 py-4">
                 <div className="mb-2 flex items-baseline justify-between gap-3">
                   <h2 className="text-[14px] leading-snug text-blanco">{practice.title}</h2>
-                  <span className="shrink-0 text-[10px] tracking-wide text-crema/40 uppercase">
+                  <span className="shrink-0 text-[10px] tracking-wide text-crema/55 uppercase">
                     {CADENCE_LABEL[practice.cadence]}
                   </span>
                 </div>
@@ -100,7 +100,7 @@ export function Routine() {
 
                   {total > 0 && (
                     // A total, never a consecutive run. See the note above.
-                    <span className="shrink-0 text-[11px] text-crema/35">
+                    <span className="shrink-0 text-[11px] text-crema/55">
                       {total} {total === 1 ? 'día' : 'días'} en total
                     </span>
                   )}

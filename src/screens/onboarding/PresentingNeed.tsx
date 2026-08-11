@@ -51,7 +51,7 @@ export function PresentingNeed({
         <textarea
           id="presenting-need"
           rows={3}
-          className="glass w-full resize-none rounded-[var(--radius-option)] px-4 py-3 text-sm leading-relaxed text-blanco placeholder:text-crema/25"
+          className="glass w-full resize-none rounded-[var(--radius-option)] px-4 py-3 text-sm leading-relaxed text-blanco placeholder:text-crema/55"
           placeholder="Escribí lo que se te venga…"
           value={draft.presenting_need_text}
           onChange={(e) => onChange({ presenting_need_text: e.target.value })}

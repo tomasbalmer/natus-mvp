@@ -39,7 +39,7 @@ export function Paywall({
         <button type="button" className="cta" onClick={onSimulate}>
           Simular acceso completo
         </button>
-        <p className="px-1 text-[10.5px] leading-relaxed text-crema/35">
+        <p className="px-1 text-[10.5px] leading-relaxed text-crema/55">
           Esto no cobra nada. No hay pasarela de pago en esta demo: el botón sólo cambia el
           estado para que puedas seguir viendo cómo funciona.
         </p>

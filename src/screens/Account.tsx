@@ -70,7 +70,7 @@ export function Account() {
           {client ? (
             <>
               <p className="text-[13px] leading-snug text-blanco">{client.email}</p>
-              <p className="mt-1 text-[11.5px] leading-relaxed text-crema/45">
+              <p className="mt-1 text-[11.5px] leading-relaxed text-crema/55">
                 Cuenta simulada. No se envió ningún correo y no hay ningún servidor donde
                 exista.
               </p>
@@ -78,7 +78,7 @@ export function Account() {
           ) : (
             <>
               <p className="text-[13px] leading-snug text-blanco">Sin cuenta</p>
-              <p className="mt-1 mb-2.5 text-[11.5px] leading-relaxed text-crema/45">
+              <p className="mt-1 mb-2.5 text-[11.5px] leading-relaxed text-crema/55">
                 Todo lo tuyo vive en este navegador y caduca a los siete días.
               </p>
               <Link
@@ -109,7 +109,7 @@ export function Account() {
               </button>
             ))}
           </div>
-          <p className="text-[11.5px] leading-relaxed text-crema/45">
+          <p className="text-[11.5px] leading-relaxed text-crema/55">
             Queda guardada tu preferencia. La demo está escrita solo en español, así que la
             pantalla no cambia todavía.
           </p>
@@ -129,7 +129,7 @@ export function Account() {
             Descargar mis datos
           </button>
           {exported && (
-            <p role="status" className="mt-2 text-[11px] leading-relaxed text-crema/45">
+            <p role="status" className="mt-2 text-[11px] leading-relaxed text-crema/55">
               Descargado como {exported}.
             </p>
           )}
@@ -159,7 +159,9 @@ export function Account() {
                 type="button"
                 disabled={busy}
                 onClick={() => void deleteEverything()}
-                className="w-full rounded-full bg-alerta/85 px-3 py-2.5 text-[11px] tracking-wide text-negro uppercase disabled:opacity-50"
+                // Solid, not 85%: dark text over the faded red measured 3.8:1,
+                // under the 4.5 this 11px label needs.
+                className="w-full rounded-full bg-alerta px-3 py-2.5 text-[11px] tracking-wide text-negro uppercase disabled:opacity-50"
               >
                 {busy ? 'Borrando' : 'Sí, borrar todo'}
               </button>

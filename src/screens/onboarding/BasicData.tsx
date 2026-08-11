@@ -11,9 +11,9 @@ const COUNTRIES: [string, string][] = [
 ];
 
 const fieldClass =
-  'glass w-full rounded-[var(--radius-option)] px-4 py-3 text-sm text-blanco placeholder:text-crema/25 [color-scheme:dark]';
+  'glass w-full rounded-[var(--radius-option)] px-4 py-3 text-sm text-blanco placeholder:text-crema/55 [color-scheme:dark]';
 
-const labelClass = 'mb-1.5 block text-[11px] tracking-wide text-crema/50 uppercase';
+const labelClass = 'mb-1.5 block text-[11px] tracking-wide text-crema/55 uppercase';
 
 export function BasicData({
   draft,
@@ -57,7 +57,7 @@ export function BasicData({
             placeholder="Como figura en tu partida"
             autoComplete="name"
           />
-          <p className="mt-1.5 text-[11px] leading-relaxed text-crema/35">
+          <p className="mt-1.5 text-[11px] leading-relaxed text-crema/55">
             Los números se calculan sobre el nombre de nacimiento, no sobre el que usás
             todos los días.
           </p>
@@ -107,7 +107,7 @@ export function BasicData({
             />
           </div>
         </div>
-        <p className="-mt-2 text-[11px] leading-relaxed text-crema/35">
+        <p className="-mt-2 text-[11px] leading-relaxed text-crema/55">
           Si no las sabés, seguí sin ellas. Sin hora exacta no hablamos de Ascendente ni de
           casas, y el resto funciona igual.
         </p>
@@ -128,7 +128,7 @@ export function BasicData({
               </option>
             ))}
           </select>
-          <p className="mt-1.5 text-[11px] leading-relaxed text-crema/35">
+          <p className="mt-1.5 text-[11px] leading-relaxed text-crema/55">
             Define qué líneas de ayuda te mostramos si alguna vez hacen falta.
           </p>
         </div>

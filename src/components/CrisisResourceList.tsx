@@ -23,7 +23,7 @@ export function CrisisResourceList({
         >
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm text-blanco">{r.name}</p>
-            {r.note && <p className="truncate text-[11px] text-crema/50">{r.note}</p>}
+            {r.note && <p className="truncate text-[11px] text-crema/55">{r.note}</p>}
           </div>
           <span className="shrink-0 font-serif text-lg text-crema">{r.contact}</span>
         </a>
@@ -39,7 +39,7 @@ export function CrisisResourceList({
       >
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm text-blanco">{set.fallback.name}</p>
-          <p className="truncate text-[11px] text-crema/50">{set.fallback.note}</p>
+          <p className="truncate text-[11px] text-crema/55">{set.fallback.note}</p>
         </div>
         <span aria-hidden="true" className="shrink-0 text-crema/60">
           ↗
@@ -54,7 +54,7 @@ export function CrisisResourceList({
          * these numbers were checked. Deleting this notice is not the fix —
          * verifying the numbers is.
          */
-        <p className="px-1 pt-1 text-[11px] leading-relaxed text-crema/45">
+        <p className="px-1 pt-1 text-[11px] leading-relaxed text-crema/55">
           Estos números están tomados de fuentes públicas y todavía no fueron
           verificados uno por uno. Si alguno no responde, entrá a{' '}
           <span className="text-crema/70">findahelpline.com</span> o llamá al número de
