@@ -351,7 +351,7 @@ npm packages.
 
 ### Phase 3: Onboarding and numerology
 
-- [ ] Step 3.1: Numerology engine
+- [x] Step 3.1: Numerology engine
   - ADD `src/lib/numerology.ts` — the five Pythagorean numbers, name normalisation (uppercase, strip diacritics, N-with-tilde to N, drop non A-Z), Y always a consonant, master numbers 11/22/33 preserved, life path reduced per component:
     ```ts
     const MASTERS = new Set([11, 22, 33]);
@@ -363,24 +363,40 @@ npm packages.
     }
     ```
   - ADD `src/lib/numerology.test.ts` — at least 15 cases: one yielding 11, one yielding 22, one with N-with-tilde, one with acute accents, one five-word compound name.
-- [ ] Step 3.2: Session store
+- [x] Step 3.2: Session store
   - ADD `src/store/session.ts` — anonymous session with a 7-day expiry, claimable at signup, mirroring `anonymous_sessions`.
-  - ADD `src/store/db.ts` — the localStorage repository layer, one namespace per PDR table.
-- [ ] Step 3.3: The eight screens
+  - ADD `src/store/session.test.ts` — the acceptance criteria of US-1.1 and US-1.2 as executable checks.
+  - `src/store/db.ts` was pulled forward into Phase 2.
+- [x] Step 3.3: The eight screens
   - ADD `src/screens/onboarding/` — `Landing`, `BasicData`, `PresentingNeed`, `Openness`, `ClinicalBasics`, `NatalChart`, `Generating`, and the handoff to the Soul Map.
   - Copy follows PDR section 1: the entry question is "¿Qué te estás preguntando últimamente?"; options are phrased as situations, not diagnoses.
   - `birth_time` and `birth_city` are optional and skipping them must not block.
   - Clinical screen shows the containment intro, allows "prefiero no decir" on every question except ideation, and routes to the crisis screen when ideation is `plan_o_intencion`.
-- [ ] Step 3.4: Chart upload
-  - ADD `src/screens/onboarding/NatalChart.tsx` — accept PDF up to 10 MB and 20 pages, store the blob in IndexedDB, set `parse_status: 'pending'`, offer to continue without it.
-  - ADD `src/components/OptionList.tsx` — the mockup's 52px glass rows with thin line icons replacing the emoji.
+- [x] Step 3.4: Chart upload
+  - ADD `src/screens/onboarding/NatalChart.tsx` — accept a PDF up to 10 MB, hold it, set `parse_status: 'pending'`, offer to continue without it.
+  - ADD `src/components/onboarding/OptionItem.tsx` — the mockup's 52px glass row.
+  - _Deviation: the emoji are dropped rather than replaced with line icons.
+    Cormorant Garamond over desaturated photography is a sober register and a
+    column of emoji pulls it toward a generic wellness app; the check mark
+    carries the selected state on its own._
+  - _Deviation: the file is held in session state rather than IndexedDB. The
+    demo never re-reads the bytes — parsing needs Vision, which needs a key —
+    so persisting a multi-megabyte blob would buy nothing. IndexedDB lands
+    with the BYOK extraction call._
 
-**Verification**
+**Verification** — passed 2026-08-11
 
-`pnpm test` green including the 15 numerology cases. A full onboarding run
-reaches the generating screen without an account; reloading the browser within
-seven days restores progress; skipping birth time and city does not block; the
-ideation answer routes to the crisis screen.
+- `pnpm test` 167 passing across 6 files, `pnpm typecheck` clean, build succeeds.
+- 23 numerology cases, every expected value computed by hand with the
+  arithmetic written into the test, so the test checks the code rather than
+  the code checking itself.
+- Walked the full flow in a browser. "María de los Ángeles Fernández", born
+  1901-11-29, renders life path 33, expression 1, soul urge 8, personality 11,
+  birthday 11 — the same values derived by hand in `numerology.test.ts`.
+- Answering `plan_o_intencion` on the clinical screen replaces the flow with
+  the crisis screen and generates nothing (US-1.3 CA3).
+- Birth time and city skipped without blocking (US-1.2 CA1).
+- The whole run reaches the Soul Map with no account (US-1.1 CA1).
 
 ### Phase 4: Soul Map
 

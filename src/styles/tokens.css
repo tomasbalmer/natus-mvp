@@ -97,6 +97,52 @@
   inset: 0;
 }
 
+/* The pulsing orb of mockup screen 03, used on the generating screen. */
+.orb-pulse {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgb(28 56 41 / 0.2);
+  border: 1px solid rgb(28 56 41 / 0.4);
+  animation: pulse-ring 2.5s ease-out infinite;
+}
+
+.orb-pulse-2 {
+  width: 96px;
+  height: 96px;
+  background: rgb(28 56 41 / 0.25);
+  animation-delay: 0.8s;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  70%,
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+.wave-bar {
+  animation: wave 1.2s ease-in-out infinite;
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: scaleY(0.6);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
 /* Respect the user's motion preference. The pulse and generating animations
    are decorative; nothing depends on them to convey state. */
 @media (prefers-reduced-motion: reduce) {
