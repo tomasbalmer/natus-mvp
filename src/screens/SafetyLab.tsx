@@ -75,7 +75,7 @@ export function SafetyLab() {
 
   return (
     <Screen backdrop="grass" scrim="heavy" opacity={0.35}>
-      <div className="flex min-h-dvh flex-col gap-4 overflow-y-auto px-5 pt-14 pb-8 sm:min-h-0">
+      <div className="flex min-h-dvh flex-col gap-4 overflow-y-auto px-5 pt-[var(--top-inset)] pb-8 sm:min-h-0">
         <div>
           <p className="eyebrow mb-2">Laboratorio</p>
           <h1 className="text-[26px] text-blanco">Capa 1 de safety</h1>

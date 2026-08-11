@@ -33,6 +33,14 @@ const MOCKUP_GEOMETRY = {
   '--h-option': '52px',
 } as const;
 
+/**
+ * Tokens this demo adds that have no counterpart in the mockup. Kept apart so
+ * MOCKUP_GEOMETRY keeps meaning exactly one thing: fidelity to the design.
+ */
+const DEMO_CHROME = {
+  '--top-inset': '62px',
+} as const;
+
 function readTokens(): Map<string, string> {
   const css = readFileSync(new URL('./tokens.css', import.meta.url), 'utf8');
   const tokens = new Map<string, string>();
@@ -59,6 +67,10 @@ describe('design tokens match the mockup', () => {
   });
 
   it.each(Object.entries(MOCKUP_GEOMETRY))('%s is %s', (name, expected) => {
+    expect(tokens.get(name)).toBe(expected);
+  });
+
+  it.each(Object.entries(DEMO_CHROME))('%s is %s (demo chrome, not from the mockup)', (name, expected) => {
     expect(tokens.get(name)).toBe(expected);
   });
 

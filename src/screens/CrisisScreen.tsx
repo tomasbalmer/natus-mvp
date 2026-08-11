@@ -27,7 +27,7 @@ export function CrisisScreen({
 }) {
   return (
     <Screen backdrop="palm" scrim="diagonal" opacity={0.5}>
-      <div className="flex min-h-dvh flex-col overflow-y-auto px-6 pt-14 pb-9 sm:min-h-0">
+      <div className="flex min-h-dvh flex-col overflow-y-auto px-6 pt-[var(--top-inset)] pb-9 sm:min-h-0">
         <div className="mb-6 flex items-center gap-2.5">
           <span aria-hidden="true" className="size-2 rounded-full bg-alerta shadow-[0_0_8px_var(--natus-alerta)]" />
           <p className="eyebrow">Antes de seguir</p>

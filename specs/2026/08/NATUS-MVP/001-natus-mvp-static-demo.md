@@ -297,23 +297,57 @@ npm packages.
 
 ### Phase 2: Crisis safety
 
-- [ ] Step 2.1: Keyword lists
+- [x] Step 2.1: Keyword lists
   - ADD `data/crisis-keywords.json` — five categories (ideación, autolesión, abuso, psicosis, pánico) plus indirect markers and negation/third-person markers, versioned, flagged `"status": "preliminary"`.
-- [ ] Step 2.2: Detector
-  - ADD `src/lib/safety.ts` — normalise (lowercase, strip diacritics, collapse whitespace), match on word boundaries, discard a match preceded by a negation or third-person marker within a 4-token window, require two distinct indirect markers within the same text, and expose `detectCrisis(input): CrisisVerdict`.
-  - ADD `src/lib/safety.test.ts` — at least 20 synthetic cases, including the PDR's own counter-examples: "mi terapeuta me sigue en Instagram" and "ya no aguanto este trabajo" must not trigger.
-- [ ] Step 2.3: Deduplication and events
-  - ADD `src/store/crisis.ts` — record events locally; suppress repeat notification within 6 hours.
-- [ ] Step 2.4: Surfaces
+- [x] Step 2.2: Detector
+  - ADD `src/lib/safety.ts` — normalise, match whole token sequences on word boundaries, discard a match preceded by a suppressor within a 4-token window, require two distinct indirect markers within the same text, and expose `detectCrisis`, `isClinicallyVulnerable`, `riskLevel`, `shouldNotifyAdmin`.
+  - ADD `src/lib/safety.test.ts` — 60 cases across direct terms, suppression with positive controls, indirect accumulation, the clinical answer, vulnerability and notification windows.
+  - _Deviation: suppressors are split into three classes rather than the
+    PDR's single list. Negation and reported speech always suppress; a person
+    reference suppresses only when the matched term does not begin with "me".
+    The exception is load-bearing — abuse is disclosed as "mi ex me persigue",
+    where the person named is the perpetrator, not a different subject, and a
+    flat list would silence the entire abuse category._
+- [x] [UNPLANNED] Step 2.2b: Prove the suppression tests are not vacuous
+  - MODIFY `src/lib/safety.test.ts` — every suppression case now carries a control: the same sentence without the suppressor, which must fire.
+  - _Rationale: four of the first suppression tests passed while exercising
+    nothing. Spanish reflexive morphology already separates third-person
+    narration ("matarse" is not "matarme"), so the sentences never matched a
+    term in the first place. The controls exposed two real defects — see the
+    verification notes below._
+- [x] Step 2.3: Deduplication and events
+  - ADD `src/store/db.ts` — namespaced localStorage repository, one namespace per PDR table. Pulled forward from Phase 3 because the crisis store needs it.
+  - ADD `src/store/crisis.ts` — record events, suppress repeat notification within 6 hours, false-positive marking, 30-day windows for blocking and for `$clinically_vulnerable`.
+  - ADD `src/store/crisis.test.ts` — 11 cases over a Map-backed storage stub.
+- [x] Step 2.4: Surfaces
   - ADD `src/screens/CrisisScreen.tsx` — full-screen takeover, containment copy, country hotlines with `tel:` links, unverified notice when `verified_at` is null, and the discreet "esto no aplica a mi caso" false-positive link.
-  - ADD `src/components/CrisisBanner.tsx` — persistent banner for low severity.
+  - ADD `src/components/CrisisBanner.tsx` — collapsible persistent banner for low severity.
+  - ADD `src/components/CrisisResourceList.tsx` — shared by both surfaces so they cannot drift.
   - ADD `src/lib/crisis-resources.ts` — country lookup with the international fallback for any country outside CL/MX/CO/AR/PE.
+- [x] [UNPLANNED] Step 2.5: `/lab/safety`
+  - ADD `src/screens/SafetyLab.tsx` — type a phrase, see the verdict and the surface it produces, with samples covering each path including the deliberate silences.
+  - _Rationale: the phase verification calls for a scratch route. Making it a
+    real screen costs little and turns "the detector stays silent on
+    bereavement" into something demonstrable rather than described._
 
-**Verification**
+**Verification** — passed 2026-08-11
 
-`pnpm test` green including the 20 safety cases. Manually entering a
-high-severity phrase in a scratch route renders the crisis screen and no other
-content. Clicking the false-positive link restores the flow.
+- `pnpm test` 133 passing across 4 files, `pnpm typecheck` clean, build succeeds.
+- Screenshot-verified in a browser: low severity renders the verdict and the
+  collapsible banner; high severity renders the full-screen takeover with four
+  Chilean numbers, the international fallback, and the unverified notice.
+- The positive controls exposed two real defects, both fixed in the data:
+  - **False positives on other people's lives.** Bare nouns fired:
+    "el suicidio de mi hermano" and "mi primo tuvo una sobredosis" both
+    triggered a full lockout, which would have met a bereaved person with a
+    crisis screen. Every term is now anchored to a first-person form.
+  - **False negatives on abuse.** The category had no stalking terms, so
+    "mi ex me persigue" and "mi vecino me espera afuera de mi casa" were
+    silent. Added, and covered by tests asserting they survive the person
+    reference.
+- [UNPLANNED] `DemoBanner` ran to three lines and covered every screen
+  heading. Collapsed to one line with an expandable detail, and screens now
+  clear it through a `--top-inset` token rather than each guessing a padding.
 
 ### Phase 3: Onboarding and numerology
 
