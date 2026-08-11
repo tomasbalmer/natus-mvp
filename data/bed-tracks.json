@@ -1,0 +1,73 @@
+{
+  "$comment": "Sound beds for meditations. These are SYNTHESIS DESCRIPTORS, not file paths: the demo builds each bed in the browser with OscillatorNode and filtered noise rather than shipping audio. That removes the licensing question entirely (PDR 5.7 makes bed_tracks.license mandatory) and keeps the repository small. When a real audio library replaces this, the shape stays: name, frequency_hz, and a selection hint the model can reason over.",
+  "version": "bed-tracks-v1",
+  "$safety": "None of these are binaural beats. Binaural beats present two different frequencies, one per ear, and are contraindicated in epilepsy - using them would require adding a question to the clinical onboarding screen, which is out of scope. Every bed here is a single tone, or a chord of tones, played identically to both ears, plus filtered noise.",
+  "tracks": [
+    {
+      "id": "cuencos-432",
+      "name": "Cuencos 432 Hz",
+      "frequency_hz": 432,
+      "suits": "Intenciones de calma, cierre del día, soltar.",
+      "synthesis": {
+        "voices": [
+          { "type": "sine", "hz": 432, "gain": 0.16 },
+          { "type": "sine", "hz": 648, "gain": 0.05 },
+          { "type": "sine", "hz": 864, "gain": 0.03 }
+        ],
+        "noise": null,
+        "lfo": { "hz": 0.08, "depth": 0.35 }
+      },
+      "is_active": true
+    },
+    {
+      "id": "drone-528",
+      "name": "Drone 528 Hz",
+      "frequency_hz": 528,
+      "suits": "Intenciones de apertura, autoestima, reparación.",
+      "synthesis": {
+        "voices": [
+          { "type": "sine", "hz": 528, "gain": 0.14 },
+          { "type": "triangle", "hz": 264, "gain": 0.06 }
+        ],
+        "noise": null,
+        "lfo": { "hz": 0.11, "depth": 0.3 }
+      },
+      "is_active": true
+    },
+    {
+      "id": "drone-grave",
+      "name": "Drone grave",
+      "frequency_hz": 96,
+      "suits": "Intenciones de arraigo y regulación cuando hay mucha activación.",
+      "synthesis": {
+        "voices": [
+          { "type": "sine", "hz": 96, "gain": 0.2 },
+          { "type": "sine", "hz": 144, "gain": 0.07 }
+        ],
+        "noise": { "type": "brown", "gain": 0.05, "lowpass_hz": 400 },
+        "lfo": { "hz": 0.06, "depth": 0.25 }
+      },
+      "is_active": true
+    },
+    {
+      "id": "lluvia",
+      "name": "Lluvia",
+      "frequency_hz": null,
+      "suits": "Intenciones de sueño y descanso, o cuando el tono puro molesta.",
+      "synthesis": {
+        "voices": [],
+        "noise": { "type": "pink", "gain": 0.14, "lowpass_hz": 1800 },
+        "lfo": { "hz": 0.2, "depth": 0.2 }
+      },
+      "is_active": true
+    },
+    {
+      "id": "silencio",
+      "name": "Solo voz",
+      "frequency_hz": null,
+      "suits": "Cuando la persona prefiere la guía sin fondo. Siempre disponible.",
+      "synthesis": { "voices": [], "noise": null, "lfo": null },
+      "is_active": true
+    }
+  ]
+}

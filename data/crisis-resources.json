@@ -1,0 +1,173 @@
+{
+  "$comment": "Crisis resources per PDR 6.4. EVERY entry carries verified_at: null. The PDR calls telephone verification an absolute launch blocker, and a wrong number here is the worst possible bug in this product - so while verified_at is null the crisis screen renders an unverified notice and always shows the international fallback alongside. Verify by calling, not by searching, then set the date. Re-verify every 6 months. Numbers below are transcribed from the PDR and have NOT been called.",
+  "version": "crisis-resources-v1-unverified",
+  "resources": [
+    {
+      "country": "CL",
+      "type": "hotline",
+      "name": "Salud Responde",
+      "contact": "600 360 7777",
+      "note": "Orientación en salud mental, 24 horas.",
+      "priority": 1,
+      "is_active": true,
+      "verified_at": null
+    },
+    {
+      "country": "CL",
+      "type": "hotline",
+      "name": "Fono Esperanza",
+      "contact": "800 800 077",
+      "note": "Escucha y contención.",
+      "priority": 2,
+      "is_active": true,
+      "verified_at": null
+    },
+    {
+      "country": "CL",
+      "type": "hotline",
+      "name": "Línea Libre",
+      "contact": "1515",
+      "note": "Para personas de 8 a 29 años.",
+      "priority": 3,
+      "is_active": true,
+      "verified_at": null
+    },
+    {
+      "country": "CL",
+      "type": "emergency",
+      "name": "Emergencias",
+      "contact": "131",
+      "note": "Ambulancia SAMU.",
+      "priority": 4,
+      "is_active": true,
+      "verified_at": null
+    },
+    {
+      "country": "MX",
+      "type": "hotline",
+      "name": "Línea de la Vida",
+      "contact": "800 290 0024",
+      "note": "Atención en crisis, 24 horas.",
+      "priority": 1,
+      "is_active": true,
+      "verified_at": null
+    },
+    {
+      "country": "MX",
+      "type": "hotline",
+      "name": "SAPTEL",
+      "contact": "55 5259 8121",
+      "note": "Apoyo psicológico por teléfono.",
+      "priority": 2,
+      "is_active": true,
+      "verified_at": null
+    },
+    {
+      "country": "MX",
+      "type": "emergency",
+      "name": "Emergencias",
+      "contact": "911",
+      "note": null,
+      "priority": 3,
+      "is_active": true,
+      "verified_at": null
+    },
+    {
+      "country": "CO",
+      "type": "hotline",
+      "name": "Línea Salud Mental",
+      "contact": "192",
+      "note": "Marcar 192 y elegir la opción 4.",
+      "priority": 1,
+      "is_active": true,
+      "verified_at": null
+    },
+    {
+      "country": "CO",
+      "type": "hotline",
+      "name": "Línea Amiga",
+      "contact": "106",
+      "note": "Bogotá.",
+      "priority": 2,
+      "is_active": true,
+      "verified_at": null
+    },
+    {
+      "country": "CO",
+      "type": "emergency",
+      "name": "Emergencias",
+      "contact": "123",
+      "note": null,
+      "priority": 3,
+      "is_active": true,
+      "verified_at": null
+    },
+    {
+      "country": "AR",
+      "type": "hotline",
+      "name": "Centro de Asistencia al Suicida",
+      "contact": "135",
+      "note": "Desde otras provincias: (011) 5275-1135.",
+      "priority": 1,
+      "is_active": true,
+      "verified_at": null
+    },
+    {
+      "country": "AR",
+      "type": "hotline",
+      "name": "Hablemos",
+      "contact": "0800 345 1435",
+      "note": "Escucha y orientación.",
+      "priority": 2,
+      "is_active": true,
+      "verified_at": null
+    },
+    {
+      "country": "AR",
+      "type": "emergency",
+      "name": "Emergencias",
+      "contact": "911",
+      "note": null,
+      "priority": 3,
+      "is_active": true,
+      "verified_at": null
+    },
+    {
+      "country": "PE",
+      "type": "hotline",
+      "name": "Línea de Salud Mental MINSA",
+      "contact": "113",
+      "note": "Marcar 113 y elegir la opción 5.",
+      "priority": 1,
+      "is_active": true,
+      "verified_at": null
+    },
+    {
+      "country": "PE",
+      "type": "hotline",
+      "name": "Ayúdame a Vivir",
+      "contact": "0800 37822",
+      "note": "Prevención del suicidio.",
+      "priority": 2,
+      "is_active": true,
+      "verified_at": null
+    },
+    {
+      "country": "PE",
+      "type": "emergency",
+      "name": "Emergencias",
+      "contact": "106",
+      "note": "Ambulancia SAMU.",
+      "priority": 3,
+      "is_active": true,
+      "verified_at": null
+    }
+  ],
+  "fallback": {
+    "$comment": "Shown for any country outside CL/MX/CO/AR/PE, and shown alongside the local list whenever any local entry is unverified. PDR 6.4: never leave the list empty.",
+    "name": "Find a Helpline",
+    "url": "https://findahelpline.com",
+    "note": "Directorio internacional de líneas de ayuda por país.",
+    "emergency_instruction": "Si estás en peligro inmediato, llamá al número de emergencias de tu país."
+  }
+}

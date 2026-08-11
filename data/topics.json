@@ -1,0 +1,21 @@
+{
+  "$comment": "The 15 topics of PDR 5.3. Slugs are the join key between what a user describes and therapy_modalities.works_well_for. User-facing strings are Spanish because the product UI is Spanish; keys are English.",
+  "version": "topics-v1",
+  "topics": [
+    { "slug": "ansiedad", "name_es": "Ansiedad", "name_en": "Anxiety" },
+    { "slug": "depresion", "name_es": "Depresión", "name_en": "Depression" },
+    { "slug": "duelo", "name_es": "Duelo y pérdida", "name_en": "Grief and loss" },
+    { "slug": "pareja", "name_es": "Pareja y relaciones", "name_en": "Couples and relationships" },
+    { "slug": "sexualidad", "name_es": "Sexualidad", "name_en": "Sexuality" },
+    { "slug": "familia", "name_es": "Familia y crianza", "name_en": "Family and parenting" },
+    { "slug": "trauma", "name_es": "Trauma", "name_en": "Trauma" },
+    { "slug": "autoestima", "name_es": "Autoestima", "name_en": "Self-esteem" },
+    { "slug": "proposito", "name_es": "Propósito de vida", "name_en": "Life purpose" },
+    { "slug": "transiciones", "name_es": "Transiciones de vida", "name_en": "Life transitions" },
+    { "slug": "espiritualidad", "name_es": "Espiritualidad", "name_en": "Spirituality" },
+    { "slug": "adicciones", "name_es": "Adicciones", "name_en": "Addiction" },
+    { "slug": "alimentacion", "name_es": "Trastornos alimentarios", "name_en": "Eating disorders" },
+    { "slug": "desarrollo-profesional", "name_es": "Desarrollo profesional", "name_en": "Professional development" },
+    { "slug": "identidad", "name_es": "Identidad y orientación", "name_en": "Identity and orientation" }
+  ]
+}

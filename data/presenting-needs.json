@@ -1,0 +1,48 @@
+{
+  "$comment": "Shortcuts for onboarding screen 3, listed under the free-text field. PDR 14 leaves the final list open; this is a draft. Every one is phrased as something a person is going through or asking themselves - never as a diagnosis. The mockups showed 'Superar la depresión' and 'Reducir ansiedad', which PDR 1.1 explicitly forbids: the copy must never make the user diagnose themselves. topic_hints feed $inferred_topics in the hard filter; they are hints for retrieval, not labels applied to the person.",
+  "version": "presenting-needs-v1-draft",
+  "prompt_es": "¿Qué te estás preguntando últimamente?",
+  "helper_es": "Escribilo con tus palabras. Si no sabés por dónde empezar, tocá alguna de estas.",
+  "needs": [
+    {
+      "slug": "algo-tiene-que-cambiar",
+      "label_es": "Siento que algo tiene que cambiar y no sé qué",
+      "topic_hints": ["proposito", "transiciones"]
+    },
+    {
+      "slug": "perdida",
+      "label_es": "Estoy atravesando una pérdida",
+      "topic_hints": ["duelo"]
+    },
+    {
+      "slug": "cuerpo-tenso",
+      "label_es": "Vivo con el cuerpo tenso y no afloja",
+      "topic_hints": ["ansiedad", "trauma"]
+    },
+    {
+      "slug": "no-puedo-parar",
+      "label_es": "No puedo parar, y cuando paro me angustio",
+      "topic_hints": ["ansiedad", "desarrollo-profesional"]
+    },
+    {
+      "slug": "relacion-trabada",
+      "label_es": "Hay una relación que no sé cómo sostener",
+      "topic_hints": ["pareja", "familia"]
+    },
+    {
+      "slug": "repito-algo",
+      "label_es": "Repito algo una y otra vez y no entiendo por qué",
+      "topic_hints": ["autoestima", "familia", "identidad"]
+    },
+    {
+      "slug": "sin-piso",
+      "label_es": "Estoy en un cambio grande y no encuentro piso",
+      "topic_hints": ["transiciones", "identidad"]
+    },
+    {
+      "slug": "para-que",
+      "label_es": "Me pregunto para qué estoy haciendo todo esto",
+      "topic_hints": ["proposito", "espiritualidad", "desarrollo-profesional"]
+    }
+  ]
+}

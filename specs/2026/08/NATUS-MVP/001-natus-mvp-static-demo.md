@@ -252,23 +252,48 @@ npm packages.
 
 ### Phase 1: Content seed and contracts
 
-- [ ] Step 1.1: Therapy catalogue
+- [x] Step 1.1: Therapy catalogue
   - ADD `data/modalities.json` — 21 modalities from PDR section 5.3, each with `slug`, `name_es`, `name_en`, `family`, `short_description`, `what_happens`, `works_well_for`, `typical_format`, `typical_horizon`, `intensity` (1-5), `evidence_level`, `contraindications`, `requires_clinical_support`.
-  - `requires_clinical_support: true` on constelaciones familiares, medicina ancestral, hipnosis, breathwork, EMDR.
-- [ ] Step 1.2: Supporting seeds
+  - `requires_clinical_support: true` on constelaciones familiares, medicina ancestral, hipnosis, EMDR.
+  - _Deviation: plain `breathwork` is NOT flagged. PDR 5.3 names "breathwork
+    holotrópico" specifically, and the PDR's own model example of a good
+    routine tip is 4-7-8 breathing. The seed describes the general practice
+    and calls out the intense variants in `contraindications` instead._
+- [x] Step 1.2: Supporting seeds
   - ADD `data/topics.json` — the 15 topics from PDR section 5.3.
-  - ADD `data/crisis-resources.json` — the 11 hotlines for CL/MX/CO/AR/PE with `verified_at: null`, plus the international fallback entry.
+  - ADD `data/crisis-resources.json` — the hotlines for CL/MX/CO/AR/PE with `verified_at: null`, plus an emergency number per country and the international fallback entry.
   - ADD `data/bed-tracks.json` — synthesis descriptors (`frequency_hz`, waveform, noise layer) rather than file paths.
-  - ADD `data/presenting-needs.json` — the 6-8 shortcuts for onboarding screen 3, phrased as questions the user is asking, never as diagnoses.
-- [ ] Step 1.3: Contracts
-  - ADD `src/lib/schemas/` — zod schemas for `Numerology`, `SoulMapSynthesis`, `MatchResult`, `ChatResponse`, `MeditationScript`, `ComparisonResult`, `Modality`, `Topic`, `CrisisResource`.
-  - ADD `src/lib/schemas/index.test.ts` — every seed file parses against its schema.
+  - ADD `data/presenting-needs.json` — the 8 shortcuts for onboarding screen 3, phrased as questions the user is asking, never as diagnoses.
+- [x] [UNPLANNED] Step 1.2b: Onboarding screen 4 options
+  - ADD `data/openness-options.json` — five family-level choices, each with the modality slugs it expands to.
+  - _Rationale: PDR 5.2 stores `openness_to_modalities` as slugs and PDR 7.2
+    filters on them, but twenty-one checkboxes is an unusable screen. The UI
+    offers families and the store expands to slugs before persisting, so the
+    data contract is untouched. `expands_to` is asserted against
+    `modalities.json` in the tests, so a modality that no option reaches — and
+    would therefore be silently absent from every user's pool — fails._
+- [x] Step 1.3: Contracts
+  - ADD `src/lib/schemas/catalog.ts` — `Modality`, `Topic`, `CrisisResource`, `BedTrack`, `PresentingNeed`, and the two option files.
+  - ADD `src/lib/schemas/ai.ts` — `Numerology`, `SoulMapSynthesis`, `SoulMapCrisis`, `MatchResult`, `ChatResponse`, `MeditationScript`, `ComparisonResult`.
+  - ADD `src/lib/catalog.ts` — parses every seed at module load and exposes typed accessors plus `expandOpenness` and `hasUnverifiedResources`.
+  - ADD `src/lib/catalog.test.ts` — referential integrity and the PDR's prose invariants.
+  - _Note: the crisis contract is modelled so it has nowhere to put tips, and
+    the comparison contract has no verdict or score field. The PDR states both
+    as hard prompt rules; expressing them in the schema means a model that
+    breaks them fails validation rather than reaching a screen._
 
-**Verification**
+**Verification** — passed 2026-08-11
 
-`pnpm test` passes with the seed-validation suite green. `data/modalities.json`
-contains exactly 21 entries and every `works_well_for` slug exists in
-`data/topics.json`.
+- `pnpm test` 67 passing across 2 files, `pnpm typecheck` clean, `pnpm build`
+  succeeds with the seed imported through the `@data` alias.
+- 21 modalities, 15 topics, unique slugs, every `works_well_for` resolving.
+- The coverage test caught a real hole on first run: no modality claimed
+  `sexualidad`. Added to `psicologia-clinica`, `terapia-sistemica` and
+  `terapia-somatica`, which is where sex therapy actually lives.
+- Every MVP country reports unverified, and every country has an emergency
+  number rather than only hotlines.
+- The self-diagnosis guard rejects any shortcut naming a condition, which is
+  what the mockups' "Superar la depresión" would have been.
 
 ### Phase 2: Crisis safety
 
