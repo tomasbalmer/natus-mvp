@@ -628,23 +628,66 @@ Three defects found by walking it, all fixed:
 
 ### Phase 8: Meditations
 
-- [ ] Step 8.1: Script and SSML
+- [x] Step 8.1: Script and SSML
   - ADD `src/ai/prompts/meditation.ts` — the four-part structure of PDR section 9.4 with SSML markers, `rate` between 78% and 88%, and 2-5s breaks.
   - ADD `src/audio/ssml.ts` — parse SSML into an ordered queue of utterances and timed pauses.
   - ADD `src/audio/ssml.test.ts` — break durations and prosody survive the round trip.
-- [ ] Step 8.2: Audio
+  - ADD `src/ai/meditation.ts` — runs `validateMeditation` over the result, so a model outside the prosody band fails at generation rather than at play time, in front of whoever is listening.
+  - _`validateMeditation` is kept apart from `parseSsml`: the player has to cope
+    with whatever it is handed, while generation is held to the contract. Same
+    split as the copy lint._
+- [x] [UNPLANNED] Step 8.1b: Meditation fixtures
+  - ADD `src/ai/fixtures/meditation.ts`, `src/ai/fixtures/meditation.test.ts` — scripts assembled from moves, chosen deterministically from the intention.
+  - _Rationale: the same one as chat — `runAi` needs a fixture path. The
+    transcript is derived from the SSML rather than written twice, so the text
+    beside the audio cannot disagree with what is spoken._
+- [x] [UNPLANNED] Step 8.1c: The copy lint was failing every meditation
+  - MODIFY `src/lib/copy-lint.ts` — strip markup before applying the rules.
+  - _Rationale: `<prosody rate="82%">` tripped the percentage rule. Not only in
+    the fixtures — `runAi` lints every payload, so a live generated meditation
+    would have been rejected too. Markup is not copy; the words inside the tags
+    are still linted, and a percentage actually said to the person still fails._
+- [x] Step 8.2: Audio
   - ADD `src/audio/tts.ts` — Web Speech synthesis behind the same `synthesize` shape the PDR defines for the server provider, so swapping to Google TTS is one implementation.
   - ADD `src/audio/bed.ts` — bed tracks synthesised with `OscillatorNode` and filtered noise at the declared frequencies; single-tone drones only, explicitly not binaural.
   - ADD `src/audio/player.ts` — two gain nodes, independent voice and bed volume, preference persisted.
-- [ ] Step 8.3: Screens
+  - _Deviation: the bed gets a gain node and the voice does not. SpeechSynthesis
+    never enters the audio graph, so the voice level is set per utterance,
+    read fresh at each segment so the slider still acts mid-practice._
+  - _The bed's swell is its own gain stage. A signal connected to an AudioParam
+    is summed with its value, so modulating the output gain directly would have
+    made the depth of the breathing depend on how loud the listener set it._
+- [x] Step 8.3: Screens
   - ADD `src/screens/Meditation.tsx` — intent input passing through Layer 1 safety, 5/10/20 minute choice, status progression, transcript beside the audio.
   - ADD `src/screens/Library.tsx` — generated meditations, deletable together with their stored audio.
+  - ADD `src/store/meditations.ts`; `src/store/preferences.ts` gains the two volumes.
+  - _Deviation: there is no stored audio to delete alongside. PDR 5.7 pairs each
+    meditation with a file in a private bucket; here it is synthesised at play
+    time, so a meditation is one row. `store/blobs.ts` still sweeps IndexedDB on
+    the account-wide delete, so the claim stays true if a later phase caches._
 
-**Verification**
+**Verification** — passed 2026-08-11
 
-`pnpm test` green including the SSML round trip. A generated meditation plays
-voice and bed together, the two volume sliders act independently, the
-preference survives a reload, and the transcript matches the spoken script.
+- `pnpm test` 441 passing across 16 files, `pnpm typecheck` clean, build
+  succeeds. 17 of those are the SSML round trip.
+- Walked it in a browser, console clean: the intention picks the core and the
+  bed ("bronca" → *Algo que quedó caliente* over the low drone, "no puedo parar
+  de pensar" → *Bajar un cambio* over Cuencos 432 Hz), the transcript sits
+  beside the player, the library lists both and the two-step delete removes one
+  without touching the other.
+- **A real defect the first pass hid.** The duration test asserted only that
+  longer requests produced longer scripts — which passed while a 20-minute
+  request produced 8 minutes of audio. The fix is not more words: a
+  twenty-minute guided practice is mostly silence, and professional recordings
+  of that length run under 800 words. Narrated rests now carry the difference,
+  and the test asserts the estimate lands within a minute of what was asked
+  (5 → 5.2, 10 → 10.3, 20 → 20.0) *and* that it gets there with silence rather
+  than with talking.
+- **Not verified: audible playback.** Headless Chromium ships no speech voices
+  and no audio device, so the player's state machine, progress, transcript,
+  sliders and persistence were exercised but nothing was heard. Voice, bed, and
+  the two volumes acting independently need one listen in a real browser before
+  this phase is genuinely closed.
 
 ### Phase 9: Chart comparison
 

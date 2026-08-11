@@ -6,6 +6,7 @@ import { activeProfile, isSignedIn } from '@/store/account';
 import { currentSynthesis } from '@/store/soulMap';
 import { currentMatchFor, isCheckedToday, savedSlugs } from '@/store/matches';
 import { remainingQuestions } from '@/store/chat';
+import { listMeditations } from '@/store/meditations';
 import { activeHighSeverityEvent, hasRecentLowSeverity } from '@/store/crisis';
 
 /**
@@ -70,6 +71,7 @@ export function Dashboard() {
 
   const saved = savedSlugs().length;
   const chatRemaining = remainingQuestions();
+  const savedMeditations = listMeditations().length;
   const practices = match?.result.routine ?? [];
   const today = new Date().toISOString().slice(0, 10);
   const doneToday = practices.filter((p) => isCheckedToday(p.title, today)).length;
@@ -116,9 +118,12 @@ export function Dashboard() {
     {
       key: 'meditaciones',
       eyebrow: 'Meditaciones',
-      title: 'Una práctica guiada, hecha para vos',
-      body: 'Todavía no está en esta demo.',
-      to: null,
+      title:
+        savedMeditations === 0
+          ? 'Una práctica guiada, armada para hoy'
+          : `${savedMeditations} ${savedMeditations === 1 ? 'práctica guardada' : 'prácticas guardadas'}`,
+      body: 'Se arma desde una intención concreta. No hay catálogo para elegir.',
+      to: '/meditaciones',
     },
     {
       key: 'comparacion',

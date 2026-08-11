@@ -13,6 +13,8 @@ import { Dashboard } from '@/screens/Dashboard';
 import { Signup } from '@/screens/Signup';
 import { Account } from '@/screens/Account';
 import { Chat } from '@/screens/Chat';
+import { Meditation } from '@/screens/Meditation';
+import { Library } from '@/screens/Library';
 import { getAiMode, type AiMode } from '@/ai/mode';
 
 /**
@@ -28,6 +30,8 @@ const NAV_ROUTES = new Set([
   '/rutina',
   '/cuenta',
   '/chat',
+  '/meditaciones',
+  '/biblioteca',
 ]);
 
 export function App() {
@@ -51,6 +55,8 @@ export function App() {
         <Route path="/registro" element={<Signup />} />
         <Route path="/cuenta" element={<Account />} />
         <Route path="/chat" element={<Chat />} />
+        <Route path="/meditaciones" element={<Meditation />} />
+        <Route path="/biblioteca" element={<Library />} />
         <Route path="/lab/safety" element={<SafetyLab />} />
         <Route path="*" element={<Landing onAiModeChange={setAiMode} />} />
       </Routes>

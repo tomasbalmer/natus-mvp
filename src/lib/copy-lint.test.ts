@@ -88,6 +88,27 @@ describe('linting a whole payload', () => {
   });
 });
 
+describe('markup is not copy', () => {
+  it('does not read an SSML speech rate as a promised percentage', () => {
+    // This is not hypothetical: every meditation carries a prosody rate, and
+    // linting the tag failed all of them — in the fixtures and in `runAi`
+    // alike, so a live generation would have been rejected as well.
+    expect(lintCopy('<prosody rate="82%">Quedate como estés.</prosody>')).toEqual([]);
+  });
+
+  it('still lints the words inside the tags', () => {
+    expect(lintCopy('<speak>Debés meditar diez minutos.</speak>').map((v) => v.rule)).toEqual([
+      'command',
+    ]);
+  });
+
+  it('still catches a percentage that is actually said to the person', () => {
+    expect(lintCopy('<speak>Tenés 98% de compatibilidad.</speak>').map((v) => v.rule)).toContain(
+      'percentage',
+    );
+  });
+});
+
 describe('shape requirements', () => {
   it('recognises an invitation by its question mark', () => {
     expect(isInvitation('¿La sumás como experimento esta semana?')).toBe(true);

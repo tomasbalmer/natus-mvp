@@ -77,10 +77,25 @@ const RULES: Rule[] = [
   },
 ];
 
+/**
+ * Markup is not copy.
+ *
+ * Meditation scripts arrive as SSML, and `<prosody rate="82%">` is a speech
+ * parameter, not a claim made to a person. Linting it as prose failed every
+ * meditation on the percentage rule — in the fixture tests *and* in `runAi`,
+ * so a real generated meditation would have been rejected too. Stripping tags
+ * first costs nothing elsewhere: every rule here is about Spanish sentences,
+ * and the words inside the tags are still linted.
+ */
+function prose(text: string): string {
+  return text.replace(/<[^>]*>/g, ' ');
+}
+
 export function lintCopy(text: string): CopyViolation[] {
+  const subject = prose(text);
   const violations: CopyViolation[] = [];
   for (const rule of RULES) {
-    const match = rule.pattern.exec(text);
+    const match = rule.pattern.exec(subject);
     if (match) violations.push({ rule: rule.id, match: match[0], why: rule.why });
   }
   return violations;
