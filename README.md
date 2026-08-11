@@ -77,6 +77,7 @@ modalities, not people.
 | File | What |
 |------|------|
 | `specs/2026/08/NATUS-MVP/001-natus-mvp-static-demo.md` | Implementation plan, phase by phase |
+| `docs/DECISIONS.md` | Why things are the way they are, and what was rejected |
 | `docs/ASSETS.md` | Image origin and licensing |
 | `docs/HANDOFF.md` | Transferring the repository to a new owner |
 | `docs/MIGRATION.md` | Mapping this code onto Supabase |
