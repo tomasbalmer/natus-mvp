@@ -69,12 +69,13 @@ export function Onboarding() {
   }, []);
 
   const advance = useCallback(() => {
-    setIndex((i) => {
-      const next = Math.min(i + 1, STEPS.length - 1);
-      setSession(setStep(next));
-      return next;
-    });
-  }, []);
+    // The updater has to stay pure. Persisting from inside it meant the write
+    // ran twice under StrictMode's double-invoke, and React was free to
+    // discard the result — the screen simply stopped advancing.
+    const next = Math.min(index + 1, STEPS.length - 1);
+    setIndex(next);
+    setSession(setStep(next));
+  }, [index]);
 
   const back = useCallback(() => setIndex((i) => Math.max(0, i - 1)), []);
 

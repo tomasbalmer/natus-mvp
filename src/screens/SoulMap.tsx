@@ -156,20 +156,21 @@ export function SoulMap() {
         </p>
 
         <div className="mt-auto flex flex-col gap-2.5 pt-4">
-          <div className="glass rounded-[var(--radius-option)] px-4 py-3.5">
-            <p className="text-[12px] leading-relaxed text-crema/55">
-              <span className="text-crema/80">Próximo:</span> las terapias sugeridas y tu rutina.
-              Llegan en la fase 5 del plan.
-            </p>
-          </div>
+          <Link to="/recomendaciones" className="cta no-underline">
+            Ver terapias sugeridas
+            <span aria-hidden="true">→</span>
+          </Link>
 
           <p className="px-1 text-[10px] tracking-wide text-crema/25 uppercase">
             {stored.mode === 'fixture' ? 'Modo demo · guion curado' : 'Generado con Claude'} ·{' '}
             {stored.prompt_version}
           </p>
 
-          <Link to="/" className="cta no-underline">
-            Volver al inicio
+          <Link
+            to="/"
+            className="glass-chip rounded-full px-3 py-2.5 text-center text-[11px] tracking-wide text-crema/60 uppercase no-underline"
+          >
+            Inicio
           </Link>
         </div>
       </div>

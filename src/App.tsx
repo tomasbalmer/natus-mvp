@@ -6,6 +6,8 @@ import { Landing } from '@/screens/Landing';
 import { SoulMap } from '@/screens/SoulMap';
 import { SafetyLab } from '@/screens/SafetyLab';
 import { Onboarding } from '@/screens/onboarding/Onboarding';
+import { Recommendations } from '@/screens/Recommendations';
+import { Routine } from '@/screens/Routine';
 import { getAiMode, type AiMode } from '@/ai/mode';
 
 export function App() {
@@ -22,6 +24,8 @@ export function App() {
         <Route path="/" element={<Landing onAiModeChange={setAiMode} />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/mapa" element={<SoulMap />} />
+        <Route path="/recomendaciones" element={<Recommendations />} />
+        <Route path="/rutina" element={<Routine />} />
         <Route path="/lab/safety" element={<SafetyLab />} />
         <Route path="*" element={<Landing onAiModeChange={setAiMode} />} />
       </Routes>

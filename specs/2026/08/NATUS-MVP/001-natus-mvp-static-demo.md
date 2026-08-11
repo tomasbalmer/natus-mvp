@@ -450,24 +450,51 @@ npm packages.
 
 ### Phase 5: Modality matching and routine
 
-- [ ] Step 5.1: Hard filter
+- [x] Step 5.1: Hard filter
   - ADD `src/lib/matching.ts` — the SQL filter of PDR section 7.2 as pure TypeScript: openness exclusion (with `me_da_lo_mismo` bypass), clinical-vulnerability exclusion of `requires_clinical_support`, topical relevance, and the four edge cases — empty pool retries without the topical filter then falls back to the five contemplative modalities, a pool of one or two is shown honestly, a pool over twelve truncates by ascending intensity and logs the count dropped, and an AI failure falls back to top-three by topic overlap with pre-written reasoning.
   - ADD `src/lib/matching.test.ts` — one case per edge case plus a clinically vulnerable profile that must exclude every removing modality.
-- [ ] Step 5.2: Ranking
-  - ADD `src/ai/prompts/match.ts` — the four ordered dimensions from PDR section 7.3, the prohibition on inventing slugs, the requirement of a `caution_note` whenever `requires_clinical_support` survives, and the copy rules of section 7.5.
-- [ ] Step 5.3: Copy lint
-  - ADD `src/lib/copy-lint.ts` — rejects absolute-certainty phrasing ("la terapia ideal", "va a resolver", "te va a curar", any percentage) in any reasoning string.
-  - ADD `src/lib/copy-lint.test.ts` — the PDR's own anti-patterns must fail the lint.
-- [ ] Step 5.4: Screens
-  - ADD `src/screens/Recommendations.tsx` — the constellation from mockup 04 with modality nodes, no percentage, no person.
-  - ADD `src/components/ModalityCard.tsx` — name, family, what happens in a session, personalised reasoning, typical format, evidence level, optional caution note, and the save / "no me hace sentido" actions.
-  - ADD `src/screens/Routine.tsx` — practices with explicit cadence and a check-in, with no streak, badge or notification.
+- [x] Step 5.2: Ranking
+  - ADD `src/ai/prompts/match.ts` — the four ordered dimensions of PDR 7.3, the prohibition on inventing slugs, the mandatory `caution_note`, and the copy rules of 7.5. Reconstructed, like every prompt here.
+  - ADD `src/ai/fixtures/match.ts` — a curated reasoning for all 21 modalities, assembled against whatever the hard filter returned, plus four routine practices.
+  - ADD `src/ai/match.ts` — the call, with the deterministic fallback of PDR 7.2 edge case 4.
+  - _The prompt is told how the pool was reached. A relaxed or fallback pool
+    should not be described with the confidence of a topically matched one._
+- [x] Step 5.3: Copy lint
+  - Completed early in Phase 4.
+- [x] Step 5.4: Screens
+  - ADD `src/components/Constellation.tsx` — mockup screen 04 with modality nodes, no score, no person.
+  - ADD `src/components/ModalityCard.tsx` — name, family, format, horizon, evidence level, personalised reasoning, an expandable "qué pasa en una sesión", the caution note, and save / dismiss.
+  - ADD `src/screens/Recommendations.tsx`, `src/screens/Routine.tsx`, `src/store/matches.ts`.
 
-**Verification**
+**Verification** — passed 2026-08-11
 
-`pnpm test` green including matching edge cases and the copy lint. Every card
-in the UI shows an evidence level and none shows a number followed by a percent
-sign. Dismissed modalities do not reappear on a re-match.
+- `pnpm test` 244 passing across 10 files, `pnpm typecheck` clean, build succeeds.
+- Walked the flow in a browser: five modalities ranked, evidence levels
+  visible and distinguished, no percentage anywhere, and the routine screen
+  carrying check-ins with no streak.
+
+Three defects found by walking it, all fixed:
+
+- **A contradiction inside the PDR.** Section 7.2 says a pool of one or two is
+  shown as it is, "sin rellenar con ruido"; section 7.4 requires three to five
+  matched modalities. A two-modality pool therefore failed schema validation
+  and silently fell through to the deterministic fallback. Resolved in favour
+  of 7.2 — padding is the one thing that edge case forbids. The schema's lower
+  bound drops to 1 and the real guard moves to `matchModalities`, which
+  rejects fewer than `min(3, poolSize)` so a model under-delivering on a
+  healthy pool still fails.
+- **An impure state updater.** `advance` persisted the step from inside a
+  `setIndex` updater. Under StrictMode's double-invoke the write ran twice and
+  React was free to discard the result — the onboarding simply stopped
+  advancing after the second screen. It looked like a click-handling problem
+  and was a purity problem.
+- **A stale match.** Redoing onboarding landed on the previous
+  recommendations, because a stored match had no link to the synthesis it came
+  from. `StoredMatch` now carries `synthesis_id` — which PDR 5.4 already asks
+  for under the name `soul_map_snapshot`, for reproducibility.
+- [UNPLANNED] The constellation was being flex-shrunk inside the screen's
+  column while its absolutely positioned nodes stayed put, landing them on the
+  heading. `shrink-0`.
 
 ### Phase 6: Account, dashboard and library
 

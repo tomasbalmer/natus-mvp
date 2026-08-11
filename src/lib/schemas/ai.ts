@@ -61,7 +61,20 @@ export type SoulMapCrisis = z.infer<typeof soulMapCrisisSchema>;
 export const soulMapResultSchema = z.union([soulMapSynthesisSchema, soulMapCrisisSchema]);
 export type SoulMapResult = z.infer<typeof soulMapResultSchema>;
 
-/** PDR 7.4. */
+/**
+ * PDR 7.4.
+ *
+ * The lower bound is 1, not the 3 the contract states, because sections 7.2
+ * and 7.4 contradict each other and 7.2 has to win. The contract asks for
+ * three to five modalities; the hard filter can legitimately leave one or
+ * two, and 7.2 says those are shown as they are — "sin rellenar con ruido".
+ * A schema demanding three would force padding with modalities the filter had
+ * already ruled out, which is the one thing that edge case forbids.
+ *
+ * The guard that matters is kept elsewhere: `matchModalities` rejects a
+ * result carrying fewer than `min(3, poolSize)`, so a model under-delivering
+ * on a healthy pool still fails, while an honestly small pool passes.
+ */
 export const matchResultSchema = z.object({
   prompt_version: z.string().min(1),
   matched_modalities: z
@@ -76,7 +89,7 @@ export const matchResultSchema = z.object({
         caution_note: z.string().min(1).nullable(),
       }),
     )
-    .min(3)
+    .min(1)
     .max(5),
   routine: z.array(tipSchema).min(3).max(5),
 });
