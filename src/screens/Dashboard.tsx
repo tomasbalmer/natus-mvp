@@ -5,6 +5,7 @@ import { CrisisScreen } from '@/screens/CrisisScreen';
 import { activeProfile, isSignedIn } from '@/store/account';
 import { currentSynthesis } from '@/store/soulMap';
 import { currentMatchFor, isCheckedToday, savedSlugs } from '@/store/matches';
+import { remainingQuestions } from '@/store/chat';
 import { activeHighSeverityEvent, hasRecentLowSeverity } from '@/store/crisis';
 
 /**
@@ -68,6 +69,7 @@ export function Dashboard() {
   }
 
   const saved = savedSlugs().length;
+  const chatRemaining = remainingQuestions();
   const practices = match?.result.routine ?? [];
   const today = new Date().toISOString().slice(0, 10);
   const doneToday = practices.filter((p) => isCheckedToday(p.title, today)).length;
@@ -106,8 +108,10 @@ export function Dashboard() {
       key: 'chat',
       eyebrow: 'Conversación',
       title: 'Preguntarle algo a tu mapa',
-      body: 'Todavía no está en esta demo.',
-      to: null,
+      body: chatRemaining > 0
+        ? `Te quedan ${chatRemaining} ${chatRemaining === 1 ? 'pregunta' : 'preguntas'} incluidas.`
+        : 'Usaste las preguntas incluidas. Tu mapa y tus caminos siguen disponibles.',
+      to: '/chat',
     },
     {
       key: 'meditaciones',

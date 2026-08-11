@@ -12,6 +12,7 @@ import { Routine } from '@/screens/Routine';
 import { Dashboard } from '@/screens/Dashboard';
 import { Signup } from '@/screens/Signup';
 import { Account } from '@/screens/Account';
+import { Chat } from '@/screens/Chat';
 import { getAiMode, type AiMode } from '@/ai/mode';
 
 /**
@@ -20,7 +21,14 @@ import { getAiMode, type AiMode } from '@/ai/mode';
  * half-answered — so the nav appears only once there is something to navigate
  * between.
  */
-const NAV_ROUTES = new Set(['/inicio', '/mapa', '/recomendaciones', '/rutina', '/cuenta']);
+const NAV_ROUTES = new Set([
+  '/inicio',
+  '/mapa',
+  '/recomendaciones',
+  '/rutina',
+  '/cuenta',
+  '/chat',
+]);
 
 export function App() {
   // The banner has to tell the truth about where typed text goes, so it reads
@@ -42,6 +50,7 @@ export function App() {
         <Route path="/inicio" element={<Dashboard />} />
         <Route path="/registro" element={<Signup />} />
         <Route path="/cuenta" element={<Account />} />
+        <Route path="/chat" element={<Chat />} />
         <Route path="/lab/safety" element={<SafetyLab />} />
         <Route path="*" element={<Landing onAiModeChange={setAiMode} />} />
       </Routes>

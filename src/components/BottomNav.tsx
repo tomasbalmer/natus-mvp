@@ -4,7 +4,7 @@ import { NavLink } from 'react-router-dom';
  * The glass navigation of the mockups, extended past their three icons.
  *
  * The mockup drew three, because the May scope had three destinations. The
- * PDR's journey has five that matter once the Soul Map exists, and five fits
+ * PDR's journey has six that matter once the Soul Map exists, and six fits
  * across 335px if the glyphs stay small and the labels stay short.
  *
  * The glyphs are decorative and marked as such: they are abstract marks, not
@@ -20,6 +20,7 @@ const ITEMS: { to: string; label: string; glyph: string }[] = [
   // A list mark, not a chevron: `❯` read as "next" in the browser check and
   // made the nav item look like a step in a flow.
   { to: '/rutina', label: 'Rutina', glyph: '≡' },
+  { to: '/chat', label: 'Chat', glyph: '△' },
   { to: '/cuenta', label: 'Cuenta', glyph: '⌾' },
 ];
 

@@ -575,19 +575,56 @@ Three defects found by walking it, all fixed:
 
 ### Phase 7: Chat and paywall
 
-- [ ] Step 7.1: Chat engine
+- [x] Step 7.1: Chat engine
   - ADD `src/ai/prompts/chat.ts` — inherits the shared tone, adds short turns of two to six sentences, clarifying questions over forced interpretation, explicit referral to human work, and no therapy.
   - ADD `src/store/chat.ts` — conversations and messages, with the risk level derived in code rather than passing raw clinical notes into context.
-- [ ] Step 7.2: Screens
+  - ADD `src/ai/chat.ts`, `src/store/chat.test.ts`.
+  - _The quota lives in the store, not the screen: what counts as a spent
+    question is a product rule. A turn is charged when it produced a usable
+    answer, so a failed call and a crisis turn both cost nothing._
+  - _`askChat` filters `linked_modality_slugs` against the list the person
+    already has. The prompt says only those slugs are allowed; a model
+    inventing one would put a therapy on screen that no filter ever cleared,
+    which is the thing the client-side hard filter exists to prevent._
+- [x] [UNPLANNED] Step 7.1b: Chat fixtures
+  - ADD `src/ai/fixtures/chat.ts`, `src/ai/fixtures/chat.test.ts` — curated turns selected deterministically from the question and the turn index.
+  - _Rationale: the plan listed no fixture for chat and `runAi` requires one.
+    A conversation that only works for a viewer holding an Anthropic key is
+    not a demo. The recommendation turn is assembled from the catalogue rather
+    than written by hand, so it cannot describe a session that does not
+    happen, and the tests hold the fixtures to the same schema, the same copy
+    lint and the same 2-6 sentence budget the prompt demands of the model._
+- [x] [UNPLANNED] Step 7.1c: Simulated subscription
+  - ADD `src/store/subscription.ts` — the `subscription` namespace, already declared in `db.ts`, with no gateway and no charge.
+  - _Rationale: the paywall needs something to flip or the demo dead-ends at
+    three questions. The button says on its face that nothing was billed._
+- [x] Step 7.2: Screens
   - ADD `src/screens/Chat.tsx` — always-visible remaining-question counter, Layer 1 safety on every message before it reaches the model, and the four response types.
   - ADD `src/components/Paywall.tsx` — appears at zero remaining without discarding the text already typed.
+  - _Safety runs before the quota check, not after. PDR 1.6 forbids a
+    commercial fallback in that moment, and the ordering is what guarantees
+    someone in crisis is never met by a payment screen._
+  - _`send` re-reads the quota rather than trusting the value its render closed
+    over. Simulating a subscription and sending immediately is exactly the path
+    where a stale zero bounces the person back to the paywall they just left._
 
-**Verification**
+**Verification** — passed 2026-08-11
 
-`pnpm test` green. The counter decrements only on successful answers, not on
-failures or crisis turns. Reaching zero shows the paywall with the draft
-message intact. A crisis phrase in chat switches to containment mode with no
-symbolic interpretation.
+- `pnpm test` 319 passing across 14 files, `pnpm typecheck` clean, build
+  succeeds.
+- Walked it in a browser, console clean: all four response types render, the
+  counter runs 3 → 2 → 1 → 0, and the recommendation turn carries a chip
+  linking to the modality it named.
+- At zero the paywall appears with the typed message still sitting in the
+  composer underneath, and simulating access sends that same draft — the
+  counter then reads "sin límite".
+- "hace semanas que me quiero morir" switched the screen to containment: a
+  crisis turn with the Chilean hotlines and the unverified notice, the
+  composer replaced, and no interpretation of any kind offered. The
+  false-positive link restores the composer.
+- [UNPLANNED] The nav gained a sixth item. Five destinations left `/chat`
+  matching nothing in the bar, which is a small navigational lie; six still
+  fit across 335px.
 
 ### Phase 8: Meditations
 
