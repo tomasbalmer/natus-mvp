@@ -1,7 +1,8 @@
-import { Route, Routes } from 'react-router-dom';
+import { Link, Route, Routes } from 'react-router-dom';
 import { PhoneFrame } from '@/components/PhoneFrame';
 import { DemoBanner } from '@/components/DemoBanner';
 import { Screen } from '@/components/Screen';
+import { SafetyLab } from '@/screens/SafetyLab';
 
 /**
  * Shell only. Screens land in Phase 3 onwards; this establishes the frame,
@@ -43,9 +44,12 @@ function Placeholder() {
           </span>
         </button>
 
-        <p className="mt-4 text-[10px] tracking-wide text-crema/35 uppercase">
-          Fase 0 — shell
-        </p>
+        <Link
+          to="/lab/safety"
+          className="mt-4 text-[10px] tracking-wide text-crema/35 uppercase no-underline hover:text-crema/60"
+        >
+          Fase 2 — laboratorio de safety
+        </Link>
       </div>
     </Screen>
   );
@@ -59,6 +63,7 @@ export function App() {
       </div>
       <Routes>
         <Route path="/" element={<Placeholder />} />
+        <Route path="/lab/safety" element={<SafetyLab />} />
         <Route path="*" element={<Placeholder />} />
       </Routes>
     </PhoneFrame>
