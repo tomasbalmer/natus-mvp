@@ -1,18 +1,16 @@
 import { Link } from 'react-router-dom';
 import { Screen } from '@/components/Screen';
-import { NUMBER_LABELS, computeNumerology, NumerologyInputError } from '@/lib/numerology';
+import { NUMBER_LABELS } from '@/lib/numerology';
 import { getSession } from '@/store/session';
+import { currentSynthesis } from '@/store/soulMap';
 import type { Numerology } from '@/lib/schemas';
 
 /**
- * Screen 8 of PDR 6.1.
+ * Screen 8 of PDR 6.1: the narrative synthesis in three sections, the tips,
+ * and the five numbers underneath.
  *
- * Phase 3 delivers the half of this screen that needs no model: the five
- * Pythagorean numbers, computed locally and correct. Phase 4 adds the
- * narrative synthesis above them.
- *
- * They are labelled as a symbolic language rather than a measurement, per
- * PDR 1.3 — "tu carta sugiere", never "tu carta dice".
+ * The account is asked for after this screen, never before — PDR section 3.
+ * The person has already put in the time and now has something to lose.
  */
 
 const NUMBER_ORDER: (keyof typeof NUMBER_LABELS)[] = [
@@ -23,39 +21,82 @@ const NUMBER_ORDER: (keyof typeof NUMBER_LABELS)[] = [
   'birthday',
 ];
 
-function useNumerology(): { numerology: Numerology | null; name: string } {
-  const session = getSession();
-  const draft = session?.draft;
-  if (!draft?.legal_birth_name || !/^\d{4}-\d{2}-\d{2}$/.test(draft.birth_date)) {
-    return { numerology: null, name: '' };
-  }
-  try {
-    return {
-      numerology: computeNumerology({
-        legalBirthName: draft.legal_birth_name,
-        birthDate: draft.birth_date,
-      }),
-      name: draft.legal_birth_name,
-    };
-  } catch (error) {
-    if (error instanceof NumerologyInputError) return { numerology: null, name: draft.legal_birth_name };
-    throw error;
-  }
+const SECTION_TITLES = {
+  tu_camino: 'Tu camino',
+  lo_que_estas_trabajando: 'Lo que estás trabajando',
+  que_necesitas_ahora: 'Qué necesitás ahora',
+} as const;
+
+const CADENCE_LABEL = {
+  daily: 'cada día',
+  weekly: 'cada semana',
+  process: 'durante el proceso',
+  one_off: 'una vez',
+} as const;
+
+function Numbers({ numerology }: { numerology: Numerology }) {
+  return (
+    <>
+      <div className="flex flex-col gap-2">
+        {NUMBER_ORDER.map((key) => (
+          <div
+            key={key}
+            className="glass flex items-center justify-between rounded-[var(--radius-option)] px-4 py-3"
+          >
+            <span className="text-[13px] text-blanco/85">{NUMBER_LABELS[key]}</span>
+            <span className="font-serif text-2xl font-light text-crema">{numerology[key]}</span>
+          </div>
+        ))}
+      </div>
+
+      {numerology.master_numbers_present.length > 0 && (
+        <p className="mt-4 px-1 text-[12px] leading-relaxed text-crema/55">
+          Aparecen números maestros en tu mapa:{' '}
+          <span className="text-crema">{numerology.master_numbers_present.join(', ')}</span>. En
+          la tradición pitagórica no se reducen, y se leen como una intensidad que pide más de
+          vos.
+        </p>
+      )}
+
+      <p className="mt-3 px-1 text-[11px] leading-relaxed text-crema/35">
+        Calculados en tu navegador a partir de tu nombre de nacimiento y tu fecha. Son un
+        lenguaje simbólico para pensarte, no una medición.
+      </p>
+    </>
+  );
 }
 
 export function SoulMap() {
-  const { numerology, name } = useNumerology();
-  const firstName = name.trim().split(/\s+/)[0] ?? '';
+  const session = getSession();
+  const stored = currentSynthesis();
+  const firstName = (session?.draft.legal_birth_name ?? '').trim().split(/\s+/)[0] ?? '';
+
+  if (!stored) {
+    return (
+      <Screen backdrop="palm" scrim="heavy" opacity={0.45}>
+        <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
+          <p className="text-sm leading-relaxed text-crema/65">
+            Todavía no generamos tu mapa. Empezá por el principio y volvemos acá.
+          </p>
+          <Link to="/onboarding" className="cta no-underline">
+            Empezar
+          </Link>
+        </div>
+      </Screen>
+    );
+  }
+
+  const { synthesis, numerology } = stored;
 
   return (
     <Screen backdrop="palm" scrim="heavy" opacity={0.45}>
       <div className="flex min-h-dvh flex-col overflow-y-auto px-6 pt-[var(--top-inset)] pb-9 sm:min-h-0">
         <p className="eyebrow mb-3">Tu mapa del alma</p>
 
-        <h1 className="mb-6 text-[30px] leading-[1.15] text-blanco">
+        <h1 className="mb-7 text-[30px] leading-[1.15] text-blanco">
           {firstName ? (
             <>
-              <span className="font-serif italic text-crema">{firstName}</span>,
+              <span className="font-serif text-crema italic">{firstName}</span>,
               <br />
               esto es lo que
               <br />
@@ -66,51 +107,66 @@ export function SoulMap() {
           )}
         </h1>
 
-        {numerology ? (
-          <>
-            <div className="mb-5 flex flex-col gap-2">
-              {NUMBER_ORDER.map((key) => (
-                <div
-                  key={key}
-                  className="glass flex items-center justify-between rounded-[var(--radius-option)] px-4 py-3"
-                >
-                  <span className="text-[13px] text-blanco/85">{NUMBER_LABELS[key]}</span>
-                  <span className="font-serif text-2xl font-light text-crema">
-                    {numerology[key]}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {numerology.master_numbers_present.length > 0 && (
-              <p className="mb-5 px-1 text-[12px] leading-relaxed text-crema/55">
-                Aparecen números maestros en tu mapa:{' '}
-                <span className="text-crema">
-                  {numerology.master_numbers_present.join(', ')}
-                </span>
-                . En la tradición pitagórica no se reducen, y se leen como una intensidad que
-                pide más de vos.
+        <div className="flex flex-col gap-6">
+          {(Object.keys(SECTION_TITLES) as (keyof typeof SECTION_TITLES)[]).map((key) => (
+            <section key={key}>
+              <h2 className="eyebrow mb-2.5">{SECTION_TITLES[key]}</h2>
+              <p className="text-[13.5px] leading-relaxed text-blanco/85">
+                {synthesis.soul_map_synthesis[key]}
               </p>
-            )}
+            </section>
+          ))}
+        </div>
 
-            <p className="mb-8 px-1 text-[11px] leading-relaxed text-crema/35">
-              Estos números se calcularon en tu navegador a partir de tu nombre de nacimiento
-              y tu fecha. Son un lenguaje simbólico para pensarte, no una medición.
-            </p>
-          </>
+        <div className="my-7 h-px w-10 bg-crema/25" />
+
+        <h2 className="eyebrow mb-3">Para probar</h2>
+        <div className="flex flex-col gap-2.5">
+          {synthesis.tips.map((tip) => (
+            <article key={tip.title} className="glass rounded-[var(--radius-option)] px-4 py-3.5">
+              <div className="mb-1.5 flex items-baseline justify-between gap-3">
+                <h3 className="text-[13px] text-blanco">{tip.title}</h3>
+                <span className="shrink-0 text-[10px] tracking-wide text-crema/40 uppercase">
+                  {CADENCE_LABEL[tip.cadence]}
+                </span>
+              </div>
+              <p className="text-[12.5px] leading-relaxed text-crema/65">{tip.body}</p>
+              {/* PDR 1.5: every tip closes on a micro-invitation. It is set in
+                  the serif italic so it reads as a question, not a step. */}
+              <p className="mt-2.5 font-serif text-[15px] leading-snug text-crema italic">
+                {tip.invitation}
+              </p>
+            </article>
+          ))}
+        </div>
+
+        <div className="my-7 h-px w-10 bg-crema/25" />
+
+        <h2 className="eyebrow mb-3">Tus números</h2>
+        {numerology ? (
+          <Numbers numerology={numerology} />
         ) : (
-          <p className="mb-8 text-sm leading-relaxed text-crema/60">
-            Todavía no tenemos tus datos. Empezá por el principio y volvemos acá.
+          <p className="text-[12px] leading-relaxed text-crema/50">
+            No pudimos calcular los números con el nombre que ingresaste.
           </p>
         )}
 
-        <div className="mt-auto flex flex-col gap-2.5">
+        <p className="mt-8 mb-3 px-1 font-serif text-[17px] leading-snug text-crema/80 italic">
+          {synthesis.follow_up_invitation}
+        </p>
+
+        <div className="mt-auto flex flex-col gap-2.5 pt-4">
           <div className="glass rounded-[var(--radius-option)] px-4 py-3.5">
             <p className="text-[12px] leading-relaxed text-crema/55">
-              <span className="text-crema/80">Próximo:</span> la síntesis narrativa en tres
-              secciones y las terapias sugeridas. Llegan en la fase 4 del plan.
+              <span className="text-crema/80">Próximo:</span> las terapias sugeridas y tu rutina.
+              Llegan en la fase 5 del plan.
             </p>
           </div>
+
+          <p className="px-1 text-[10px] tracking-wide text-crema/25 uppercase">
+            {stored.mode === 'fixture' ? 'Modo demo · guion curado' : 'Generado con Claude'} ·{' '}
+            {stored.prompt_version}
+          </p>
 
           <Link to="/" className="cta no-underline">
             Volver al inicio

@@ -56,6 +56,10 @@ export function Onboarding() {
   const [index, setIndex] = useState(0);
   const [crisisEventId, setCrisisEventId] = useState<string | null>(null);
   const [lowSeverity, setLowSeverity] = useState(false);
+  const [failure, setFailure] = useState<string | null>(null);
+  // Remounts Generating so a retry actually re-runs. PDR 6.5: the input is
+  // never lost, so retrying costs the person nothing but the wait.
+  const [attempt, setAttempt] = useState(0);
 
   const draft = session.draft;
   const step = STEPS[index] ?? 'datos';
@@ -128,13 +132,33 @@ export function Onboarding() {
   }
 
   if (step === 'generando') {
+    if (failure) {
+      return (
+        <Screen backdrop="surf" scrim="diagonal" opacity={0.6}>
+          <div className="flex min-h-dvh flex-col items-center justify-center gap-6 px-8 text-center sm:min-h-0">
+            <p className="text-sm leading-relaxed text-crema/75">{failure}</p>
+            <button
+              type="button"
+              className="cta"
+              onClick={() => {
+                setFailure(null);
+                setAttempt((a) => a + 1);
+              }}
+            >
+              Reintentar
+            </button>
+          </div>
+        </Screen>
+      );
+    }
+
     return (
       <Generating
-        onDone={() => {
-          // Phase 4 replaces this with the Soul Map. Until then the generated
-          // numerology is what there is to show.
-          navigate('/mapa', { state: { numerology: numerologyPreview } });
-        }}
+        key={attempt}
+        draft={draft}
+        numerology={numerologyPreview}
+        onDone={() => navigate('/mapa')}
+        onFailed={setFailure}
       />
     );
   }

@@ -400,25 +400,53 @@ npm packages.
 
 ### Phase 4: Soul Map
 
-- [ ] Step 4.1: AI client
-  - ADD `src/ai/client.ts` — `AiClient` interface, `FixtureAiClient` (default) and `AnthropicAiClient` using `fetch` with the `anthropic-dangerous-direct-browser-access` header; both validate output with zod and expose latency and token counts.
-  - ADD `src/ai/mode.ts` — mode toggle persisted in `localStorage`, key never leaves the browser.
-  - ADD `src/components/AiModeToggle.tsx` — header control, with an explicit warning that BYOK sends the entered text to Anthropic.
-- [ ] Step 4.2: Prompts
-  - ADD `src/ai/prompts/soul-map.ts` — system prompt v2.0 with the PDR output contract, `matched_facilitators` removed, plus `inferred_topics`.
-  - ADD `src/ai/prompts/shared.ts` — the tone rules: mirror not therapist, no first-person emotion, no diagnosis, no guarantees.
-- [ ] Step 4.3: Fixtures
-  - ADD `src/ai/fixtures/` — three curated profiles (a `pregunta` phase, an `exploracion` phase, a crisis case) each with synthesis, tips and inferred topics.
-- [ ] Step 4.4: Screens
-  - ADD `src/screens/Generating.tsx` — a 10-30s animation over the surf photograph, with the timeout copy from PDR section 6.5 and no loss of input.
-  - ADD `src/screens/SoulMap.tsx` — the three synthesis sections, the chart-unreadable note, and the follow-up invitation.
+- [x] [UNPLANNED] Step 4.0: Pull the copy lint forward from Phase 5
+  - ADD `src/lib/copy-lint.ts`, `src/lib/copy-lint.test.ts` — the rules of PDR sections 1 and 7.5 as executable checks, with the PDR's own anti-patterns as failing cases and its model examples as passing ones.
+  - _Rationale: the lint was planned for Phase 5, over model output. Written
+    now, it also governs the hand-written fixtures — which is where the copy
+    rules are most likely to lapse quietly, because nobody reviews a fixture
+    the way they review a prompt. `runAi` applies it to both implementations._
+- [x] Step 4.1: AI client
+  - ADD `src/ai/client.ts` — one `runAi` with two paths, both parsing against the same schema and passing the same copy lint; `fetch` with the `anthropic-dangerous-direct-browser-access` header, a 45s timeout, and one retry.
+  - ADD `src/ai/mode.ts` — mode persisted in `localStorage`, key never leaves the browser except to Anthropic.
+  - ADD `src/components/AiModeToggle.tsx` — reachable from the landing screen, with the warning stated at the moment of the choice rather than in a policy.
+  - _Note: a copy violation breaks out of the retry loop. It is a property of
+    the prompt, not a bad roll, so a second call buys the same answer at the
+    cost of the viewer's quota._
+- [x] Step 4.2: Prompts
+  - ADD `src/ai/prompts/soul-map.ts` — the output contract of PDR 6.5, `matched_facilitators` removed, `inferred_topics` added.
+  - ADD `src/ai/prompts/shared.ts` — tone rules and JSON discipline.
+  - _Deviation, and the important one: PDR appendix B calls
+    `07 - System Prompt IA.md` "vigente y crítico — copiar literal". That file
+    was not available, so the prompt is RECONSTRUCTED from the principles of
+    section 1, the contract of 6.5 and the copy rules of 7.5. Every version
+    string carries a `-reconstructed` suffix, the provenance is stated at the
+    top of `shared.ts`, and the Soul Map screen prints the version — so
+    nothing downstream can mistake it for the vault's text. Swapping in the
+    real one is a change to two constants._
+  - _`clinical_basics` is deliberately absent from the payload. PDR 10.2
+    applies the same reasoning to chat: a derived risk level, never the raw
+    answers._
+- [x] Step 4.3: Fixtures
+  - ADD `src/ai/fixtures/soul-map.ts` — three narratives (`pregunta`, `exploracion`, `integracion`) plus the crisis branch, selected deterministically from what the person chose.
+  - ADD `src/ai/fixtures/soul-map.test.ts` — schema, copy lint, sentence budgets, question-shaped invitations, topic existence, and that three different inputs give three different maps.
+  - _Deviation: four fixtures rather than three. A demo where every answer is
+    identical teaches the viewer that nothing is being read._
+- [x] Step 4.4: Screens
+  - MODIFY `src/screens/onboarding/Generating.tsx` — runs the generation, holds a 4.8s floor, and shows the PDR's empathetic failure copy with a retry that keeps the input.
+  - MODIFY `src/screens/SoulMap.tsx` — three sections, tips with cadence and italic invitations, the five numbers, and a provenance line naming the mode and prompt version.
+  - ADD `src/store/soulMap.ts` — mirrors `soul_map_syntheses` including the one-current-row rule.
 
-**Verification**
+**Verification** — passed 2026-08-11
 
-`pnpm test` green including fixture-contract tests. In fixture mode the Soul
-Map renders for all three profiles. The crisis profile renders the crisis
-screen and persists no tips or recommendations. A malformed fixture fails the
-test suite rather than the UI.
+- `pnpm test` 208 passing across 8 files, `pnpm typecheck` clean, build succeeds.
+- Walked the flow in a browser: choosing "Repito algo" produced the
+  `exploracion` narrative with four tips, the five numbers, and the footer
+  reading `MODO DEMO · GUION CURADO · SOUL-MAP-V2.0-RECONSTRUCTED`.
+- The fixtures pass the same lint applied to model output — including the
+  sentence budgets of PDR 6.5 and the rule that every tip closes on a question.
+- Generation is guarded against StrictMode's double-invoke, which would
+  otherwise spend two API calls on someone else's key.
 
 ### Phase 5: Modality matching and routine
 

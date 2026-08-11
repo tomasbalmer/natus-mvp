@@ -1,16 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Screen } from '@/components/Screen';
+import { generateSoulMap } from '@/ai/soul-map';
+import { saveSynthesis } from '@/store/soulMap';
+import { AiError } from '@/ai/client';
+import type { Numerology } from '@/lib/schemas';
+import type { OnboardingDraft } from '@/store/session';
+import { SOUL_MAP_PROMPT_VERSION } from '@/ai/prompts/soul-map';
 
 /**
  * PDR 6.1 screen 7 and PDR 6.5.
  *
- * The orb and its pulse rings are lifted from mockup screen 03. The stages
- * are named rather than shown as a spinner because they are true — numerology
- * really is computed locally before anything is sent, and saying so is part
+ * The orb and its pulse rings come from mockup screen 03. The stages are
+ * named rather than shown as a spinner because they are true — the numbers
+ * really are computed locally before anything is sent — and saying so is part
  * of the product's claim about itself.
  *
- * PDR 6.5 also specifies the timeout copy: past 45 seconds, offer a retry
- * without losing the input.
+ * In fixture mode the work finishes almost instantly, and the screen still
+ * takes a few seconds on purpose. Showing an instant result would
+ * misrepresent a product whose real generation takes ten to thirty seconds.
  */
 
 const STAGES = [
@@ -20,24 +27,55 @@ const STAGES = [
   'Escribiendo tu mapa',
 ];
 
+const MINIMUM_MS = 4800;
+
 export function Generating({
+  draft,
+  numerology,
   onDone,
-  durationMs = 5200,
+  onFailed,
 }: {
+  draft: OnboardingDraft;
+  numerology: Numerology | null;
   onDone: () => void;
-  durationMs?: number;
+  onFailed: (message: string) => void;
 }) {
   const [stage, setStage] = useState(0);
+  const started = useRef(false);
 
   useEffect(() => {
-    const per = durationMs / STAGES.length;
-    const timers = STAGES.map((_, i) => setTimeout(() => setStage(i), per * i));
-    const finish = setTimeout(onDone, durationMs);
+    // StrictMode double-invokes effects in development; generating twice
+    // would burn two API calls on someone else's key.
+    if (started.current) return;
+    started.current = true;
+
+    const timers = STAGES.map((_, i) =>
+      setTimeout(() => setStage(i), (MINIMUM_MS / STAGES.length) * i),
+    );
+
+    const run = async () => {
+      const floor = new Promise((resolve) => setTimeout(resolve, MINIMUM_MS));
+      try {
+        const [result] = await Promise.all([generateSoulMap({ draft, numerology }), floor]);
+        saveSynthesis({
+          synthesis: result.value,
+          numerology,
+          promptVersion: SOUL_MAP_PROMPT_VERSION,
+          mode: result.mode,
+          latencyMs: result.latencyMs,
+        });
+        onDone();
+      } catch (error) {
+        await floor;
+        onFailed(messageFor(error));
+      }
+    };
+
+    void run();
     return () => {
       for (const t of timers) clearTimeout(t);
-      clearTimeout(finish);
     };
-  }, [durationMs, onDone]);
+  }, [draft, numerology, onDone, onFailed]);
 
   return (
     <Screen backdrop="surf" scrim="diagonal" opacity={0.7}>
@@ -69,4 +107,23 @@ export function Generating({
       </div>
     </Screen>
   );
+}
+
+/** PDR 6.5: empathetic copy, never a technical error, and the input is kept. */
+function messageFor(error: unknown): string {
+  if (!(error instanceof AiError)) {
+    return 'Algo se cortó en el camino. Nada de lo que escribiste se perdió.';
+  }
+  switch (error.kind) {
+    case 'timeout':
+      return 'Esto está tardando más de lo normal. Nada se perdió: podemos reintentar.';
+    case 'api_error':
+      return 'No pudimos completar la generación. Revisá tu clave y reintentamos.';
+    case 'copy_violation':
+      // Worth being specific: this one means the model broke a product rule
+      // rather than failing technically, and that is a prompt problem.
+      return 'La respuesta no cumplió las reglas de lenguaje del producto y se descartó. Podemos reintentar.';
+    default:
+      return 'La respuesta llegó incompleta. Nada se perdió: podemos reintentar.';
+  }
 }

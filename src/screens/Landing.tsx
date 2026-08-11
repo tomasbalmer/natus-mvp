@@ -1,9 +1,17 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Screen } from '@/components/Screen';
+import { AiModeToggle } from '@/components/AiModeToggle';
+import type { AiMode } from '@/ai/mode';
 
 /** Screen 1 of PDR 6.1, built from mockup screen 01. */
-export function Landing() {
+export function Landing({
+  onAiModeChange,
+}: {
+  onAiModeChange?: ((mode: AiMode) => void) | undefined;
+}) {
   const navigate = useNavigate();
+  const [showSettings, setShowSettings] = useState(false);
 
   return (
     <Screen backdrop="forest" scrim="bottom" opacity={0.9} focus="center 20%">
@@ -44,12 +52,27 @@ export function Landing() {
           </span>
         </button>
 
-        <Link
-          to="/lab/safety"
-          className="mt-4 text-[10px] tracking-wide text-crema/30 uppercase no-underline hover:text-crema/60"
-        >
-          Laboratorio de safety
-        </Link>
+        {showSettings && (
+          <div className="mt-4 w-full text-left">
+            <AiModeToggle onChange={onAiModeChange} />
+          </div>
+        )}
+
+        <div className="mt-4 flex items-center gap-4 text-[10px] tracking-wide uppercase">
+          <button
+            type="button"
+            onClick={() => setShowSettings((v) => !v)}
+            className="text-crema/30 hover:text-crema/60"
+          >
+            Modo IA
+          </button>
+          <span aria-hidden="true" className="text-crema/15">
+            ·
+          </span>
+          <Link to="/lab/safety" className="text-crema/30 no-underline hover:text-crema/60">
+            Safety
+          </Link>
+        </div>
       </div>
     </Screen>
   );
