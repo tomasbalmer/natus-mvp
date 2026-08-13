@@ -188,14 +188,17 @@ refresh_token_reuse_interval = 10
 enable_signup = true
 # Allow/disallow anonymous sign-ins to your project.
 #
-# Off since DECISIONS.md section 13 put a door in front of the product. With a
-# mandatory sign-in this could never fire, and leaving it enabled would keep a
-# second way in that nothing exercises and nobody reviews.
+# On, and gated by VITE_REQUIRE_INVITE on the client rather than here.
 #
-# It carried the whole auth model for one day: every visitor got a real
-# auth.users row on their first load, which is what gave auth.uid() something
-# to mean. Google now supplies that, and supplies a name for it.
-enable_anonymous_sign_ins = false
+# DECISIONS.md section 13 put a door in front of the product for the fifty-person
+# pilot. Before that pilot there is a preview, where the people trying the tool
+# are known to each other and the data is invented — and there, an anonymous
+# session is exactly right: each device gets its own identity and its own rows
+# without anybody signing in to anything.
+#
+# The door is a switch per environment, not a deleted decision. When Google is
+# configured, VITE_REQUIRE_INVITE turns it on and this stops being reachable.
+enable_anonymous_sign_ins = true
 # Allow/disallow testing manual linking of accounts
 enable_manual_linking = false
 # Passwords shorter than this value will be rejected as weak. Minimum 6, recommended 8 or more.

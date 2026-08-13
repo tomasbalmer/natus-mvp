@@ -34,6 +34,19 @@ const anonKey = import.meta.env['VITE_SUPABASE_ANON_KEY'];
  */
 export const isBackendConfigured = Boolean(url && anonKey);
 
+/**
+ * Whether the door is closed. `DECISIONS.md` §13.
+ *
+ * Default is closed, so forgetting to set this errs towards refusing people
+ * rather than admitting them — the safe direction for a product holding
+ * clinical answers.
+ *
+ * It is off for the preview deploy, where the people trying the tool know each
+ * other and the data is invented. It goes on before the pilot, which is the
+ * point at which the answers stop being invented.
+ */
+export const requiresInvite = import.meta.env['VITE_REQUIRE_INVITE'] !== 'false';
+
 function create(): TypedClient | null {
   if (!url || !anonKey) return null;
 

@@ -1,5 +1,5 @@
 import type { Session, User } from '@supabase/supabase-js';
-import { supabase } from './client';
+import { requiresInvite, supabase } from './client';
 
 /**
  * Identity, from the first page load.
@@ -36,11 +36,34 @@ export class AuthError extends Error {}
  * throwing. A paused free-tier project must degrade the demo to fixtures, not
  * end it — the same reasoning that governs `store/db.ts`'s swallowed reads.
  */
-export async function currentSession(): Promise<Session | null> {
+let inFlight: Promise<Session | null> | null = null;
+
+export function currentSession(): Promise<Session | null> {
+  if (!supabase) return Promise.resolve(null);
+  // Shared between concurrent callers. StrictMode invokes the mount effect
+  // twice, and without this both observe "no session" before either resolves
+  // and both sign in — which produced two anonymous users eight microseconds
+  // apart the first time this ran in a browser.
+  inFlight ??= acquire().finally(() => {
+    inFlight = null;
+  });
+  return inFlight;
+}
+
+async function acquire(): Promise<Session | null> {
   if (!supabase) return null;
   try {
     const { data } = await supabase.auth.getSession();
-    return data.session;
+    if (data.session) return data.session;
+
+    // Only when the door is open. With VITE_REQUIRE_INVITE on, an identity
+    // must arrive by walking through Google, and creating one here would be a
+    // second way in past the allow-list.
+    if (requiresInvite) return null;
+
+    const { data: created, error } = await supabase.auth.signInAnonymously();
+    if (error) return null;
+    return created.session;
   } catch {
     // Network failure, DNS, a project mid-restore. Not a crash.
     return null;

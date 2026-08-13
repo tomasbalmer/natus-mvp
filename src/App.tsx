@@ -22,7 +22,7 @@ import { Result } from '@/screens/comparison/Result';
 import { getAiMode, type AiMode } from '@/ai/mode';
 import { activeHighSeverityEvent } from '@/store/crisis';
 import { hydrate } from '@/store/hydrate.ts';
-import { isBackendConfigured } from '@/supabase/client.ts';
+import { isBackendConfigured, requiresInvite } from '@/supabase/client.ts';
 import { Gate } from '@/screens/Gate';
 
 /**
@@ -100,7 +100,7 @@ export function App() {
   // `admitted` comes from hydration having found a session, which it now never
   // creates — an identity arrives only by walking through Google, and Google
   // refuses anyone off the consent screen's list before the redirect returns.
-  if (isBackendConfigured && !admitted) {
+  if (isBackendConfigured && requiresInvite && !admitted) {
     return (
       <PhoneFrame>
         <Gate />

@@ -48,6 +48,19 @@ jobs:
         # domain later means changing this one line (or deleting it).
         env:
           VITE_BASE: /natus-mvp/
+          # Repository *variables*, not secrets. Both ship in the bundle by
+          # design — the publishable key is a public identifier and is safe
+          # only because Row Level Security is on for every table. Filing a
+          # public value as a secret would mislead whoever reads this next.
+          VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          # The door. DECISIONS.md section 13.
+          #
+          # 'false' opens it, and it is open for the preview: the people trying
+          # the tool know each other and the data is invented. Set it to 'true'
+          # — or delete the variable, since closed is the default — before the
+          # fifty-person pilot, which is when the answers stop being invented.
+          VITE_REQUIRE_INVITE: ${{ vars.REQUIRE_INVITE }}
         run: pnpm build
 
       - name: SPA fallback
