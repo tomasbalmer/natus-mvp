@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { PhoneFrame } from '@/components/PhoneFrame';
 import { DemoBanner } from '@/components/DemoBanner';
@@ -20,6 +20,7 @@ import { Consent } from '@/screens/comparison/Consent';
 import { Result } from '@/screens/comparison/Result';
 import { getAiMode, type AiMode } from '@/ai/mode';
 import { activeHighSeverityEvent } from '@/store/crisis';
+import { ensureSession } from '@/supabase/session';
 
 /**
  * Where the navigation belongs. Onboarding, the landing and the signup are
@@ -50,6 +51,17 @@ export function App() {
   // the live mode rather than a constant.
   const [aiMode, setAiMode] = useState<AiMode>(() => getAiMode().mode);
   const { pathname } = useLocation();
+
+  // Acquire the anonymous identity, once, in the background.
+  //
+  // Nothing rendered below waits on it and nothing yet reads from it: the
+  // store is still local until Phase 4. What this buys now is that auth.uid()
+  // has a value, which is what every RLS policy keys on — and that a visitor
+  // who arrives before the backend exists is indistinguishable from one who
+  // arrives after, because ensureSession resolves to null instead of throwing.
+  useEffect(() => {
+    void ensureSession();
+  }, []);
 
   return (
     <PhoneFrame>

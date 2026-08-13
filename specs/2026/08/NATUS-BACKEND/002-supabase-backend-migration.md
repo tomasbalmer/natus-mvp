@@ -396,42 +396,85 @@ briefly, is a table exposed to the anon key.
 
 Additive. The session comes into existence and nothing reads from it yet.
 
-- [ ] Step 2.1: Add the client dependency
-  - MODIFY `package.json` — `@supabase/supabase-js` pinned to the version that
-    clears the age gate at install time (2.112.1 as of 2026-08-13). Re-run the
-    check; do not reuse this number.
-  - _Per the global dependency policy: age check first, then `pnpm audit`, then
-    the lockfile committed alongside. Confirm the version diff before
-    installing._
-- [ ] Step 2.2: The client singleton
+- [x] Step 2.1: Add the client dependency
+  - MODIFY `package.json` — `@supabase/supabase-js` pinned to `2.112.1`,
+    7 days old and the newest that clears the gate; 2.112.2 (6d) and 2.112.3
+    (1d) were both blocked.
+  - _[FINDING] `pnpm audit` reports one pre-existing high: nanoid 3.3.17 via
+    `vite > postcss > nanoid`, devDependencies only, so it never reaches the
+    bundle. The fix, nanoid 3.3.18, was published 5 days ago and is itself
+    blocked by the gate. Unresolvable today without an exception; it clears on
+    2026-08-14. Not introduced by this change._
+- [x] Step 2.2: The client singleton
   - ADD `src/supabase/client.ts` — reads `VITE_SUPABASE_URL` and
-    `VITE_SUPABASE_ANON_KEY`, and fails loudly at boot if either is missing
-    rather than at the first query.
-- [ ] Step 2.3: Anonymous sign-in
-  - ADD `src/supabase/session.ts` — ensure an anonymous session exists at app
-    start. This is the Supabase-side counterpart of `src/store/session.ts`'s
-    `getOrCreateSession`.
+    `VITE_SUPABASE_ANON_KEY`.
+  - _[DEVIATION] It does not fail loudly at boot when they are missing, as the
+    step said it should. A build without them is not broken — it is the
+    fixture demo, which still runs every screen offline, and that is a
+    supported way to run this application rather than an error state. Exports
+    `isBackendConfigured` and a nullable client instead, so the absence is a
+    branch rather than an exception thrown somewhere that cannot decide what
+    to do about it._
+- [x] Step 2.3: Anonymous sign-in
+  - ADD `src/supabase/session.ts`, `src/supabase/session.test.ts`.
+  - MODIFY `src/App.tsx` — acquire the session once, in the background.
   - _An anonymous `auth.users` row is what makes every `auth.uid()` policy in
     Phase 1 meaningful. Without it, RLS has nothing to key on._
-- [ ] Step 2.4: Upgrade to email
-  - MODIFY `src/screens/Signup.tsx` — magic link that upgrades the existing
-    anonymous row rather than creating a second one. No data migration: it is
-    the same `auth.users` row gaining an identity.
-  - _This is the whole reason for choosing anonymous-plus-upgrade over a
-    mandatory login. The onboarding flow does not move._
-- [ ] Step 2.5: Auth callback
-  - MODIFY `src/App.tsx` — handle the callback at the base root, not a nested
-    route.
+- [x] [UNPLANNED] Step 2.3b: An in-flight guard on `ensureSession`
+  - MODIFY `src/supabase/session.ts` — concurrent callers share one attempt.
+  - _Rationale: the first browser run created **two** anonymous users eight
+    microseconds apart. StrictMode invokes the mount effect twice, both calls
+    observed "no session" before either resolved, and both signed in. Harmless
+    today because nothing reads the identity; in Phase 4 it means rows written
+    to a `user_id` the second sign-in has already replaced, held by nobody.
+    The type checker and 570 passing tests were both silent on it._
+- [ ] ~~Step 2.4: Upgrade to email~~ — **deferred to Phase 4**
+  - _[DEVIATION] `upgradeToEmail` is written and verified, but `Signup.tsx` is
+    not wired to it. The screen currently reads "En esta demo no se envía
+    ningún correo ni se crea ninguna cuenta en ningún servidor", and sending a
+    confirmation link makes that false. The honest replacement while the store
+    is still local — we email you, but your answers stay in this browser — is
+    a sentence describing an intermediate state nobody should have to parse.
+    The copy and the data move together in Phase 4. This product's plain
+    self-description is load-bearing; it is not a caption to be left stale for
+    a phase._
+- [x] Step 2.5: Auth callback
+  - MODIFY `supabase/config.toml` — `enable_anonymous_sign_ins`, plus local
+    site and redirect URLs. `emailRedirectTo` resolves against
+    `import.meta.env.BASE_URL`, so it carries the `/natus-mvp/` prefix.
   - _The base root returns HTTP 200. A nested route returns 404 with the app as
     its body via the `404.html` fallback. Both render, but only one of them
     stops looking like a bug during the next incident._
+  - _The hosted project's URL configuration is deliberately not pushed from
+    `config.toml`: supabase/cli#3208 reports `config push` overwriting a remote
+    project's URLs with the local ones. Phase 6 sets them directly._
 
-**Verification** — a fresh browser reaches the site and acquires an anonymous
-session; the row is visible in the local Supabase dashboard. Signing up with an
-email upgrades that same row, confirmed by the `id` being unchanged. The
-redirect lands under `/natus-mvp/` and not at the domain root. The application
-still reads and writes `localStorage` throughout; nothing a visitor sees has
-changed. All three validation commands pass.
+**Verification** — passed 2026-08-13
+
+- 15/15 assertions in an end-to-end check through `supabase-js` against the
+  local stack, not through psql: anonymous sign-in yields a real `auth.users`
+  row flagged `is_anonymous`; a second visitor gets a different id and reads
+  none of the first's rows, including when naming their `user_id` explicitly;
+  a cross-user write is refused with 42501; the pool is readable signed in and
+  refused signed out; crisis resources are readable either way.
+- **The property the auth model rests on**: after `updateUser({ email })` the
+  user id is byte-identical, and the row answered before signup is still
+  readable. Nothing migrates at signup because nothing needs to.
+- Browser, dev server against the local stack: the app renders identically,
+  console clean. One page load creates exactly one anonymous user; a reload
+  creates none, reusing the session. Both counted in `auth.users` rather than
+  inferred.
+- `pnpm test` 573 passing across 22 files (+8), `pnpm typecheck` clean,
+  `pnpm build` succeeds.
+- The concurrency test was confirmed non-vacuous by removing the guard and
+  watching it fail — worth doing, because an earlier version of it passed
+  while asserting nothing: the static import at the top of the file had
+  already cached the real client, so `vi.doMock` never applied and the mock
+  recorded zero calls. `vi.resetModules()` now runs in `beforeEach`, not only
+  `afterEach`.
+- Bundle is 709 kB (210 kB gzipped), over Vite's 500 kB warning. It was
+  already over before this phase; `supabase-js` made it worse. Code-splitting
+  is still out of scope, and still worth a decision before Phase 5 adds more.
 
 ---
 
@@ -487,6 +530,11 @@ The switch, and the bulk of the work. Approach A, per `DECISIONS.md` §12.
   - _Today `write` swallows quota errors on purpose, to degrade a demo rather
     than break it. A dropped network write is a different thing: the person
     believes their data was saved. It has to be visible._
+- [ ] Step 4.4a: Wire the email upgrade, and rewrite the signup copy with it
+  - MODIFY `src/screens/Signup.tsx` — call `upgradeToEmail`, and replace the
+    "no se envía ningún correo" paragraph, which stops being true here.
+  - _Carried from Phase 2, where the plumbing landed but the screen did not.
+    The copy can only be honest once the data has actually moved._
 - [ ] Step 4.4: Per-store queries
   - MODIFY each of `session.ts`, `account.ts`, `soulMap.ts`, `matches.ts`,
     `crisis.ts`, `chat.ts`, `subscription.ts`, `meditations.ts`,
@@ -636,6 +684,11 @@ it. Both are recorded in Phase 0 as decisions so the deviation from
 `docs/MIGRATION.md` is on the record before anyone implements against the older
 plan.
 
-**Where this stands.** Phases 0 and 1 are done. The prerequisites are met
-except the free-tier pause decision and the CI variables, neither of which
-blocks Phase 2. Phase 5 still needs the Anthropic key.
+**Where this stands.** Phases 0, 1 and 2 are done, less the signup wiring,
+which moved into Phase 4 alongside the copy it would have made untrue. Phase 3
+is next and needs nothing new. Outstanding and owned by Tomás: the free-tier
+pause decision, the CI variables, and the Anthropic key for Phase 5.
+
+**Carried forward.** The nanoid advisory clears the age gate on 2026-08-14 and
+should be closed then. The bundle is over Vite's chunk warning and Phase 5 will
+add to it.
