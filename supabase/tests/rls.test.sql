@@ -167,10 +167,15 @@ insert into public.external_profiles (id, user_id, display_name, legal_birth_nam
 values ('cccccccc-0000-4000-8000-000000000003',
         'aaaaaaaa-0000-4000-8000-000000000001', 'Someone', 'Someone Else');
 
+-- The scope is a shape, not a name: three independent booleans, because the
+-- person consents to each kind of material separately. It was `text` until
+-- the adapter tried to map it and the compiler objected.
 insert into public.comparison_consents (id, user_id, external_profile_id, scope, status)
 values ('dddddddd-0000-4000-8000-000000000004',
         'aaaaaaaa-0000-4000-8000-000000000001',
-        'cccccccc-0000-4000-8000-000000000003', 'basic', 'granted');
+        'cccccccc-0000-4000-8000-000000000003',
+        '{"numerology": true, "astro": false, "soul_map_themes": true}'::jsonb,
+        'granted');
 
 insert into public.chart_comparisons (id, user_id, external_profile_id, consent_id,
                                       prompt_version, result, mode)

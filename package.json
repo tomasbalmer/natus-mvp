@@ -17,7 +17,8 @@
     "test:watch": "vitest",
     "sync:shared": "rm -rf supabase/functions/_shared/lib supabase/functions/_shared/data && mkdir -p supabase/functions/_shared/lib/schemas supabase/functions/_shared/data && find src/lib -name '*.ts' ! -name '*.test.ts' -exec sh -c 'cp \"$1\" \"supabase/functions/_shared/${1#src/}\"' _ {} \\; && cp data/*.json supabase/functions/_shared/data/",
     "gen:types": "supabase gen types typescript --local > src/supabase/database.types.ts",
-    "verify:adapters": "npx vite-node scripts/verify-adapters.mjs"
+    "verify:adapters": "npx vite-node scripts/verify-adapters.mjs",
+    "verify:chat": "npx vite-node scripts/verify-chat-function.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.112.1",

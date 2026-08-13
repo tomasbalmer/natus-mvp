@@ -677,36 +677,36 @@ two were found by reading. The compiler does not get tired.
 
 ### Phase 5: The AI moves server-side
 
-- [ ] Step 5.1: One Edge Function per purpose
+- [~] Step 5.1: One Edge Function per purpose
   - ADD `supabase/functions/{soul-map,match,chat,meditation,comparison}/index.ts` —
     each reusing the existing prompts, zod schemas and copy lint from
     `_shared/lib`. Each validates the JWT and derives the user from it.
   - _Not one function with a `purpose` parameter. Separate deployables mean a
     broken meditation prompt cannot take the Soul Map down with it._
-- [ ] Step 5.2: CORS, written explicitly
+- [x] Step 5.2: CORS, written explicitly
   - ADD `supabase/functions/_shared/cors.ts` — the `OPTIONS` preflight handler
     and headers, used by all five.
   - _And in the same file, a comment recording why it is not a security
     boundary: the Pages origin is the whole `github.io` subdomain, shared with
     every other repository the owner publishes. The JWT check is the control._
-- [ ] Step 5.3: Safety stays in front
+- [x] Step 5.3: Safety stays in front
   - MODIFY the chat function — Layer 1 detection runs before the model call,
     server-side, per `docs/DECISIONS.md` §5.
   - _And before the quota check. PDR 1.6 forbids meeting someone in crisis with
     a commercial fallback, and the ordering is what guarantees it. The 001 plan
     got this right in step 7.2; it must survive the move._
-- [ ] Step 5.4: The derived risk level, not the raw notes
+- [x] Step 5.4: The derived risk level, not the raw notes
   - _A non-negotiable in `CLAUDE.md`: raw `clinical_basics` never enters a model
     payload. With a server this is finally enforceable rather than merely
     observed — and it is also newly easy to break, because the function has the
     whole row in hand and only discipline stops it being forwarded._
-- [ ] Step 5.5: The real quota
+- [x] Step 5.5: The real quota
   - MODIFY `src/store/subscription.ts` and the chat function — the quota becomes
     a count over `messages where counted`, enforced server-side.
   - _Enforced in the function, not the client. A quota checked in the browser is
     a suggestion. This is the step that discharges `DECISIONS.md` §3's surviving
     objection, and the chat does not open to users until it is done._
-- [ ] Step 5.6: Logging
+- [x] Step 5.6: Logging
   - ADD the `claude_api_calls` table and writes from each function — PDR 4,
     which had no equivalent in the demo because there was no server to log from.
 - [ ] Step 5.7: Delete the BYOK path
@@ -717,14 +717,58 @@ two were found by reading. The compiler does not get tired.
     That symmetry is what stops the fixtures drifting into a different product,
     and it is worth as much now as it was in the demo._
 
-**Verification** — every AI surface generates against the local stack with no
-key in the browser, confirmed by inspecting the network tab for the absence of
-any `api.anthropic.com` request. A malformed model response still fails the
-schema before reaching a screen. A copy-lint violation still fails. The crisis
-path in chat produces containment and no interpretation, and costs no quota. At
-zero remaining the paywall appears; the quota cannot be bypassed by editing
-client state, verified by trying. `claude_api_calls` rows appear. With Supabase
-unreachable the fixture path still renders every screen.
+**Verification — partial, 2026-08-13. The model call is not wired.**
+
+Everything around the model is built and verified; the call itself waits on the
+Anthropic key, and the prompts still live in `src/ai/prompts`, which does not
+cross into `_shared`. Without a key the function answers `503 no_model`, which
+routes the turn to the client's existing fixture path rather than inventing a
+second, worse one server-side.
+
+- `pnpm verify:chat` — 13/13 against the local Edge runtime.
+- **The ordering assertion, proved by sabotage.** Moving the quota check above
+  the safety check makes a crisis message at zero remaining return
+  `402 quota_exhausted` — a payment screen in answer to "hace semanas que me
+  quiero morir", which is exactly what PDR 1.6 forbids. The suite catches it.
+  Nothing else could: the two blocks type-check in either order.
+- The JWT is the control, confirmed both ways — no token and a forged token
+  are both refused 401, and the user is derived from the token rather than
+  read from the body.
+- The quota is counted where the person cannot reach it. The check writes
+  three counted messages **through the anon key under RLS**, which is what
+  somebody inflating their own allowance would do, and the function still
+  refuses the fourth turn.
+- A crisis turn consults no quota and is logged `refused_crisis`; the
+  ledger holds all three refusals.
+- `pnpm typecheck` clean, `pnpm test` 653 across 26 files (+22),
+  `pnpm build` succeeds, `supabase test db` 20/20.
+
+**The Phase 1 grant defect, again, in a new role.** `service_role` bypasses
+RLS *policies* and not table *grants*, and it had none. Both call sites are
+written to fail quietly on purpose — `logCall` must never break the request a
+person is waiting on, and `currentQuota` coalesces a null count — so the
+failure surfaced as **a person at zero remaining being told they had three**.
+Quiet was right; nothing watching was not. Only the suite asking "is the quota
+actually enforced" found it.
+
+- [DEVIATION] `src/lib/cors.ts` holds the allow-list decision as a pure
+  function, tested there, because the local Supabase gateway rewrites
+  `Access-Control-Allow-Origin` to `*` on every response whatever the function
+  sets. The delivered header is therefore unobservable on a laptop — which is
+  the exact condition under which a wildcard reaches production — so it must
+  be confirmed against the deployed project in Phase 6.
+- [DEVIATION] `FREE_QUESTIONS` moved from `store/chat.ts` into `lib/quota.ts`
+  and is re-exported. The client renders the counter and the function enforces
+  it; two copies would eventually disagree and the person would be shown a
+  number that is not the rule being applied to them. It crosses under the
+  parity test now.
+- [FINDING] The scope migration broke a fixture in `supabase/tests/rls.test.sql`
+  which inserted `'basic'` into what is now `jsonb`. Not caught at the time
+  because `supabase test db` was not re-run after that migration. It is cheap
+  and it should run after every schema change.
+
+Still to do in this phase: the model call, the four remaining functions, and
+bringing `src/ai/prompts` across.
 
 ---
 
@@ -799,9 +843,15 @@ it. Both are recorded in Phase 0 as decisions so the deviation from
 `docs/MIGRATION.md` is on the record before anyone implements against the older
 plan.
 
-**Where this stands.** Phases 0 to 4 are done. Phase 5 is next and needs the
-Anthropic key. Also outstanding and owned by Tomás: the free-tier pause
-decision and the CI variables, neither of which blocks Phase 5.
+**Where this stands.** Phases 0 to 4 are done. Phase 5 is **in progress**:
+everything around the model call — CORS, the JWT check, safety before quota,
+the server-side quota and the ledger — is built and verified. The call itself,
+the four remaining functions, and moving `src/ai/prompts` into `_shared` all
+wait on the Anthropic key.
+
+Owned by Tomás: `supabase secrets set ANTHROPIC_API_KEY=…`, run in a real
+terminal so it does not pass through a transcript; the free-tier pause
+decision; and the CI variables.
 
 **Carried forward.** The nanoid advisory clears the age gate on 2026-08-14.
 The bundle is over Vite's chunk warning and Phase 5 will add to it. Chat,

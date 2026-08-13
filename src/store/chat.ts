@@ -1,6 +1,7 @@
 import { read, write } from './db';
 import { isSubscribed } from './subscription';
 import type { ChatResponse } from '@/lib/schemas';
+import { isChargeable, quotaState } from '@/lib/quota.ts';
 
 /**
  * `conversations` and `messages` from PDR 5.6.
@@ -41,12 +42,13 @@ export type Conversation = {
 };
 
 /**
- * PDR section 3 describes a free tier with a small number of questions and a
- * paywall after it; the exact figure was not to hand. Three is small enough
- * that the paywall is reachable in a demo and large enough to show the
- * conversation working first. One constant to change.
+ * Re-exported, not defined. The Edge Function enforces this number and the
+ * screen renders it; two copies would eventually disagree, and the person
+ * would be shown a counter that is not the rule being applied to them.
+ * `lib/quota.ts` is the single definition and it crosses to the server under
+ * the parity test.
  */
-export const FREE_QUESTIONS = 3;
+export { FREE_QUESTIONS } from '@/lib/quota.ts';
 
 function newId(prefix: string): string {
   return globalThis.crypto?.randomUUID?.() ?? `${prefix}-${Math.trunc(performance.now())}`;
@@ -108,7 +110,7 @@ export function appendAssistantMessage(
     linked_modality_slugs: response.linked_modality_slugs,
     created_at: now,
     // A containment turn is not a product feature being consumed.
-    counted: response.type !== 'crisis',
+    counted: isChargeable(response.type),
   });
 }
 
@@ -133,8 +135,7 @@ export function usedQuestions(): number {
 }
 
 export function remainingQuestions(): number {
-  if (isSubscribed()) return Number.POSITIVE_INFINITY;
-  return Math.max(0, FREE_QUESTIONS - usedQuestions());
+  return quotaState(usedQuestions(), isSubscribed()).remaining;
 }
 
 export function hasQuestionsLeft(): boolean {
