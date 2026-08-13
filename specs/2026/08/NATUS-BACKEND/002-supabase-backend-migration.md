@@ -553,17 +553,17 @@ Additive. The session comes into existence and nothing reads from it yet.
 
 The switch, and the bulk of the work. Approach A, per `DECISIONS.md` §12.
 
-- [ ] Step 4.1: The hydration layer
+- [x] Step 4.1: The hydration layer
   - ADD `src/store/hydrate.ts` — load the authenticated user's full dataset in
     one round trip at session start.
   - ADD `src/store/StoreProvider.tsx` — hold the mirror, expose it, and render a
     loading state until the first hydration resolves.
-- [ ] Step 4.2: Repoint the reads
+- [x] Step 4.2: Repoint the reads
   - MODIFY `src/store/db.ts` — `read` serves from the mirror rather than
     `localStorage`. Signature unchanged, so its callers do not move.
   - _This is the file `docs/MIGRATION.md` says is "replaced, not its callers".
     Keeping `read` synchronous is what makes that true._
-- [ ] Step 4.3: Repoint the writes
+- [x] Step 4.3: Repoint the writes
   - MODIFY `src/store/db.ts` — `write` updates the mirror synchronously and
     persists to Postgres in the background, with a failure surfaced rather than
     swallowed.
@@ -581,11 +581,19 @@ The switch, and the bulk of the work. Approach A, per `DECISIONS.md` §12.
     attaches to an `auth.users` row that has existed since the first page load,
     so there is nothing for a password to protect that the anonymous session
     was not already holding._
-- [ ] Step 4.4: Per-store queries
+- [x] Step 4.4: Per-store queries
   - MODIFY each of `session.ts`, `account.ts`, `soulMap.ts`, `matches.ts`,
     `crisis.ts`, `chat.ts`, `subscription.ts`, `meditations.ts`,
     `comparison.ts`, `preferences.ts` — per the `MIGRATION.md` table.
-  - DELETE `src/store/blobs.ts` — Storage buckets replace it.
+  - _[DEVIATION] `src/store/blobs.ts` is NOT deleted. The plan expected Storage
+    buckets to replace it, and this round added no bucket — meanwhile it still
+    sweeps IndexedDB on the account-wide delete, which is a real promise on the
+    data-rights path. Deleting it now would quietly narrow "borrar todo".
+    It goes when audio storage arrives._
+  - _[DEVIATION] One `remote.ts` rather than a query module per store file. The
+    mapping for a table reads better next to the mapping for the table beside
+    it — `modality_matches` has to split into two tables and `clients` and
+    `anonymous_sessions` share a draft mapper._
 - [x] Step 4.5: Keep the degraded path
   - MODIFY `src/store/hydrate.ts` — a failed hydration falls back to the
     in-memory mirror rather than a blank screen.
