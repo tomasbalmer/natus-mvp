@@ -18,6 +18,25 @@
 
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
 
+    <!--
+      Home-screen icons. Without these the phone falls back to the browser's
+      own icon, which is what "add to home screen" produced before.
+
+      Every href is relative, because the site is served from a /natus-mvp/
+      subpath today and from a domain root if one is ever attached. An
+      absolute path would work in exactly one of those.
+
+      Android reads the manifest. iOS ignores it for the icon and reads
+      apple-touch-icon, which is why both are here — and why that PNG has
+      square corners: iOS rounds it itself, and rounding a rounded icon
+      leaves dark notches.
+    -->
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Natus" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
