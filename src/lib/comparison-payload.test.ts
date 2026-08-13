@@ -5,8 +5,8 @@ import {
   isScopeUsable,
   type ComparisonScope,
   type ComparisonSource,
-} from './comparison-payload';
-import type { Numerology } from './schemas';
+} from './comparison-payload.ts';
+import type { Numerology } from './schemas/index.ts';
 
 const NUMEROLOGY: Numerology = {
   life_path: 7,

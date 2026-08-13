@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { EXPORT_FORMAT, REDACTED, buildExport, exportFileName } from './export';
+import { EXPORT_FORMAT, REDACTED, buildExport, exportFileName } from './export.ts';
 
 const AT = '2026-08-11T14:03:00.000Z';
 

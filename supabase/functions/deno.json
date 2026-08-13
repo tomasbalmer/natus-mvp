@@ -1,0 +1,19 @@
+{
+  "$comment": [
+    "Import map for the Edge Functions runtime.",
+    "",
+    "This file exists so that supabase/functions/_shared/lib can stay byte-identical",
+    "to src/lib. Those files were written for Vite and use two conventions Deno does",
+    "not share by default: the @data/ alias, and extensionless relative imports",
+    "(./schemas rather than ./schemas/index.ts). Both are resolution concerns, not",
+    "code concerns — mapping them here keeps the promise docs/MIGRATION.md makes,",
+    "which is that the library crosses the boundary unchanged.",
+    "",
+    "src/lib/shared-parity.test.ts fails if the two copies ever diverge."
+  ],
+  "imports": {
+    "@data/": "./_shared/data/",
+    "zod": "npm:zod@4.4.3"
+  },
+  "unstable": ["sloppy-imports"]
+}

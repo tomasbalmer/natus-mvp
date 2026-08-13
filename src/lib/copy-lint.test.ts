@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { countSentences, isInvitation, lintCopy, lintDeep } from './copy-lint';
+import { countSentences, isInvitation, lintCopy, lintDeep } from './copy-lint.ts';
 
 const rulesFor = (text: string) => lintCopy(text).map((v) => v.rule);
 

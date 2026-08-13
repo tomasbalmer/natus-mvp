@@ -480,32 +480,72 @@ Additive. The session comes into existence and nothing reads from it yet.
 
 ### Phase 3: The shared library crosses the boundary
 
-- [ ] Step 3.1: Copy `src/lib` unchanged
-  - COPY `src/lib/*` → `supabase/functions/_shared/lib/` — per the file table in
-    `docs/MIGRATION.md`. Unchanged means unchanged; a diff here is a finding,
-    not a fix.
+- [x] Step 3.1: Copy `src/lib` unchanged
+  - COPY `src/lib/*.ts` → `supabase/functions/_shared/lib/`, byte-identical.
+  - ADD `supabase/functions/deno.json` — import map for `@data/` and `zod`.
+  - ADD `pnpm sync:shared` — regenerates the copy, so nobody does it by hand.
   - _If anything needs editing to run on the other side, the boundary was
-    already broken and this is the step that reveals it. That is the whole
-    point of the step._
-- [ ] Step 3.2: The tests come with it
-  - COPY the corresponding `*.test.ts` files and run them against the copy.
-  - _They pass unchanged or the copy was not faithful._
-- [ ] Step 3.3: Seeds move with the code that reads them
-  - MOVE the `data/` JSON that `safety.ts` and `catalog.ts` depend on into the
-    shared directory, or reference it from a single location. `crisis-keywords.json`
-    in particular travels with `safety.ts`.
-- [ ] Step 3.4: Decide where the hard filter runs
-  - _`docs/MIGRATION.md` is explicit: in production the clinical exclusions
-    belong in the Edge Function, next to the model call, because a filter
-    running on a client can be tampered with and this one decides whether
-    someone in a fragile state is shown a modality that opens things up. Same
-    file, different side. The client keeps its copy for the responsive UI; the
-    server's is the one that counts._
+    already broken and this is the step that reveals it. It revealed two
+    things, and neither was what the step was watching for — see 3.1b._
+- [x] [UNPLANNED] Step 3.1b: Two Vite conventions Deno does not share
+  - MODIFY `src/lib/safety.ts`, `src/lib/catalog.ts` — JSON imports carry
+    `with { type: 'json' }`.
+  - MODIFY every relative import in `src/lib` — explicit `.ts` / `/index.ts`.
+  - MODIFY `tsconfig.json` — `allowImportingTsExtensions: true`.
+  - _Rationale: the boundary held in the way that mattered. Nothing in
+    `src/lib` reached for React, `localStorage` or `@/store`; the library is
+    portable in substance. What did not port was module-resolution syntax.
+    Deno rejects a JSON import without an import attribute, and rejects
+    `./schemas` without an extension — `sloppy-imports` is declared in
+    `deno.json` and the edge runtime does not honour it, though it does read
+    the import map, which is how `@data/` resolves._
+  - _Both were fixed **in the source rather than in the copy**, because the
+    standard syntax works under Vite, vitest and Deno alike. Fixing them in
+    the copy would have bought a transform step and lost byte-identity, which
+    is the one property making the copy safe._
+- [x] Step 3.2: The tests come with it
+  - _[DEVIATION] They do not. Tests are excluded from the copy and stay in
+    `src/lib`, where they run. Copying them would deploy test files inside a
+    production function, and running them a second time under the same runner
+    would prove only that `cp` works — they cannot run under Deno at all,
+    since they import `vitest`. The property that step wanted is enforced
+    instead by `src/lib/shared-parity.test.ts`, which is stronger: it fails on
+    drift in either direction, forever, rather than once at copy time._
+- [x] Step 3.3: Seeds move with the code that reads them
+  - COPY `data/*.json` → `supabase/functions/_shared/data/`, under parity too.
+- [x] Step 3.4: Decide where the hard filter runs
+  - MODIFY `src/lib/matching.ts` — records that the Edge Function's copy is
+    authoritative from Phase 5, and why.
+  - _Written where a reader lands rather than only in `docs/MIGRATION.md`: a
+    filter running in a browser can be edited by whoever holds the browser,
+    and `clinicallyExcluded` is not a presentation concern. The client keeps
+    its copy so the UI answers without a round trip; the parity test is what
+    keeps the two from disagreeing._
 
-**Verification** — the copied tests pass in place. `src/lib` and
-`supabase/functions/_shared/lib` are byte-identical for every file in the
-`MIGRATION.md` table, verified by `diff`. The application is unchanged and all
-three validation commands pass.
+**Verification** — passed 2026-08-13
+
+- **The library runs on the real runtime**, not on a proxy for it: a temporary
+  function served by `supabase functions serve` (edge-runtime 1.74.3, Deno
+  2.1.4) imported `numerology`, `safety`, `copy-lint` and `catalog` from the
+  copy and returned HTTP 200. Deleted afterwards; Phase 5 brings the real ones.
+- **Cross-runtime determinism.** The same four calls under Node and under Deno
+  return identical output: `life_path 9`, `expression 11`, master number 11
+  detected, safe text not flagged, `hace semanas que me quiero morir` flagged
+  high, and both copy violations — `command` on "Tenés que" and `percentage`
+  on "98%" — in the same order. The arithmetic and the safety layer do not
+  change when they cross.
+- `pnpm test` 616 passing across 23 files (+43), `pnpm typecheck` clean,
+  `pnpm build` succeeds. Every pre-existing test passed unchanged after the
+  import rewrite, which is the evidence that it was syntax and not semantics.
+- **Parity is non-vacuous**, confirmed both ways: appending a line to the
+  copy fails `matching.ts is byte-identical`; adding a file to `src/lib`
+  without syncing fails `contains exactly the same files`. The second is the
+  one that matters — the realistic failure is not a bad copy today but a good
+  edit made in one place in six weeks.
+- Two structural assertions also live in that file: nothing in `src/lib` may
+  import `@/store`, `react`, or any `@/` specifier; and every relative import
+  must carry an extension and every JSON import an attribute. The Deno
+  requirements are now a test rather than a thing to remember.
 
 ---
 
@@ -684,10 +724,10 @@ it. Both are recorded in Phase 0 as decisions so the deviation from
 `docs/MIGRATION.md` is on the record before anyone implements against the older
 plan.
 
-**Where this stands.** Phases 0, 1 and 2 are done, less the signup wiring,
-which moved into Phase 4 alongside the copy it would have made untrue. Phase 3
-is next and needs nothing new. Outstanding and owned by Tomás: the free-tier
-pause decision, the CI variables, and the Anthropic key for Phase 5.
+**Where this stands.** Phases 0 to 3 are done, less the signup wiring, which
+moved into Phase 4 alongside the copy it would have made untrue. Phase 4 is
+next and is the largest. Outstanding and owned by Tomás: the free-tier pause
+decision, the CI variables, and the Anthropic key for Phase 5.
 
 **Carried forward.** The nanoid advisory clears the age gate on 2026-08-14 and
 should be closed then. The bundle is over Vite's chunk warning and Phase 5 will

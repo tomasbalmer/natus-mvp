@@ -7,7 +7,7 @@ import {
   scanText,
   shouldNotifyAdmin,
   CRISIS_NOTIFICATION_WINDOW_MS,
-} from './safety';
+} from './safety.ts';
 
 /**
  * PDR 13 asks for 20 synthetic cases. The ones that matter most are the

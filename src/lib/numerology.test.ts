@@ -5,7 +5,7 @@ import {
   lifePath,
   normalizeName,
   reduce,
-} from './numerology';
+} from './numerology.ts';
 
 /**
  * Expected values are computed by hand and the arithmetic is written out, so

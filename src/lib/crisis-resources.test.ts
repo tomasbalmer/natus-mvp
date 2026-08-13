@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MVP_COUNTRIES, resourcesForCountry, telHref } from './crisis-resources';
+import { MVP_COUNTRIES, resourcesForCountry, telHref } from './crisis-resources.ts';
 
 /**
  * The honest-framing criterion of Phase 10, over the one screen where being

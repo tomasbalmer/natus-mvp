@@ -1,0 +1,200 @@
+{
+  "$comment": "Layer 1 crisis keywords, PDR 6.4. The vault's lists were not available when this was written, so these are a draft in LATAM Spanish. PDR 6.4 says the vault's own lists are preliminary too and require review by a clinical psychologist before production - that review is a launch blocker, not a development one.",
+  "version": "crisis-keywords-v2",
+  "status": "preliminary",
+  "$matching": "Terms are matched as whole token sequences on normalised text (lowercased, diacritics stripped). A match is discarded when a suppressor appears in the four tokens before it. Two conventions keep the list usable: negated forms are written out in full ('no quiero vivir', never 'quiero vivir') so the leading 'no' belongs to the term rather than reading as a suppressor of it; and no term is a bare noun. 'suicidio' on its own fires on 'el suicidio de mi hermano', which locks a bereaved person out of the product - so every term is anchored to a first-person form.",
+  "categories": {
+    "ideacion": {
+      "severity": "high",
+      "terms": [
+        "quiero morirme",
+        "me quiero morir",
+        "quiero matarme",
+        "me quiero matar",
+        "voy a matarme",
+        "matarme",
+        "suicidarme",
+        "me voy a suicidar",
+        "pense en el suicidio",
+        "pienso en el suicidio",
+        "quitarme la vida",
+        "acabar con mi vida",
+        "terminar con mi vida",
+        "no quiero vivir",
+        "no quiero seguir viviendo",
+        "no quiero seguir vivo",
+        "no quiero seguir viva",
+        "no quiero estar mas aca",
+        "no quiero despertar",
+        "prefiero morirme",
+        "prefiero estar muerto",
+        "prefiero estar muerta",
+        "mejor estar muerto",
+        "mejor estar muerta",
+        "pense en matarme",
+        "pense en quitarme la vida",
+        "ganas de morirme",
+        "ganas de no existir",
+        "planee como hacerlo"
+      ]
+    },
+    "autolesion": {
+      "severity": "high",
+      "terms": [
+        "cortarme",
+        "me corto",
+        "me estoy cortando",
+        "me corte los brazos",
+        "lastimarme",
+        "me lastimo a proposito",
+        "hacerme dano",
+        "me hago dano",
+        "quemarme la piel",
+        "me quemo la piel",
+        "golpearme",
+        "me golpeo la cabeza",
+        "me pego a mi misma",
+        "me pego a mi mismo",
+        "tome muchas pastillas",
+        "tuve una sobredosis",
+        "me tome una sobredosis"
+      ]
+    },
+    "abuso": {
+      "severity": "high",
+      "$note": "Abuse is almost always reported as 'mi <person> me <verb>', which is why other_subject suppressors must not apply to terms beginning with 'me'. Terms are specific on purpose: a bare 'me sigue' fires on 'mi terapeuta me sigue en Instagram', which is the example PDR 6.4 uses to show that a naive list is unusable.",
+      "terms": [
+        "me pega",
+        "me pego anoche",
+        "me golpea",
+        "me golpeo anoche",
+        "abusa de mi",
+        "abuso de mi",
+        "me violo",
+        "me viola",
+        "me obliga a tener sexo",
+        "me obliga a acostarme",
+        "me amenaza con",
+        "me amenaza de muerte",
+        "tengo miedo de que me mate",
+        "me encierra",
+        "no me deja salir de casa",
+        "me persigue",
+        "me acosa",
+        "me sigue a todos lados",
+        "me sigue hasta mi casa",
+        "me sigue hasta el trabajo",
+        "me espera afuera de mi casa",
+        "me espera en la puerta"
+      ]
+    },
+    "psicosis": {
+      "severity": "high",
+      "terms": [
+        "escucho voces",
+        "las voces me dicen",
+        "una voz me dice",
+        "me estan siguiendo",
+        "me estan vigilando",
+        "me quieren envenenar",
+        "me controlan la mente",
+        "leen mis pensamientos",
+        "estoy en una mision divina"
+      ]
+    },
+    "panico": {
+      "severity": "high",
+      "terms": [
+        "estoy teniendo un ataque de panico",
+        "tengo un ataque de panico",
+        "no puedo respirar",
+        "me falta el aire",
+        "siento que me muero",
+        "creo que me estoy muriendo",
+        "el corazon se me sale"
+      ]
+    }
+  },
+  "indirect": {
+    "$comment": "Two distinct terms must appear in the SAME text - not accumulated across screens - to raise low severity. One alone is not enough, which is what keeps the PDR's own example ('ya no aguanto este trabajo') from locking someone out of the product.",
+    "min_distinct": 2,
+    "severity": "low",
+    "terms": [
+      "ya no aguanto",
+      "no aguanto mas",
+      "no doy mas",
+      "no puedo mas",
+      "estoy vacio",
+      "estoy vacia",
+      "me siento un peso",
+      "soy una carga",
+      "estarian mejor sin mi",
+      "nadie me va a extranar",
+      "no le encuentro sentido",
+      "nada tiene sentido",
+      "no veo salida",
+      "no hay salida",
+      "estoy cansado de todo",
+      "estoy cansada de todo",
+      "quiero que se termine",
+      "quiero que esto termine",
+      "no sirvo para nada",
+      "todo me da igual",
+      "ya nada me importa",
+      "no le veo futuro",
+      "no quiero levantarme",
+      "estoy solo en esto",
+      "estoy sola en esto"
+    ]
+  },
+  "suppressors": {
+    "window_tokens": 4,
+    "negation": {
+      "$comment": "Always suppress. The person is denying the thing.",
+      "terms": ["no", "nunca", "jamas", "ni", "tampoco", "ojala"]
+    },
+    "reported_speech": {
+      "$comment": "Always suppress. The words belong to fiction, a dream, a quotation, or a distant past being narrated rather than lived.",
+      "terms": [
+        "en la pelicula",
+        "en la serie",
+        "en el libro",
+        "en la novela",
+        "el personaje",
+        "la protagonista",
+        "sone que",
+        "un sueno donde",
+        "cito textual",
+        "cuando era chico",
+        "cuando era chica",
+        "hace anos",
+        "antes de la terapia"
+      ]
+    },
+    "other_subject": {
+      "$comment": "Suppress ONLY when the matched term does not begin with 'me'. Spanish reflexive morphology already separates most third-person narration on its own ('matarse' is not 'matarme'), so this class exists for the residue. The 'me' exception is load-bearing: abuse is reported as 'mi ex me persigue', where the person reference names the perpetrator, not a different subject. Suppressing that would silence exactly the disclosures this category is for.",
+      "terms": [
+        "mi amigo",
+        "mi amiga",
+        "un amigo",
+        "una amiga",
+        "mi hermana",
+        "mi hermano",
+        "mi mama",
+        "mi papa",
+        "mi hija",
+        "mi hijo",
+        "mi primo",
+        "mi prima",
+        "mi vecino",
+        "mi vecina",
+        "mi paciente",
+        "un paciente",
+        "una paciente",
+        "mi terapeuta",
+        "el suicidio de",
+        "la muerte de"
+      ]
+    }
+  }
+}

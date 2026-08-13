@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { MAX_POOL, fallbackRanking, filterModalities, poolFraming } from './matching';
-import { ACTIVE_MODALITIES, modalityBySlug } from './catalog';
+import { MAX_POOL, fallbackRanking, filterModalities, poolFraming } from './matching.ts';
+import { ACTIVE_MODALITIES, modalityBySlug } from './catalog.ts';
 
 /** Every slug, as the "me da lo mismo" case produces. */
 const ANY = ['me_da_lo_mismo'];

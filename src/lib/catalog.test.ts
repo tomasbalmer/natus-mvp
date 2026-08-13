@@ -10,7 +10,7 @@ import {
   hasUnverifiedResources,
   modalityBySlug,
   opennessFile,
-} from './catalog';
+} from './catalog.ts';
 
 /**
  * The seed files parse on import — `catalog.ts` calls `.parse`, so a schema
