@@ -42,6 +42,14 @@ state is shown a modality that opens things up. Same file, different side.
 Every file writes one `localStorage` key named after the PDR 5 table it
 mirrors, and exposes functions shaped like the queries that replace them.
 
+**"Call sites do not move" has a condition attached.** The store is synchronous
+and the screens call it from render bodies, not from hooks or effects —
+`Dashboard.tsx:46` reads `activeProfile()` and `currentSynthesis()` inline. A
+component cannot await in its render body, so this is not a matter of
+propagating `await` through twenty-eight importing files. Something has to
+absorb the asynchrony, and the promise above only survives if that something
+sits behind `read`. `DECISIONS.md` §12 records how, and what it costs.
+
 | Store file | Table | What has to exist in SQL |
 |------------|-------|--------------------------|
 | `session.ts` | `anonymous_sessions` | 7-day expiry; a nightly job deletes expired unclaimed rows with their orphaned soul map and stored PDF |
@@ -92,12 +100,18 @@ to log from. It lands with the Edge Function.
 |------|------------|
 | Web Speech API | Google Cloud TTS. `audio/tts.ts` already has the `synthesize` shape; the bed and the SSML parser stay client-side |
 | `OscillatorNode` beds | Curated audio files, and `bed_tracks.license` becomes mandatory |
-| Chart PDF held in session state | Storage bucket plus a Vision call. `parse_status` already exists on the record |
+| Chart PDF held in session state | ~~Storage bucket plus a Vision call~~ — **superseded.** The chart is calculated from date, time and place through the Astrologer API's `/api/v5/context/birth-chart`, and the upload is removed rather than parsed. See `DECISIONS.md` §11 |
 | Simulated consent between two local profiles | Transactional email with a signed link |
 | Simulated paywall | Payment gateway and webhooks |
 | Local debug panel | `claude_api_calls` |
 
 ## The order to do it in
+
+Steps 1 to 4 are planned phase by phase in
+`specs/2026/08/NATUS-BACKEND/002-supabase-backend-migration.md`, with auth
+inserted between 1 and 2 — anonymous sign-in with an optional upgrade to email,
+because `auth.uid()` has to mean something before the policies in step 1 do
+anything. Steps 5 and 6 are not scheduled.
 
 1. Tables and RLS. The policies above are the ones worth writing tests for.
 2. `_shared/lib`, copied, with its existing tests. They pass unchanged; if they

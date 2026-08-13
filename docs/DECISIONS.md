@@ -62,6 +62,9 @@ copy lint will catch a prompt that stops matching the fixtures.
 
 ## 3. Fixtures by default, BYOK by opt-in — and no proxy
 
+> **Partly superseded by §10.** The no-proxy half of this decision no longer
+> holds; the fixture half does, and matters more than ever. Read §10 with it.
+
 **Decision.** The demo ships curated responses. A viewer can paste their own
 Anthropic key to see real generation.
 
@@ -165,7 +168,7 @@ back.
 | Five contemplative modalities for the empty-pool fallback | Four | The fallback selects by family and safety rather than a hardcoded count; a fifth would have meant miscategorising something |
 | Google Cloud TTS | Web Speech API | No backend can hold the key. The `synthesize` interface is preserved |
 | Curated `bed_tracks` audio files | `OscillatorNode` synthesis | No assets, no licensing exposure, same declared frequencies |
-| Server-side Vision parsing of the chart PDF | Held, parsing stubbed | Needs a key; enabled in BYOK mode later |
+| Server-side Vision parsing of the chart PDF | Held, parsing stubbed | Needs a key. **Superseded by §11** — the chart stops being a PDF rather than becoming a parsed one |
 | Consent by transactional email | Simulated between local profiles | No mail provider in a static build |
 
 ---
@@ -181,3 +184,143 @@ back.
 | Final onboarding copy and the 6-8 presenting needs | Product | Nothing — drafted per PDR section 1 |
 | Repository visibility (Pages on free requires public) | Tomás | Nothing today |
 | Brand mark | Tomás | Nothing — the mockup's ouroboros stands in |
+| Whether to pay to stop the Supabase project pausing | Tomás | Nothing structural — it decides whether a demo opens instantly or cold-starts |
+
+---
+
+# Backend migration
+
+Decisions from August 2026, when the project stopped being a static demo. The
+sections above were written for a product with no server and most of them still
+stand; these three are where that assumption was load-bearing.
+
+Planned in `specs/2026/08/NATUS-BACKEND/002-supabase-backend-migration.md`.
+
+---
+
+## 10. The proxy, reconsidered
+
+**Decision.** The Anthropic key moves into a Supabase Edge Function. Every
+visitor gets live generation without holding a key. The BYOK path is deleted.
+**The fixture path stays.**
+
+**This supersedes half of §3.** That section rejected a server-side proxy for
+two reasons, and they did not age the same way.
+
+> "It reintroduces a server to a project whose whole premise is that it does
+> not have one."
+
+Correct, and no longer applicable. The premise changed. This stopped being a
+demo the moment it acquired users whose data has to outlive their browser
+session, and once a server exists to hold their rows, refusing to let it hold a
+key buys nothing.
+
+> "It puts a spend-anything endpoint on a public URL."
+
+Still entirely true, and unaddressed by anything above. This is why the chat
+quota becomes real in the same round rather than a later one: enforced
+server-side, counted over `messages where counted`, and checked in the Edge
+Function rather than the browser. A quota checked in the client is a
+suggestion. **The chat does not open to users until that is done** — that
+sequencing is what discharges the objection, and reordering it would quietly
+reintroduce the risk §3 named.
+
+**What survives untouched.** The fixture path, and the reason for it: "a live
+demo that depends on a network call and someone else's quota is a demo that
+fails in the room." That is now a demo depending on a Supabase project that
+pauses after a week of inactivity, which is the same failure with a different
+cause. Fixtures become the degraded mode. `runAi` keeps its two-implementation
+shape, its single zod validation and its single copy lint, which is what has
+been stopping the fixtures from drifting into a different product.
+
+**Rejected: deleting fixtures along with BYOK.** Tempting, since a working
+server makes them look redundant. They are not — they are the offline path, and
+they are the only thing that proves the contracts hold without spending tokens.
+
+**What this newly makes possible, and newly makes fragile.** Raw
+`clinical_basics` never entering a model payload (§7) was previously
+guaranteed by there being no server to send it from. Now it is a real
+guarantee — enforceable, logged, testable — and simultaneously easy to break,
+because the function holds the whole row and only discipline stops it being
+forwarded. It is a step in the plan for that reason.
+
+---
+
+## 11. The natal chart comes from ephemeris, not from a PDF
+
+**Decision.** The chart is calculated from date, time and place through the
+Astrologer API, which runs Kerykeion over Swiss Ephemeris. The PDF upload is
+removed rather than made to work.
+
+**Rejected: Vision parsing of the uploaded PDF.** This was the plan of record —
+§8 and `docs/MIGRATION.md` both describe a Storage bucket plus a Vision call,
+and `src/screens/onboarding/NatalChart.tsx` was written against it, accepting
+the file and leaving `parse_status: 'pending'`. It was rejected because asking
+someone to export a PDF from astro.com and upload it is harder than asking them
+when and where they were born, because it spends model tokens on every chart,
+and because it returns extracted text where the alternative returns structured
+data.
+
+**Why this API.** Its `/api/v5/context/*` endpoints return XML shaped for a
+model rather than an SVG that would have to be parsed back into meaning. That
+is the exact seam the Soul Map needs, and it removes a serialiser nobody has to
+write. It also speaks Spanish, which matters for anything rendered.
+
+**Cost shape.** One call per person for the life of their account, not one per
+session. Fifty users is fifty calls, ever.
+
+**The trap in the same API.** `/compatibility-score` returns a number — a Ciro
+Discepolo score. §7 forbids match percentages and the chart comparison is
+explicitly verdict-free. `/chart-data/synastry` gives the aspects without the
+score and is the endpoint to use. This is written down because the wrong one is
+the more obviously named of the two.
+
+**What still needs a fallback.** Houses and the ascendant need an exact birth
+time and many people do not know theirs. The existing path — numerology plus
+stated context, with the chart absent — already covers it and does not become a
+special case.
+
+---
+
+## 12. The store keeps its synchronous shape
+
+**Decision.** The user's dataset is loaded once into a React context at session
+start and held as a synchronous in-memory mirror. `read` in `src/store/db.ts`
+keeps its signature and serves from the mirror; `write` updates the mirror and
+persists to Postgres behind it.
+
+**Why it needed deciding at all.** `docs/MIGRATION.md` promised that "call
+sites do not move; implementations do". That promise is nearly true and quietly
+depends on something: the call sites are synchronous *and in render bodies*.
+
+```
+src/screens/Dashboard.tsx:46
+  const profile = activeProfile();
+  const synthesis = currentSynthesis();
+```
+
+Neither is a hook, neither is in an effect, and a component cannot await in its
+render body. Swapping `localStorage` for a network client is therefore not a
+matter of propagating `await`. Twenty-eight files import from `@/store`.
+
+**Rejected: an effect and a loading state per screen.** Twenty-eight files of
+hand-rolled fetch-and-store. Phase 5 of the 001 plan already recorded a
+stale-match defect that neither the type checker nor the test suite caught;
+this approach is that defect class multiplied by the number of screens.
+
+**Rejected for now: TanStack Query.** The conventional answer, and the right
+one if this outgrows a mirror. It was not chosen because one user's dataset
+here is genuinely small — a synthesis, some matches, some messages, some
+meditations — and because adopting it means rewriting every read as a hook,
+which is the churn `MIGRATION.md` was trying to avoid.
+
+**The signal to change.** If the mirror starts needing invalidation rules,
+adopt TanStack Query rather than growing a cache by hand. Two things will
+produce that signal: a streaming chat, and a second device on the same account.
+Neither exists yet; both are foreseeable.
+
+**What it costs.** Multi-tab staleness, and a write path where the mirror and
+Postgres can disagree. The second is the dangerous one: `write` currently
+swallows failures on purpose, to degrade a demo rather than break it, and that
+is the wrong behaviour for a dropped network write — the person believes their
+data was saved. Write failures surface.
