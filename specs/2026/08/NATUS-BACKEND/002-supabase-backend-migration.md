@@ -303,10 +303,15 @@ The order inside this phase matters: tables, then RLS enabled, then policies,
 then the tests that prove the policies. A table that exists without RLS, even
 briefly, is a table exposed to the anon key.
 
-- [ ] Step 1.1: Initialise the Supabase project structure
-  - ADD `supabase/config.toml` — local stack configuration.
-  - ADD `.gitignore` entries for local Supabase artefacts.
-- [ ] Step 1.2: Tables
+- [x] Step 1.1: Initialise the Supabase project structure
+  - ADD `supabase/config.toml`, `supabase/.gitignore` — via `supabase init`.
+  - Hosted project `khwrauqgwopkgyvbonmp`, region `sa-east-1`, Postgres 17.6.
+  - _[DEVIATION] The project was first created in `us-east-1` from the
+    dashboard's defaults and recreated through the CLI, where `--region` is an
+    explicit argument rather than a dropdown. Recorded because it is the
+    argument for doing the next project this way round: the region is
+    permanent and the dashboard makes it easy to accept by omission._
+- [x] Step 1.2: Tables
   - ADD `supabase/migrations/<ts>_initial_schema.sql` — one table per namespace
     in `src/store/db.ts`, following the mapping table in `docs/MIGRATION.md`.
     Carry across the constraints that document names as load-bearing: the
@@ -314,10 +319,29 @@ briefly, is a table exposed to the anon key.
     constraint on check-ins, and the 7-day expiry on anonymous sessions.
   - _The seed JSON in `data/` becomes tables here — modalities, topics, crisis
     resources, bed tracks. `catalog.ts`'s accessors become queries in Phase 3._
-- [ ] Step 1.3: Enable RLS on every table, in the same migration
+  - _[DEVIATION] Match reactions became their own table, `match_reactions`,
+    keyed on (user_id, modality_slug), rather than the `Record<slug, …>` the
+    demo keeps inside the match row. The demo's shape made a reaction a
+    property of a request, and every re-match then had to copy them forward by
+    hand so they were not lost. As a table they simply outlive the request,
+    which is what `store/matches.ts` says they are for._
+  - _[DEVIATION] `bed_tracks.frequency_hz` is nullable. It was written
+    `not null` and the seed rejected it: `lluvia` is filtered noise and
+    `silencio` is no bed at all, so neither has a fundamental. The constraint
+    was a claim about the domain that two of the five rows disproved._
+- [x] Step 1.3: Enable RLS on every table, in the same migration
   - _Not a follow-up migration. A window between the two, however short, is a
     window where the anon key reads everything._
-- [ ] Step 1.4: Policies
+- [x] [UNPLANNED] Step 1.3b: Grants
+  - MODIFY `supabase/migrations/…_rls_policies.sql` — explicit `grant` per role.
+  - _Rationale: the plan treated RLS as the whole of access control and it is
+    only half. A grant decides whether a role may touch a table; a policy
+    decides which rows. Postgres checks the grant first, so nineteen tables
+    with correct policies were unreachable by every role — the first run of the
+    test suite failed on `permission denied for table clients`, not on any
+    assertion. Granted narrowly: `authenticated` gets no verb at all on the
+    reference tables, so no future policy edit can make a modality deletable._
+- [x] Step 1.4: Policies
   - ADD `supabase/migrations/<ts>_rls_policies.sql` — ownership policies keyed
     on `auth.uid()`, plus the two that carry product promises per
     `docs/MIGRATION.md`: consent-gated reads of `chart_comparisons`, and
@@ -326,19 +350,45 @@ briefly, is a table exposed to the anon key.
   - _`readableComparison` re-checks consent on every read in the demo. In
     Postgres it has to be a policy, because a helper is only as good as the
     call site that remembers to use it._
-- [ ] Step 1.5: Policy tests
-  - ADD `supabase/tests/rls.test.sql` (pgTAP) or equivalent — assert the
-    negative cases. Two clients, and the second cannot reach the first's
-    `clinical_basics` through the table, through a join, or through the
-    comparison path. Consent revoked mid-flight closes the read.
+- [x] Step 1.5: Policy tests
+  - ADD `supabase/tests/rls.test.sql` — pgTAP 1.3.3, 20 assertions.
   - _Negative assertions only. A policy test that only proves the owner can
     read their own row proves nothing about the policy._
+  - _[UNPLANNED] Every assertion had to be made independently failable. The
+    control reading Alice's clinical answer was a bare scalar subquery, and
+    under a broken ownership policy it returns two rows, aborts the
+    transaction, and takes the eighteen assertions after it down unrun —
+    exactly when they are most needed. Aggregated instead. The same shape is
+    worth checking for in any future test here._
 
-**Verification** — `supabase db reset` against the local stack applies cleanly
-from empty. The policy tests pass, and each one is confirmed non-vacuous by
-temporarily dropping the policy it covers and watching it fail. The application
-is untouched and still runs on `localStorage`; `pnpm test`, `pnpm typecheck`
-and `pnpm build` all pass.
+**Verification** — passed 2026-08-13
+
+- `supabase db reset` applies all three migrations cleanly from empty.
+- 19 tables, RLS enabled on every one, none without a policy — confirmed by
+  querying `pg_class.relrowsecurity` against `pg_policies` rather than by
+  reading the migration back.
+- Seeds load: 21 modalities, 15 topics, 16 crisis resources, 5 bed tracks.
+  Verified hotlines: 0, which is correct — `verified_at` is null on every row
+  and stays that way until someone telephones them.
+- `supabase test db` — 20/20 pass.
+- **Non-vacuity confirmed by sabotage, twice.** Replacing the `clients`
+  ownership policy with `using (true)` failed 5 assertions, including both
+  reads of another person's clinical answer and the cross-user write.
+  Replacing the consent gate with plain ownership failed exactly 2 — the
+  revoke and the expiry — and nothing else, which is the right blast radius
+  for that policy.
+- The application is untouched and still runs on `localStorage`.
+  `pnpm typecheck` clean, `pnpm test` 565 passing across 21 files,
+  `pnpm build` succeeds.
+- [DEVIATION] One assertion was wrong rather than one policy: anon reading
+  `modalities` was written as an expected count of zero, and Postgres denies
+  it at the grant layer instead. Rewritten as `throws_ok`, which asserts the
+  stronger of the two behaviours — the role was never given the verb, so no
+  policy edit can open it by accident.
+- Not yet done in this phase: the hosted project holds no schema. Everything
+  above is local. `supabase link` and `db push` land with Phase 6, so that the
+  first thing pushed to `sa-east-1` is a schema the whole plan has been
+  verified against.
 
 ---
 
@@ -586,6 +636,6 @@ it. Both are recorded in Phase 0 as decisions so the deviation from
 `docs/MIGRATION.md` is on the record before anyone implements against the older
 plan.
 
-**Where this stands.** Phase 0 is done. Phase 1 is blocked on the
-prerequisites, all of which are owned by Tomás and none of which are code.
-Phases 2 to 6 follow in order once it clears.
+**Where this stands.** Phases 0 and 1 are done. The prerequisites are met
+except the free-tier pause decision and the CI variables, neither of which
+blocks Phase 2. Phase 5 still needs the Anthropic key.
