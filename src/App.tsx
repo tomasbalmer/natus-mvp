@@ -20,7 +20,7 @@ import { Consent } from '@/screens/comparison/Consent';
 import { Result } from '@/screens/comparison/Result';
 import { getAiMode, type AiMode } from '@/ai/mode';
 import { activeHighSeverityEvent } from '@/store/crisis';
-import { ensureSession } from '@/supabase/session';
+import { hydrate } from '@/store/hydrate.ts';
 
 /**
  * Where the navigation belongs. Onboarding, the landing and the signup are
@@ -52,16 +52,40 @@ export function App() {
   const [aiMode, setAiMode] = useState<AiMode>(() => getAiMode().mode);
   const { pathname } = useLocation();
 
-  // Acquire the anonymous identity, once, in the background.
+  // Load the dataset before anything reads it.
   //
-  // Nothing rendered below waits on it and nothing yet reads from it: the
-  // store is still local until Phase 4. What this buys now is that auth.uid()
-  // has a value, which is what every RLS policy keys on — and that a visitor
-  // who arrives before the backend exists is indistinguishable from one who
-  // arrives after, because ensureSession resolves to null instead of throwing.
+  // The screens below call the store from their render bodies —
+  // `activeProfile()`, `currentSynthesis()` — so rendering before the mirror
+  // is filled would paint an empty account and then flip. Gating here is what
+  // buys those twenty-eight call sites the right to stay synchronous, which is
+  // the trade DECISIONS.md section 12 records.
+  //
+  // It resolves either way: a paused project or a missing configuration lands
+  // on localStorage rather than on an error.
+  const [ready, setReady] = useState(false);
   useEffect(() => {
-    void ensureSession();
+    let live = true;
+    void hydrate().then(() => {
+      if (live) setReady(true);
+    });
+    return () => {
+      live = false;
+    };
   }, []);
+
+  if (!ready) {
+    return (
+      <PhoneFrame>
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex min-h-dvh items-center justify-center px-6 text-center"
+        >
+          <p className="text-[12.5px] leading-relaxed text-crema/55">Abriendo tu espacio…</p>
+        </div>
+      </PhoneFrame>
+    );
+  }
 
   return (
     <PhoneFrame>

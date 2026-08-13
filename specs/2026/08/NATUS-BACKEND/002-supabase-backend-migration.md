@@ -589,14 +589,58 @@ The switch, and the bulk of the work. Approach A, per `DECISIONS.md` §12.
   - MODIFY the existing `src/store/*.test.ts` — they currently assert against
     `localStorage`. The behaviour under test does not change; the backing does.
 
-**Verification** — the whole PDR journey walked in a browser against the local
-Supabase stack: onboarding, Soul Map, recommendations, routine, chat,
-meditations, comparison. Console clean. Data survives a hard refresh, which is
-the thing `localStorage` could already do and the thing most likely to break
-here. Rows land in Postgres and are visible in the dashboard. The project
-stopped mid-session degrades to the mirror rather than a blank screen. All
-three validation commands pass, and the store tests pass against the new
-backing.
+**Verification — partial, 2026-08-13. This phase is not finished.**
+
+Done and verified:
+
+- **All fourteen adapters round-trip**, via `pnpm verify:adapters` against the
+  local stack — 15/15. Written for a reason: thirteen of them had never
+  executed, having been written in one sitting and exercised only by type
+  checking. A round-trip suite was far cheaper than clicking every screen and
+  covers the ones the UI reaches rarely.
+- **The onboarding draft, through the real application.** Name, birth date,
+  presenting need, twelve expanded openness slugs and
+  `clinical_ideation_6m = 'fugaces_sin_plan'` all land in their own columns.
+  Clearing every `natus:*` key from `localStorage` while keeping the auth token
+  and reloading brings the answers back — so they came from Postgres, not from
+  the browser.
+- Repeated reloads create one `auth.users` row and one session row, not one
+  per load. Console clean.
+- `pnpm typecheck`, `pnpm test` 616 across 23 files, `pnpm build` all pass.
+
+**Four schema defects, all mine, all from Phase 1**, and none catchable there
+because nothing wrote to the tables yet — the RLS tests chose their own values,
+so they agreed with the schema rather than with the application:
+
+- `messages.type` allowed `'clarification'`. The schema says
+  `'clarifying_question'`.
+- `mode` allowed only `('fixture', 'server')`. The store writes `'byok'`, and
+  will until Phase 5 deletes that path.
+- `comparison_consents.scope` was `text`. `ComparisonScope` is
+  `{ numerology, astro, soul_map_themes }` — three separate booleans, because
+  consent is per kind of material. It would have stored `"[object Object]"`.
+- `crisis_events.category` was unconstrained.
+
+The third was caught by `supabase gen types` making the column type and the
+application type check against each other. That is the argument for generating
+them rather than hand-agreeing: the first two were found by reading, the third
+by the compiler, and the compiler does not get tired.
+
+Still outstanding, and why this phase stays open:
+
+- Step 4.4a and 4.6 are not done.
+- The journey past onboarding — Soul Map, recommendations, routine, chat,
+  meditations, comparison — has not been walked in a browser. The adapters
+  behind those screens round-trip in isolation, which is not the same claim.
+- A deliberately failed write has not been observed surfacing. The handler
+  exists and nothing calls `setWriteFailureHandler` yet, so today a dropped
+  write is still silent — the exact thing `DECISIONS.md` §12 says must not be.
+- [FINDING, pre-existing] `Onboarding.tsx` starts at `useState(0)` and never
+  reads the stored `step`, so a returning visitor restarts at screen one with
+  their answers pre-filled. `store/session.ts` describes `step` as "furthest
+  step reached, so a returning visitor lands where they left off", which the UI
+  has never implemented. Not a regression from this phase, and changing it is a
+  product decision rather than a migration one.
 
 ---
 
@@ -724,10 +768,13 @@ it. Both are recorded in Phase 0 as decisions so the deviation from
 `docs/MIGRATION.md` is on the record before anyone implements against the older
 plan.
 
-**Where this stands.** Phases 0 to 3 are done, less the signup wiring, which
-moved into Phase 4 alongside the copy it would have made untrue. Phase 4 is
-next and is the largest. Outstanding and owned by Tomás: the free-tier pause
-decision, the CI variables, and the Anthropic key for Phase 5.
+**Where this stands.** Phases 0 to 3 are done. Phase 4 is **in progress**: the
+mirror, the hydration and all fourteen adapters are built and round-trip
+verified, and onboarding writes to Postgres through the real application.
+Not yet done — the signup wiring carried from Phase 2, the store tests, a
+browser walk past onboarding, and surfacing a failed write. Outstanding and
+owned by Tomás: the free-tier pause decision, the CI variables, and the
+Anthropic key for Phase 5.
 
 **Carried forward.** The nanoid advisory clears the age gate on 2026-08-14 and
 should be closed then. The bundle is over Vite's chunk warning and Phase 5 will
