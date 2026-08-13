@@ -13,35 +13,10 @@ import {
 import { cancelSubscription, isSubscribed, simulateSubscribe } from './subscription';
 import { clearAll } from './db';
 import type { ChatResponse } from '@/lib/schemas';
-
-class MemoryStorage implements Storage {
-  private map = new Map<string, string>();
-  get length() {
-    return this.map.size;
-  }
-  clear() {
-    this.map.clear();
-  }
-  getItem(k: string) {
-    return this.map.get(k) ?? null;
-  }
-  key(i: number) {
-    return [...this.map.keys()][i] ?? null;
-  }
-  removeItem(k: string) {
-    this.map.delete(k);
-  }
-  setItem(k: string, v: string) {
-    this.map.set(k, v);
-  }
-  [name: string]: unknown;
-}
+import { installMemoryStorage } from './memory-storage.testing.ts';
 
 beforeEach(() => {
-  Object.defineProperty(globalThis, 'localStorage', {
-    value: new MemoryStorage(),
-    configurable: true,
-  });
+  installMemoryStorage();
   clearAll();
 });
 

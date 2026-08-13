@@ -570,77 +570,108 @@ The switch, and the bulk of the work. Approach A, per `DECISIONS.md` §12.
   - _Today `write` swallows quota errors on purpose, to degrade a demo rather
     than break it. A dropped network write is a different thing: the person
     believes their data was saved. It has to be visible._
-- [ ] Step 4.4a: Wire the email upgrade, and rewrite the signup copy with it
-  - MODIFY `src/screens/Signup.tsx` — call `upgradeToEmail`, and replace the
-    "no se envía ningún correo" paragraph, which stops being true here.
-  - _Carried from Phase 2, where the plumbing landed but the screen did not.
-    The copy can only be honest once the data has actually moved._
+- [x] Step 4.4a: Wire the email upgrade, and rewrite the signup copy with it
+  - MODIFY `src/screens/Signup.tsx` — calls `upgradeToEmail`, adds a
+    check-your-inbox state, and branches the note under the field on
+    `isBackendConfigured` so both builds tell the truth about themselves.
+  - _Carried from Phase 2, where the plumbing landed but the screen did not._
+  - _The component's own docstring said "nothing here is real" and "a static
+    page has nothing to check a password against". Both had quietly become
+    false. The no-password decision survives with a better reason: the address
+    attaches to an `auth.users` row that has existed since the first page load,
+    so there is nothing for a password to protect that the anonymous session
+    was not already holding._
 - [ ] Step 4.4: Per-store queries
   - MODIFY each of `session.ts`, `account.ts`, `soulMap.ts`, `matches.ts`,
     `crisis.ts`, `chat.ts`, `subscription.ts`, `meditations.ts`,
     `comparison.ts`, `preferences.ts` — per the `MIGRATION.md` table.
   - DELETE `src/store/blobs.ts` — Storage buckets replace it.
-- [ ] Step 4.5: Keep the degraded path
+- [x] Step 4.5: Keep the degraded path
   - MODIFY `src/store/hydrate.ts` — a failed hydration falls back to the
     in-memory mirror rather than a blank screen.
   - _A paused free-tier project must degrade the demo, not end it. This is the
     same reasoning that already governs `db.ts`'s swallowed reads._
-- [ ] Step 4.6: The store tests
-  - MODIFY the existing `src/store/*.test.ts` — they currently assert against
-    `localStorage`. The behaviour under test does not change; the backing does.
+- [x] Step 4.6: The store tests
+  - ADD `src/store/db.test.ts` — 15 cases over the three layers.
+  - _[DEVIATION] The existing suites were not modified, because they did not
+    need to be: they exercise behaviour through `session.ts` and the rest, and
+    every one passed unchanged. That is the result the step was after — the
+    backing moved and the behaviour did not. What they could not cover is the
+    layering itself, since they never see a hydrated mirror, so that is what
+    the new file covers: which layer answers a read, that a hydrated `null`
+    is honoured rather than treated as absent, that `remove` clears the mirror
+    too, and that `exportAll` prefers the mirror while still including
+    `ai_mode`, which is never hydrated because it holds a pasted key._
+- [x] [UNPLANNED] Step 4.7: Surface a failed write
+  - ADD `src/components/SaveFailureNotice.tsx`, rendered under the demo banner.
+  - _`DECISIONS.md` §12 says a dropped network write must be visible: the
+    person believes their answers were saved. The handler existed with nobody
+    registered, so until now it was collected and discarded._
+- [x] [UNPLANNED] Step 4.8: One `MemoryStorage`
+  - ADD `src/store/memory-storage.testing.ts`; five test files now import it.
+  - _It had been copy-pasted into five suites. A sixth was about to be._
 
-**Verification — partial, 2026-08-13. This phase is not finished.**
+**Verification** — passed 2026-08-13
 
-Done and verified:
+- **All fourteen adapters round-trip**, via `pnpm verify:adapters` — 15/15.
+  Written because thirteen of them had never executed, having been produced in
+  one sitting and exercised only by the type checker.
+- **The journey, in a browser, against the local stack**: onboarding through
+  the Soul Map and on to the constellation. `anonymous_sessions`,
+  `soul_map_syntheses` and `modality_matches` all receive rows; the
+  `one_current_match` partial index holds across a re-match. Console clean.
+- Clearing every `natus:*` key while keeping the auth token and reloading
+  brings the answers back, so they came from Postgres and not from the browser.
+- Repeated loads create one `auth.users` row, not one per load.
+- `pnpm typecheck` clean, `pnpm test` 631 across 24 files (+15),
+  `pnpm build` succeeds.
 
-- **All fourteen adapters round-trip**, via `pnpm verify:adapters` against the
-  local stack — 15/15. Written for a reason: thirteen of them had never
-  executed, having been written in one sitting and exercised only by type
-  checking. A round-trip suite was far cheaper than clicking every screen and
-  covers the ones the UI reaches rarely.
-- **The onboarding draft, through the real application.** Name, birth date,
-  presenting need, twelve expanded openness slugs and
-  `clinical_ideation_6m = 'fugaces_sin_plan'` all land in their own columns.
-  Clearing every `natus:*` key from `localStorage` while keeping the auth token
-  and reloading brings the answers back — so they came from Postgres, not from
-  the browser.
-- Repeated reloads create one `auth.users` row and one session row, not one
-  per load. Console clean.
-- `pnpm typecheck`, `pnpm test` 616 across 23 files, `pnpm build` all pass.
+**A defect the round-trip suite could not catch, and now can.** The first
+browser walk raised the save-failure notice — which is how it was found at all,
+the notice having been built an hour earlier. `soul_map_syntheses` was
+rejecting every insert:
 
-**Four schema defects, all mine, all from Phase 1**, and none catchable there
-because nothing wrote to the tables yet — the RLS tests chose their own values,
-so they agreed with the schema rather than with the application:
+```
+invalid input syntax for type integer: "2.600000023841858"
+```
 
-- `messages.type` allowed `'clarification'`. The schema says
+`latency_ms` comes from `performance.now()`. The column is an `integer`. The
+round-trip suite passed because **its fixture used 1200** — a number chosen to
+fit the schema rather than taken from the application, which is the same
+failure that let all four Phase 1 constraint defects through. The fixture now
+carries the real float and the value is rounded at the adapter; removing the
+rounding reproduces the error, so the suite would catch it today.
+
+Sub-millisecond precision on a call that takes ten to thirty seconds is noise,
+so the column stays an integer rather than being widened to carry a number
+nobody reads.
+
+**Four schema defects, all mine, all from Phase 1**, none catchable there
+because nothing wrote to those tables yet — the RLS tests chose their own
+values, so they agreed with the schema rather than with the application:
+
+- `messages.type` allowed `'clarification'`; the schema says
   `'clarifying_question'`.
-- `mode` allowed only `('fixture', 'server')`. The store writes `'byok'`, and
+- `mode` allowed only `('fixture', 'server')`. The store writes `'byok'` and
   will until Phase 5 deletes that path.
 - `comparison_consents.scope` was `text`. `ComparisonScope` is
   `{ numerology, astro, soul_map_themes }` — three separate booleans, because
   consent is per kind of material. It would have stored `"[object Object]"`.
 - `crisis_events.category` was unconstrained.
 
-The third was caught by `supabase gen types` making the column type and the
-application type check against each other. That is the argument for generating
-them rather than hand-agreeing: the first two were found by reading, the third
-by the compiler, and the compiler does not get tired.
+The third was caught by the compiler, because `supabase gen types` now makes
+the column type and the application type check against one another. The first
+two were found by reading. The compiler does not get tired.
 
-Still outstanding, and why this phase stays open:
-
-- Step 4.4a and 4.6 are not done.
-- The journey past onboarding — Soul Map, recommendations, routine, chat,
-  meditations, comparison — has not been walked in a browser. The adapters
-  behind those screens round-trip in isolation, which is not the same claim.
-- A deliberately failed write has not been observed surfacing. The handler
-  exists and nothing calls `setWriteFailureHandler` yet, so today a dropped
-  write is still silent — the exact thing `DECISIONS.md` §12 says must not be.
 - [FINDING, pre-existing] `Onboarding.tsx` starts at `useState(0)` and never
   reads the stored `step`, so a returning visitor restarts at screen one with
   their answers pre-filled. `store/session.ts` describes `step` as "furthest
-  step reached, so a returning visitor lands where they left off", which the UI
-  has never implemented. Not a regression from this phase, and changing it is a
-  product decision rather than a migration one.
+  step reached, so a returning visitor lands where they left off", which the
+  UI has never implemented. Not a regression from this phase, and changing it
+  is a product decision rather than a migration one.
+- Not exercised in a browser: chat, meditations and the comparison flow. Their
+  adapters round-trip in isolation, which is a weaker claim than the journey
+  above and is recorded as such.
 
 ---
 
@@ -768,13 +799,14 @@ it. Both are recorded in Phase 0 as decisions so the deviation from
 `docs/MIGRATION.md` is on the record before anyone implements against the older
 plan.
 
-**Where this stands.** Phases 0 to 3 are done. Phase 4 is **in progress**: the
-mirror, the hydration and all fourteen adapters are built and round-trip
-verified, and onboarding writes to Postgres through the real application.
-Not yet done — the signup wiring carried from Phase 2, the store tests, a
-browser walk past onboarding, and surfacing a failed write. Outstanding and
-owned by Tomás: the free-tier pause decision, the CI variables, and the
-Anthropic key for Phase 5.
+**Where this stands.** Phases 0 to 4 are done. Phase 5 is next and needs the
+Anthropic key. Also outstanding and owned by Tomás: the free-tier pause
+decision and the CI variables, neither of which blocks Phase 5.
+
+**Carried forward.** The nanoid advisory clears the age gate on 2026-08-14.
+The bundle is over Vite's chunk warning and Phase 5 will add to it. Chat,
+meditations and the comparison flow have not been walked in a browser against
+Postgres.
 
 **Carried forward.** The nanoid advisory clears the age gate on 2026-08-14 and
 should be closed then. The bundle is over Vite's chunk warning and Phase 5 will

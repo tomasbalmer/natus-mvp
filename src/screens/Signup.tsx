@@ -3,15 +3,24 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Screen } from '@/components/Screen';
 import { SignupError, isSignedIn, signUp } from '@/store/account';
 import { currentSynthesis } from '@/store/soulMap';
+import { isBackendConfigured } from '@/supabase/client.ts';
+import { upgradeToEmail } from '@/supabase/session.ts';
 
 /**
  * The conversion moment of PDR section 3: the account is asked for *after* the
  * Soul Map, never before. By this point the person has answered seven screens
  * and has something on the table; before it, an account is a toll gate.
  *
- * Nothing here is real and the screen says so at the moment of the choice
- * rather than in a policy nobody opens. There is no password field, because a
- * password would be theatre — a static page has nothing to check it against.
+ * What the screen says about itself has to keep matching what it does, at the
+ * moment of the choice rather than in a policy nobody opens. It used to say no
+ * account is created on any server, which was true of the static demo and
+ * stopped being true the moment there was a backend; the note under the field
+ * now branches on whether one is configured, so both builds tell the truth.
+ *
+ * Still no password field, and now for a better reason than the old one: the
+ * address is attached to an `auth.users` row that has existed since the first
+ * page load, and confirming it is a link in an email. There is nothing for a
+ * password to protect that the anonymous session was not already holding.
  */
 
 const fieldClass =
@@ -21,6 +30,8 @@ export function Signup() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
 
   if (isSignedIn()) {
     return (
@@ -52,17 +63,64 @@ export function Signup() {
   }
 
   const submit = () => {
+    let created = false;
     try {
       signUp({ email });
-      navigate('/inicio');
+      created = true;
     } catch (e) {
       setError(
         e instanceof SignupError
           ? 'Revisá la dirección: parece que le falta algo.'
           : 'No pudimos guardar la cuenta en este navegador.',
       );
+      return;
     }
+
+    if (!created || !isBackendConfigured) {
+      navigate('/inicio');
+      return;
+    }
+
+    // The local record is written first and the identity is attached second.
+    // If the order were reversed and the local write then failed, the account
+    // would exist with nothing on it — the same reasoning `store/account.ts`
+    // gives for writing the client before claiming the session.
+    //
+    // The address goes onto the anonymous auth.users row that has existed
+    // since the first page load, so nothing here moves data. That is the whole
+    // reason this product asks for an account after the Soul Map rather than
+    // before it: by now there is something to attach, and attaching it costs
+    // the person nothing.
+    setSending(true);
+    upgradeToEmail(email)
+      .then(() => setSent(true))
+      .catch(() => {
+        // The answers are saved either way. Only the confirmation failed, and
+        // saying "no pudimos crear tu cuenta" here would be false.
+        setError('Guardamos todo, pero no pudimos enviarte el correo de confirmación.');
+      })
+      .finally(() => setSending(false));
   };
+
+  if (sent) {
+    return (
+      <Screen backdrop="surf" scrim="heavy" opacity={0.5}>
+        <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
+          <p className="text-sm leading-relaxed text-crema/65">
+            Te mandamos un correo a <span className="text-blanco">{email}</span>. Abrilo para
+            confirmar la dirección.
+          </p>
+          <p className="text-[11px] leading-relaxed text-crema/55">
+            Tu mapa ya está guardado. Confirmar sirve para que puedas volver desde otro
+            dispositivo.
+          </p>
+          <Link to="/inicio" className="cta no-underline">
+            Ir a mi espacio
+          </Link>
+        </div>
+      </Screen>
+    );
+  }
 
   return (
     <Screen backdrop="surf" scrim="heavy" opacity={0.5}>
@@ -110,14 +168,19 @@ export function Signup() {
         )}
 
         <p id="email-note" className="mt-2.5 text-[11px] leading-relaxed text-crema/55">
-          En esta demo no se envía ningún correo ni se crea ninguna cuenta en ningún servidor.
-          La dirección queda escrita en este navegador y nada más. Podés borrar todo en un
-          clic desde Mi cuenta.
+          {isBackendConfigured
+            ? 'Te vamos a mandar un correo con un link para confirmar la dirección. No hay contraseña. Podés borrar todo en un clic desde Mi cuenta.'
+            : 'En esta demo no se envía ningún correo ni se crea ninguna cuenta en ningún servidor. La dirección queda escrita en este navegador y nada más. Podés borrar todo en un clic desde Mi cuenta.'}
         </p>
 
         <div className="mt-auto flex flex-col gap-2.5 pt-8">
-          <button type="button" className="cta" onClick={submit} disabled={email.trim() === ''}>
-            Crear mi cuenta
+          <button
+            type="button"
+            className="cta"
+            onClick={submit}
+            disabled={email.trim() === '' || sending}
+          >
+            {sending ? 'Guardando…' : 'Crear mi cuenta'}
           </button>
 
           <Link

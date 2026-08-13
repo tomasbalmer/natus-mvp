@@ -8,35 +8,13 @@ import {
 } from './crisis';
 import { clearAll } from './db';
 import type { CrisisDetection } from '@/lib/safety';
+import { installMemoryStorage } from './memory-storage.testing.ts';
 
 /**
  * A Map-backed `localStorage` so these run in the fast node environment
  * rather than pulling in a DOM. The store only uses get/set/remove/key/length,
  * which is exactly what a Map gives.
  */
-class MemoryStorage implements Storage {
-  private map = new Map<string, string>();
-  get length() {
-    return this.map.size;
-  }
-  clear() {
-    this.map.clear();
-  }
-  getItem(k: string) {
-    return this.map.get(k) ?? null;
-  }
-  key(i: number) {
-    return [...this.map.keys()][i] ?? null;
-  }
-  removeItem(k: string) {
-    this.map.delete(k);
-  }
-  setItem(k: string, v: string) {
-    this.map.set(k, v);
-  }
-  [name: string]: unknown;
-}
-
 const HIGH: CrisisDetection = {
   severity: 'high',
   category: 'ideacion',
@@ -56,10 +34,7 @@ const LOW: CrisisDetection = {
 const SIX_HOURS = 6 * 60 * 60 * 1000;
 
 beforeEach(() => {
-  Object.defineProperty(globalThis, 'localStorage', {
-    value: new MemoryStorage(),
-    configurable: true,
-  });
+  installMemoryStorage();
   clearAll();
 });
 

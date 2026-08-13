@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { PhoneFrame } from '@/components/PhoneFrame';
 import { DemoBanner } from '@/components/DemoBanner';
+import { SaveFailureNotice } from '@/components/SaveFailureNotice';
 import { BottomNav } from '@/components/BottomNav';
 import { Landing } from '@/screens/Landing';
 import { SoulMap } from '@/screens/SoulMap';
@@ -89,8 +90,9 @@ export function App() {
 
   return (
     <PhoneFrame>
-      <div className="absolute inset-x-0 top-0 z-50 p-2">
+      <div className="absolute inset-x-0 top-0 z-50 flex flex-col gap-1.5 p-2">
         <DemoBanner aiMode={aiMode} />
+        <SaveFailureNotice />
       </div>
       <Routes>
         <Route path="/" element={<Landing onAiModeChange={setAiMode} />} />

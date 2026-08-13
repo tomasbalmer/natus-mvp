@@ -40,6 +40,17 @@ const msOrNull = (value: string | null): number | null => (value ? Date.parse(va
 
 /** Postgres `date` and `time` reject the empty string the draft starts with. */
 const blankToNull = (value: string): string | null => (value.trim() === '' ? null : value);
+
+/**
+ * Round into an `integer` column.
+ *
+ * `latency_ms` comes from `performance.now()` and arrives as 2.600000023841858,
+ * which Postgres refuses for an integer. Sub-millisecond precision on a call
+ * that takes ten to thirty seconds is noise, so the column stays an integer and
+ * the value is rounded here rather than the column being widened to carry a
+ * number nobody will read.
+ */
+const whole = (value: number): number => Math.round(value);
 const nullToBlank = (value: string | null): string => value ?? '';
 
 /**
@@ -345,7 +356,7 @@ const syntheses: Adapter<StoredSynthesis[]> = {
         synthesis: s.synthesis,
         numerology: s.numerology,
         mode: s.mode,
-        latency_ms: s.latency_ms,
+        latency_ms: whole(s.latency_ms),
         created_at: iso(s.created_at),
         is_current: s.is_current,
       })),

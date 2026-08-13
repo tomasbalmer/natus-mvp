@@ -61,7 +61,14 @@ const conversationId = uuid();
 const profileId = uuid();
 const consentId = uuid();
 
-/** Ordered: later fixtures reference ids created by earlier ones. */
+/**
+ * Ordered: later fixtures reference ids created by earlier ones.
+ *
+ * A third element, where present, is what the round trip should return when
+ * that differs from what went in — a column type deliberately narrower than
+ * the value. Stating it beats loosening the comparison, which would stop the
+ * suite noticing the difference at all.
+ */
 const cases = [
   ['preferences', { locale: 'en', voice_volume: 0.5, bed_volume: 0.25 }],
   ['subscription', { status: 'active', activated_at: now }],
@@ -99,7 +106,24 @@ const cases = [
         synthesis: { titulo: 'prueba' },
         numerology: { life_path: 9 },
         mode: 'fixture',
-        latency_ms: 1200,
+        // A float on purpose: performance.now() produces one, an integer
+        // column refuses it, and the first version of this script used a
+        // round number and therefore agreed with the schema instead of with
+        // the application. That is how the defect reached a browser.
+        latency_ms: 2.600000023841858,
+        created_at: now,
+        is_current: true,
+      },
+    ],
+    // latency_ms comes back as an integer. The column is one.
+    [
+      {
+        id: synthesisId,
+        prompt_version: 'v1-reconstructed',
+        synthesis: { titulo: 'prueba' },
+        numerology: { life_path: 9 },
+        mode: 'fixture',
+        latency_ms: 3,
         created_at: now,
         is_current: true,
       },
@@ -215,16 +239,16 @@ const cases = [
   ['client', null],
 ];
 
-for (const [ns, value] of cases) {
+for (const [ns, value, expected = value] of cases) {
   const adapter = ADAPTERS[ns];
   try {
     await adapter.save(client, userId, value);
     const back = await adapter.load(client, userId);
-    const same = stable(back) === stable(value);
+    const same = stable(back) === stable(expected);
     check(
       `${ns} round-trips`,
       same,
-      same ? '' : `\n      wrote ${stable(value)}\n      read  ${stable(back)}`,
+      same ? '' : `\n      expected ${stable(expected)}\n      read     ${stable(back)}`,
     );
   } catch (error) {
     check(`${ns} round-trips`, false, error.message);
