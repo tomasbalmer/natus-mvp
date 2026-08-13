@@ -1,5 +1,5 @@
 import { supabase, type TypedClient } from '@/supabase/client.ts';
-import { ensureSession } from '@/supabase/session.ts';
+import { currentSession } from '@/supabase/session.ts';
 import { markHydrationFailed, seedMirror, setPersister } from './db.ts';
 import { ADAPTERS, type RemoteNamespace } from './remote.ts';
 import { REMOTE_NAMESPACES } from './namespaces.ts';
@@ -38,9 +38,10 @@ export async function hydrate(): Promise<HydrationResult> {
     return { kind: 'local', reason: 'unconfigured' };
   }
 
-  const session = await ensureSession();
+  const session = await currentSession();
   if (!session) {
     markHydrationFailed();
+    // Not an error: the person has not walked through the door yet.
     return { kind: 'local', reason: 'no-session' };
   }
 

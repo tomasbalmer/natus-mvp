@@ -188,11 +188,14 @@ refresh_token_reuse_interval = 10
 enable_signup = true
 # Allow/disallow anonymous sign-ins to your project.
 #
-# The whole auth model rests on this. Every visitor gets a real auth.users row
-# on their first load, which is what gives auth.uid() something to mean and
-# every RLS policy something to key on. The email upgrade later attaches an
-# identity to that same row, so nothing is migrated at signup.
-enable_anonymous_sign_ins = true
+# Off since DECISIONS.md section 13 put a door in front of the product. With a
+# mandatory sign-in this could never fire, and leaving it enabled would keep a
+# second way in that nothing exercises and nobody reviews.
+#
+# It carried the whole auth model for one day: every visitor got a real
+# auth.users row on their first load, which is what gave auth.uid() something
+# to mean. Google now supplies that, and supplies a name for it.
+enable_anonymous_sign_ins = false
 # Allow/disallow testing manual linking of accounts
 enable_manual_linking = false
 # Passwords shorter than this value will be rejected as weak. Minimum 6, recommended 8 or more.
@@ -350,6 +353,24 @@ url = ""
 skip_nonce_check = false
 # If enabled, it will allow the user to successfully authenticate when the provider does not return an email address.
 email_optional = false
+
+[auth.external.google]
+# The door. See DECISIONS.md section 13.
+#
+# Who may enter is NOT configured here — it is the test-user list on the OAuth
+# consent screen in Google Cloud, which admits up to 100 people while the app
+# is unverified. That is the allow-list, it costs nothing, and it is edited
+# without a deploy. The trade recorded in section 13 is that it therefore
+# lives outside this repository, so the source no longer shows who can get in.
+enabled = true
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+# DO NOT commit your OAuth provider secret to git. Use environment variable substitution instead:
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
+redirect_uri = ""
+url = ""
+# Required for local sign in with Google auth, per the comment on the Apple
+# block above. Google does not return the nonce on the local flow.
+skip_nonce_check = true
 
 # Allow Solana wallet holders to sign in to your project via the Sign in with Solana (SIWS, EIP-4361) standard.
 # You can configure "web3" rate limit in the [auth.rate_limit] section and set up [auth.captcha] if self-hosting.

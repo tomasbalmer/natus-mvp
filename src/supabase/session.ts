@@ -25,66 +25,28 @@ export type AuthState =
 export class AuthError extends Error {}
 
 /**
- * In-flight guard. Without it, two concurrent callers both observe "no
- * session" before either has finished signing in, and both create one.
+ * The session, if there is one. Never creates one.
  *
- * This is not hypothetical: the first browser run of this phase produced two
- * anonymous users eight microseconds apart, because StrictMode invokes the
- * mount effect twice in development. Production would not have shown it, and
- * the consequence only becomes visible in Phase 4 — data keyed to a user_id
- * that a second sign-in has already replaced, written to an identity nobody
- * is holding any more.
- *
- * Deliberately not reset on failure to a value that would let a retry storm
- * through: a failed attempt resolves to null and is cleared, so the next
- * deliberate call may try again, but simultaneous callers still share one
- * attempt.
- */
-let inFlight: Promise<Session | null> | null = null;
-
-/**
- * Ensure a session exists, creating an anonymous one if it does not.
+ * It used to sign in anonymously here, and for one day that was the whole auth
+ * model. `DECISIONS.md` §13 put a door in front of the product, so an identity
+ * now arrives only by walking through it — creating one silently would be a
+ * second way in, past the allow-list.
  *
  * Returns null when the backend is unconfigured or unreachable rather than
  * throwing. A paused free-tier project must degrade the demo to fixtures, not
- * end it — the same reasoning that already governs `store/db.ts`'s swallowed
- * reads. The caller decides what to do with the absence.
+ * end it — the same reasoning that governs `store/db.ts`'s swallowed reads.
  */
-export function ensureSession(): Promise<Session | null> {
-  if (!supabase) return Promise.resolve(null);
-  inFlight ??= acquire().finally(() => {
-    inFlight = null;
-  });
-  return inFlight;
-}
-
-async function acquire(): Promise<Session | null> {
+export async function currentSession(): Promise<Session | null> {
   if (!supabase) return null;
   try {
     const { data } = await supabase.auth.getSession();
-    if (data.session) return data.session;
-
-    const { data: created, error } = await supabase.auth.signInAnonymously();
-    if (error) return null;
-    return created.session;
+    return data.session;
   } catch {
     // Network failure, DNS, a project mid-restore. Not a crash.
     return null;
   }
 }
 
-/**
- * Classify a user. Pure on its argument — no client, no network, no
- * environment — so it is testable without a running stack, which is the whole
- * reason it takes the user rather than fetching one.
- *
- * The email is the discriminator rather than the `is_anonymous` claim.
- * `is_anonymous` stays true on the session that requested an upgrade until the
- * confirmation link is followed, so trusting it would call somebody anonymous
- * after they had given an address, and trusting it the other way would call
- * them identified before they had confirmed one. The email is the observable
- * consequence of an upgrade having actually completed.
- */
 export function describe(user: User | null): AuthState {
   if (!user) return { kind: 'none' };
   return user.email
@@ -119,6 +81,37 @@ export async function upgradeToEmail(email: string): Promise<void> {
   );
 
   if (error) throw new AuthError(error.message);
+}
+
+/**
+ * The door. See `DECISIONS.md` §13.
+ *
+ * Sends the person to Google and back. Who is allowed through is not decided
+ * here and not decided in this repository: it is the test-user list on the
+ * OAuth consent screen, which refuses anyone not on it before the redirect
+ * ever returns. There is nothing to check on this side, and adding a check
+ * here would only be a second, weaker copy of that list.
+ *
+ * `redirectTo` resolves against `BASE_URL`, so it carries the `/natus-mvp/`
+ * prefix and lands on the application root — which returns HTTP 200. A nested
+ * route would resolve too, through the `404.html` fallback, but it returns 404
+ * with the app as its body and makes every future auth failure ambiguous.
+ */
+export async function signInWithGoogle(): Promise<void> {
+  if (!supabase) throw new AuthError('There is no backend configured.');
+
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: new URL(import.meta.env.BASE_URL, window.location.origin).toString(),
+    },
+  });
+
+  if (error) throw new AuthError(error.message);
+}
+
+export async function signOut(): Promise<void> {
+  await supabase?.auth.signOut();
 }
 
 export function onAuthChange(handler: (user: User | null) => void): () => void {

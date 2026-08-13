@@ -324,3 +324,52 @@ Postgres can disagree. The second is the dangerous one: `write` currently
 swallows failures on purpose, to degrade a demo rather than break it, and that
 is the wrong behaviour for a dropped network write — the person believes their
 data was saved. Write failures surface.
+
+---
+
+## 13. A closed pilot gets a door, and the door comes first
+
+**Decision.** When a backend is configured, the application requires a Google
+sign-in before onboarding, and only addresses on an allow-list can complete it.
+Without a backend it asks for nothing, because there is nothing to protect.
+
+**This reverses the placement half of §11's sibling decision** — the one taken
+at the start of this migration, that identity is anonymous first and upgraded
+to an email after the Soul Map. PDR section 3 puts the account after the map
+for a good reason: before it, an account is a toll gate on a product the person
+has not yet seen the value of.
+
+That reason is about strangers. It does not apply to fifty people who were
+invited by name. Nobody in this pilot needs to be convinced to finish
+onboarding by being spared a login — they are here because they were asked.
+
+**What actually forced it.** There was no way to restrict access at all. The
+site is public — GitHub Pages serves files, and access control on Pages is an
+Enterprise feature — and anonymous sign-in meant anyone who opened the link
+became a user with a row in `auth.users`. Row Level Security keeps one person's
+clinical answers away from another's; it says nothing about who is allowed to
+become a person. For a prototype that asks about suicidal ideation, "whoever
+finds the URL" is the wrong answer.
+
+**Rejected: magic link with an allow-list table.** The obvious choice, and it
+has a cost that only appears at the end. Supabase's built-in email service
+refuses to deliver to anyone who is not a member of the project's team, at two
+messages an hour — so reaching fifty people means contracting a mail provider,
+verifying a domain, and adding a third service that can fail on the morning of
+a demo. Google adds an afternoon in a console and then nothing.
+
+**Rejected: a shared invite code.** Simplest of all, and it cannot say who
+accessed what. This product holds mental-health answers; a code that can be
+forwarded is not an access record.
+
+**What it costs.** Test users on an unverified Google app see a warning screen
+and their tokens expire weekly. Both go away with Google's verification
+process, which is paperwork rather than code. And the allow-list lives in
+Google Cloud rather than in this repository, so who can enter is no longer
+visible in the source — a real loss in reviewability, accepted because the
+alternative was a list nobody could enforce.
+
+**If this reverses**, the surfaces are the route gate in `src/App.tsx` and the
+provider block in `supabase/config.toml`. The anonymous path is not deleted: it
+remains the only path when no backend is configured, which is what keeps the
+fixture demo running offline.

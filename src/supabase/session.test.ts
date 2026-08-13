@@ -58,12 +58,7 @@ describe('describe', () => {
   });
 });
 
-describe('ensureSession', () => {
-  // Before, not only after. The static import at the top of this file has
-  // already loaded ./session against the real ./client, so without a reset
-  // here the dynamic import below returns that cached module and the mock
-  // never takes effect — which fails silently as "signInAnonymously was
-  // called 0 times", a message that looks like a bug in the guard.
+describe('currentSession', () => {
   beforeEach(() => {
     vi.resetModules();
   });
@@ -73,61 +68,56 @@ describe('ensureSession', () => {
     vi.resetModules();
   });
 
-  /** A client whose sign-in never resolves until released, so both callers are
-   *  genuinely in flight at the same time rather than merely appearing to be. */
-  function mockClient() {
-    let release: (() => void) | null = null;
-    const pending = new Promise<void>((r) => {
-      release = r;
-    });
-    const signInAnonymously = vi.fn(async () => {
-      await pending;
-      return { data: { session: { user: { id: 'u1' } } }, error: null };
-    });
-    return {
-      client: { auth: { getSession: async () => ({ data: { session: null } }), signInAnonymously } },
-      signInAnonymously,
-      release: () => release?.(),
+  it('never creates a session', async () => {
+    // The regression this replaces a concurrency guard with. That guard
+    // existed because this function used to sign in anonymously, and two
+    // StrictMode invocations created two users eight microseconds apart.
+    // DECISIONS.md section 13 put a door in front of the product, so an
+    // identity must arrive only by walking through it — creating one here
+    // would be a second way in, past the allow-list.
+    const signInAnonymously = vi.fn();
+    const client = {
+      auth: { getSession: async () => ({ data: { session: null } }), signInAnonymously },
     };
-  }
-
-  it('creates exactly one session when called concurrently', async () => {
-    // The regression this exists for: StrictMode invokes the mount effect
-    // twice, both calls saw no session before either resolved, and the first
-    // browser run of this phase produced two anonymous users eight
-    // microseconds apart. In Phase 4 that means rows keyed to an identity the
-    // second sign-in has already replaced.
-    const { client, signInAnonymously, release } = mockClient();
     vi.doMock('./client', () => ({ supabase: client, isBackendConfigured: true }));
 
-    const { ensureSession } = await import('./session');
-    const both = Promise.all([ensureSession(), ensureSession()]);
-    release();
-    const [a, b] = await both;
-
-    expect(signInAnonymously).toHaveBeenCalledTimes(1);
-    expect(a).toBe(b);
+    const { currentSession } = await import('./session');
+    await expect(currentSession()).resolves.toBeNull();
+    expect(signInAnonymously).not.toHaveBeenCalled();
   });
 
-  it('allows a later call to try again once the first has settled', async () => {
-    const { client, signInAnonymously, release } = mockClient();
-    vi.doMock('./client', () => ({ supabase: client, isBackendConfigured: true }));
+  it('returns the session there is', async () => {
+    const session = { user: { id: 'u1' } };
+    vi.doMock('./client', () => ({
+      supabase: { auth: { getSession: async () => ({ data: { session } }) } },
+      isBackendConfigured: true,
+    }));
 
-    const { ensureSession } = await import('./session');
-    release();
-    await ensureSession();
-    await ensureSession();
-
-    // Twice, not once: the guard deduplicates simultaneous callers, it does
-    // not cache the result forever. A session that expires must be
-    // recoverable without a page reload.
-    expect(signInAnonymously).toHaveBeenCalledTimes(2);
+    const { currentSession } = await import('./session');
+    await expect(currentSession()).resolves.toBe(session);
   });
 
   it('resolves to null rather than throwing when there is no backend', async () => {
     vi.doMock('./client', () => ({ supabase: null, isBackendConfigured: false }));
 
-    const { ensureSession } = await import('./session');
-    await expect(ensureSession()).resolves.toBeNull();
+    const { currentSession } = await import('./session');
+    await expect(currentSession()).resolves.toBeNull();
+  });
+
+  it('resolves to null rather than throwing when the call fails', async () => {
+    // A paused project. The demo degrades to fixtures; it does not end.
+    vi.doMock('./client', () => ({
+      supabase: {
+        auth: {
+          getSession: async () => {
+            throw new Error('network');
+          },
+        },
+      },
+      isBackendConfigured: true,
+    }));
+
+    const { currentSession } = await import('./session');
+    await expect(currentSession()).resolves.toBeNull();
   });
 });

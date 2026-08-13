@@ -22,6 +22,8 @@ import { Result } from '@/screens/comparison/Result';
 import { getAiMode, type AiMode } from '@/ai/mode';
 import { activeHighSeverityEvent } from '@/store/crisis';
 import { hydrate } from '@/store/hydrate.ts';
+import { isBackendConfigured } from '@/supabase/client.ts';
+import { Gate } from '@/screens/Gate';
 
 /**
  * Where the navigation belongs. Onboarding, the landing and the signup are
@@ -64,10 +66,13 @@ export function App() {
   // It resolves either way: a paused project or a missing configuration lands
   // on localStorage rather than on an error.
   const [ready, setReady] = useState(false);
+  const [admitted, setAdmitted] = useState(false);
   useEffect(() => {
     let live = true;
-    void hydrate().then(() => {
-      if (live) setReady(true);
+    void hydrate().then((result) => {
+      if (!live) return;
+      setAdmitted(result.kind === 'remote');
+      setReady(true);
     });
     return () => {
       live = false;
@@ -84,6 +89,21 @@ export function App() {
         >
           <p className="text-[12.5px] leading-relaxed text-crema/55">Abriendo tu espacio…</p>
         </div>
+      </PhoneFrame>
+    );
+  }
+
+  // The door. DECISIONS.md section 13.
+  //
+  // Only when a backend is configured: without one there is nothing to protect
+  // and nothing to sign in to, so the fixture demo runs untouched and offline.
+  // `admitted` comes from hydration having found a session, which it now never
+  // creates — an identity arrives only by walking through Google, and Google
+  // refuses anyone off the consent screen's list before the redirect returns.
+  if (isBackendConfigured && !admitted) {
+    return (
+      <PhoneFrame>
+        <Gate />
       </PhoneFrame>
     );
   }
