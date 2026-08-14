@@ -782,12 +782,26 @@ bringing `src/ai/prompts` across.
 
 ### Phase 6: Deployment, configuration and documentation
 
-- [ ] Step 6.1: CI
-  - MODIFY `.github/workflows/deploy.yml` — add `VITE_SUPABASE_URL` and
-    `VITE_SUPABASE_ANON_KEY` from repository **variables**, alongside the
-    existing `VITE_BASE`.
+- [x] Step 6.1: CI
+  - MODIFY `.github/workflows/deploy.yml` — `VITE_SUPABASE_URL`,
+    `VITE_SUPABASE_ANON_KEY` and `VITE_REQUIRE_INVITE` from repository
+    **variables**, alongside the existing `VITE_BASE`. All three are set.
   - _Variables, not secrets. They ship in the bundle. Filing a public value as
     a secret misleads whoever reads the workflow next._
+  - _Ticked late: this was done in 63fa617 while getting the preview onto a
+    phone, out of plan order, and the checkbox was not carried back._
+- [x] [UNPLANNED] Step 6.1b: The schema reaches production
+  - Seven migrations applied to `sa-east-1`; seeds confirmed live.
+  - _Also out of order. The plan had this behind the functions so that the
+    first thing to touch production would be a schema the whole plan had been
+    verified against. Two people wanting to try the tool moved it forward, and
+    the schema was in fact fully verified by then — the ordering held even
+    though the sequence did not._
+- [x] [UNPLANNED] Step 6.1c: Home-screen icons
+  - ADD `public/manifest.webmanifest`, four PNGs, `scripts/generate-icons.py`.
+  - _Rationale: added to a phone, the app wore Chrome's icon. Not in the plan
+    because the plan never imagined anyone installing it. No service worker,
+    so this is a name and a face, not an offline app._
 - [ ] Step 6.2: Function deployment
   - MODIFY `.github/workflows/deploy.yml` or ADD a second workflow — deploy Edge
     Functions on push. Anthropic key from secrets, which genuinely are secret.
