@@ -1,6 +1,8 @@
 import type { ZodType } from 'zod';
-import { getAiMode } from './mode';
+import { getAiMode, type AiRunMode } from './mode';
 import { lintDeep } from '@/lib/copy-lint';
+import { MalformedJson, parseJsonLoosely } from '@/lib/model-json';
+import { isBackendConfigured, supabase } from '@/supabase/client';
 
 /**
  * One interface, two implementations, one validation path.
@@ -19,11 +21,21 @@ export type AiCall<T> = {
   schema: ZodType<T>;
   /** Returned when no key is present. Chosen deterministically from input. */
   fixture: () => T;
+  /**
+   * The server-side path, for the surfaces that have an Edge Function.
+   *
+   * Absent means this purpose has no server implementation yet, which is the
+   * state four of the five are still in. The function builds its own prompt
+   * from `body` rather than receiving `system` and `user`: the prompt is the
+   * thing that must not be caller-supplied, or the quota buys whatever text
+   * somebody feels like sending.
+   */
+  edge?: { fn: string; body: Record<string, unknown> };
 };
 
 export type AiResult<T> = {
   value: T;
-  mode: 'fixture' | 'byok';
+  mode: AiRunMode;
   latencyMs: number;
   inputTokens: number | null;
   outputTokens: number | null;
@@ -38,7 +50,12 @@ export class AiError extends Error {
   }
 }
 
-const MODEL = 'claude-sonnet-4-6';
+/**
+ * Kept identical to the model the Edge Functions call, in
+ * `supabase/functions/_shared/anthropic.ts`. A person on their own key and a
+ * person on the server should be reading the same product.
+ */
+const MODEL = 'claude-opus-5';
 const TIMEOUT_MS = 45_000;
 
 /**
@@ -50,7 +67,7 @@ export async function runAi<T>(call: AiCall<T>): Promise<AiResult<T>> {
   const { mode, apiKey } = getAiMode();
   const started = performance.now();
 
-  if (mode === 'fixture' || !apiKey) {
+  const fixture = (): AiResult<T> => {
     const value = call.schema.parse(call.fixture());
     assertCleanCopy(value);
     // A token of latency so the generating screen is not a flash. The real
@@ -63,7 +80,90 @@ export async function runAi<T>(call: AiCall<T>): Promise<AiResult<T>> {
       inputTokens: null,
       outputTokens: null,
     };
+  };
+
+  // Three paths, in this order, and the order is a decision.
+  //
+  // A pasted key wins. Someone who went to Ajustes and typed their own
+  // credential asked for their own credential to be spent; quietly routing
+  // them through our server instead would make that switch a lie.
+  //
+  // The server comes next, and it is what the deployed product runs on. It
+  // holds the key, counts the quota where the person cannot reach it, and
+  // writes the ledger — none of which the browser can be trusted to do.
+  //
+  // Fixtures are last and are not a failure state. They are the offline demo,
+  // and they are what a server that says `no_model` is asking for.
+  if (mode !== 'fixture' && apiKey) return await byok(call, apiKey, started);
+
+  if (call.edge && isBackendConfigured && supabase) {
+    const result = await runOnEdge(call, started);
+    if (result) return result;
   }
+
+  return fixture();
+}
+
+/**
+ * The server path.
+ *
+ * Returns `null` — meaning "use the fixture" — only for the one refusal the
+ * server declares rather than suffers: `no_model`, which says the deployment
+ * has no key configured and the curated path is the right answer. Every other
+ * failure throws, because a fixture substituted for a broken server is a
+ * screen that looks like it worked.
+ */
+async function runOnEdge<T>(call: AiCall<T>, started: number): Promise<AiResult<T> | null> {
+  const edge = call.edge;
+  if (!edge || !supabase) return null;
+
+  // No session, no server path. The function derives the person from the JWT
+  // and refuses without one, and a 401 here is not a fault to surface — it is
+  // somebody using the demo without signing in, which is a supported way to
+  // run this application and has always landed on the fixtures.
+  const { data: session } = await supabase.auth.getSession();
+  if (!session.session) return null;
+
+  const { data, error } = await supabase.functions.invoke<Record<string, unknown>>(edge.fn, {
+    body: edge.body,
+  });
+
+  if (error) {
+    // `FunctionsHttpError` carries the response; anything else is transport.
+    const status = (error as { context?: { status?: number } }).context?.status;
+    if (status === 503) return null;
+    throw new AiError(`The ${edge.fn} function returned ${status ?? 'no status'}.`, 'api_error');
+  }
+
+  if (data && typeof data === 'object' && 'error' in data) {
+    if (data.error === 'no_model') return null;
+    throw new AiError(`The ${edge.fn} function refused: ${String(data.error)}.`, 'api_error');
+  }
+
+  // The server runs the same Layer 1 the caller already ran. If it fires here
+  // the two disagreed about the same text, which is a fault worth surfacing
+  // rather than papering over — the screen has its own containment path and
+  // reaches it by way of this throw.
+  if (data && typeof data === 'object' && data['type'] === 'crisis') {
+    throw new AiError(`The ${edge.fn} function saw a crisis the caller did not.`, 'api_error');
+  }
+
+  const parsed = call.schema.parse(data?.['result']);
+  assertCleanCopy(parsed);
+  return {
+    value: parsed,
+    mode: 'server',
+    latencyMs: performance.now() - started,
+    inputTokens: numberOrNull(data?.['input_tokens']),
+    outputTokens: numberOrNull(data?.['output_tokens']),
+  };
+}
+
+function numberOrNull(value: unknown): number | null {
+  return typeof value === 'number' ? value : null;
+}
+
+async function byok<T>(call: AiCall<T>, apiKey: string, started: number): Promise<AiResult<T>> {
 
   let lastError: unknown;
   for (let attempt = 0; attempt < 2; attempt++) {
@@ -142,7 +242,7 @@ async function callAnthropic<T>(
 
     const text = body.content?.find((c) => c.type === 'text')?.text ?? '';
     return {
-      json: parseJsonLoosely(text),
+      json: readModelJson(text),
       inputTokens: body.usage?.input_tokens ?? null,
       outputTokens: body.usage?.output_tokens ?? null,
     };
@@ -156,28 +256,12 @@ async function callAnthropic<T>(
   }
 }
 
-/**
- * Models wrap JSON in prose or a code fence often enough that refusing to
- * cope is a worse contract than tolerating it. The schema still decides
- * whether the result is usable.
- */
-export function parseJsonLoosely(text: string): unknown {
-  const trimmed = text.trim();
-  const fenced = /```(?:json)?\s*([\s\S]*?)```/.exec(trimmed);
-  const candidate = fenced?.[1]?.trim() ?? trimmed;
-
+/** `@/lib/model-json` holds the parser so the server shares it verbatim. */
+function readModelJson(text: string): unknown {
   try {
-    return JSON.parse(candidate);
-  } catch {
-    const start = candidate.indexOf('{');
-    const end = candidate.lastIndexOf('}');
-    if (start === -1 || end <= start) {
-      throw new AiError('The model did not return JSON', 'invalid_json');
-    }
-    try {
-      return JSON.parse(candidate.slice(start, end + 1));
-    } catch {
-      throw new AiError('The model returned malformed JSON', 'invalid_json');
-    }
+    return parseJsonLoosely(text);
+  } catch (error) {
+    if (error instanceof MalformedJson) throw new AiError(error.message, 'invalid_json');
+    throw error;
   }
 }

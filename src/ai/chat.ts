@@ -20,6 +20,8 @@ export type ChatAsk = {
   risk: 'none' | 'elevated' | 'high';
   recommendedSlugs: readonly string[];
   history: readonly ChatTurn[];
+  /** Chooses the crisis resource list if the server's Layer 1 fires. */
+  country: string;
 };
 
 export async function askChat(input: ChatAsk): Promise<AiResult<ChatResponse>> {
@@ -31,6 +33,21 @@ export async function askChat(input: ChatAsk): Promise<AiResult<ChatResponse>> {
     system: CHAT_SYSTEM_PROMPT,
     user: buildChatUserMessage({ ...input, history }),
     schema: chatResponseSchema,
+    // The server builds the prompt from its own copy of `prompts/chat.ts`,
+    // so what crosses is the context and not the text. `risk` is a derived
+    // level; PDR 10.2 keeps the answers it came from out of both payloads.
+    edge: {
+      fn: 'chat',
+      body: {
+        message: input.question,
+        country: input.country,
+        synthesis: input.synthesis,
+        numerology: input.numerology,
+        risk: input.risk,
+        recommendedSlugs: [...input.recommendedSlugs],
+        history: [...history],
+      },
+    },
     fixture: () =>
       buildChatFixture({
         question: input.question,

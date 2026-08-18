@@ -25,6 +25,16 @@ const COPY = 'supabase/functions/_shared/lib';
 const DATA_SRC = 'data';
 const DATA_COPY = 'supabase/functions/_shared/data';
 
+/**
+ * Prompts cross too, and for the same reason the library does: an Edge
+ * Function that answers with a prompt one revision behind the browser's is
+ * two products wearing one name. Only the portable ones are copied — see the
+ * list in `sync:shared` — so this asserts the copy matches rather than that
+ * every prompt travels.
+ */
+const PROMPT_SRC = 'src/ai/prompts';
+const PROMPT_COPY = 'supabase/functions/_shared/prompts';
+
 /** Relative paths of every file under `dir`, sorted, excluding tests. */
 function sources(dir: string, filter: (f: string) => boolean): string[] {
   const out: string[] = [];
@@ -76,6 +86,45 @@ describe('the seeds travel with the code that reads them', () => {
     expect(readFileSync(join(DATA_COPY, file), 'utf8')).toBe(
       readFileSync(join(DATA_SRC, file), 'utf8'),
     );
+  });
+});
+
+describe('the prompts that cross are a faithful copy', () => {
+  const copied = sources(PROMPT_COPY, isPortableSource);
+
+  it('has something to compare', () => {
+    expect(copied.length).toBeGreaterThan(1);
+  });
+
+  it.each(copied)('%s is byte-identical', (file) => {
+    expect(readFileSync(join(PROMPT_COPY, file), 'utf8')).toBe(
+      readFileSync(join(PROMPT_SRC, file), 'utf8'),
+    );
+  });
+
+  it.each(copied)('%s reaches for nothing the server lacks', (file) => {
+    const source = readFileSync(join(PROMPT_SRC, file), 'utf8');
+    const specifiers = [...source.matchAll(/from '([^']+)'/g)].map((m) => m[1]!);
+
+    for (const specifier of specifiers) {
+      // Looser than the rule for src/lib, and deliberately so: `@/lib/` is
+      // mapped in `supabase/functions/deno.json` and resolves to the copy.
+      // Nothing else is — a prompt that reaches into `@/store` or `@/audio`
+      // is one that cannot travel, and the failure would otherwise appear at
+      // runtime on the server rather than here.
+      expect(
+        specifier.startsWith('./') || specifier.startsWith('@/lib/'),
+        `${specifier} is not resolvable from _shared/prompts`,
+      ).toBe(true);
+
+      // Learned the hard way: the Edge runtime refused to boot on `./shared`,
+      // and `deno.json` declaring `sloppy-imports` did not save it. Nothing in
+      // the type checker or the test suite saw it — only serving the function
+      // did. So the extension is required here rather than hoped for, and
+      // `@/lib/schemas` must name `index.ts` rather than lean on directory
+      // resolution that the runtime does not perform.
+      expect(specifier, `${specifier} needs an explicit extension`).toMatch(/\.ts$/);
+    }
   });
 });
 

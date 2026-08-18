@@ -10,6 +10,13 @@
  *
  *   supabase start && supabase functions serve
  *   node scripts/verify-chat-function.mjs
+ *
+ * Without a key the script covers everything up to the model gate and says so.
+ * To cover the model itself — the contract, the lint and the ledger, against
+ * the real API, for a few cents — serve with one:
+ *
+ *   echo 'ANTHROPIC_API_KEY=sk-ant-...' > supabase/.env.local
+ *   supabase functions serve --env-file supabase/.env.local
  */
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'node:fs';
@@ -62,18 +69,89 @@ check('a forged token is refused', badToken.status === 401, `status=${badToken.s
 const authed = { Authorization: `Bearer ${token}` };
 
 // ── an ordinary turn ────────────────────────────────────────────────────────
-const ordinary = await call({ message: 'ultimamente me cuesta dormir' }, authed);
+//
+// Sent with a complete context, because the function parses that only after
+// the model gate: an incomplete body would be answered by the gate and the
+// keyed branch below would never be reached.
+const SYNTHESIS = {
+  detected_phase: 'exploracion',
+  detected_mode: 'exploracion',
+  soul_map_synthesis: {
+    tu_camino: 'Venís de un tiempo de mucho movimiento.',
+    lo_que_estas_trabajando: 'Sostener algo sin necesitar que se resuelva ya.',
+    que_necesitas_ahora: 'Un lugar donde bajar la velocidad.',
+  },
+  tips: [
+    { title: 'Una pausa', body: 'Cortar el día por la mitad.', invitation: '¿Probás mañana?', cadence: 'daily' },
+    { title: 'Escribir', body: 'Tres líneas, sin releer.', invitation: '¿Qué aparece?', cadence: 'weekly' },
+    { title: 'Caminar', body: 'Veinte minutos sin destino.', invitation: '¿Cuándo te queda cómodo?', cadence: 'weekly' },
+  ],
+  follow_up_invitation: '¿Querés mirar alguna de estas de cerca?',
+  inferred_topics: ['ansiedad', 'transicion'],
+};
+
+const turn = {
+  message: 'ultimamente me cuesta dormir',
+  country: 'CL',
+  synthesis: SYNTHESIS,
+  numerology: null,
+  risk: 'none',
+  recommendedSlugs: ['terapia-cognitivo-conductual'],
+  history: [],
+};
+
+const ordinary = await call(turn, authed);
 const ordinaryBody = await ordinary.json();
-check(
-  'an ordinary turn reaches the model gate',
-  ordinary.status === 503 && ordinaryBody.error === 'no_model',
-  `status=${ordinary.status} error=${ordinaryBody.error}`,
-);
-check(
-  'and reports the remaining allowance',
-  ordinaryBody.remaining === 3,
-  `remaining=${ordinaryBody.remaining}`,
-);
+
+if (ordinary.status === 503) {
+  // No key configured. This is a declared state, not a failure: `runAi` reads
+  // exactly this and falls back to the curated fixtures.
+  check(
+    'an ordinary turn reaches the model gate',
+    ordinaryBody.error === 'no_model',
+    `status=${ordinary.status} error=${ordinaryBody.error}`,
+  );
+  check(
+    'and reports the remaining allowance',
+    ordinaryBody.remaining === 3,
+    `remaining=${ordinaryBody.remaining}`,
+  );
+  console.log('note  the model path is UNVERIFIED — serve with ANTHROPIC_API_KEY to cover it');
+} else {
+  // The last mile: the contract, the copy lint and the ledger, against the
+  // real API. Costs a few cents per run, which is why it is opt-in.
+  check('an ordinary turn answers', ordinary.status === 200, `status=${ordinary.status}`);
+  check(
+    'in one of the four shapes',
+    ['reflection', 'recommendation', 'clarifying_question', 'crisis'].includes(
+      ordinaryBody.result?.type,
+    ),
+    `type=${ordinaryBody.result?.type}`,
+  );
+  check(
+    'with something to read',
+    typeof ordinaryBody.result?.message_text === 'string' &&
+      ordinaryBody.result.message_text.length > 0,
+    `${ordinaryBody.result?.message_text?.slice(0, 60)}…`,
+  );
+  check(
+    'naming only modalities that were offered',
+    (ordinaryBody.result?.linked_modality_slugs ?? []).every((slug) =>
+      turn.recommendedSlugs.includes(slug),
+    ),
+    (ordinaryBody.result?.linked_modality_slugs ?? []).join(','),
+  );
+  check(
+    'and reports the remaining allowance',
+    ordinaryBody.remaining === 2,
+    `remaining=${ordinaryBody.remaining}`,
+  );
+  check(
+    'and bills what it spent',
+    Number.isInteger(ordinaryBody.input_tokens) && Number.isInteger(ordinaryBody.output_tokens),
+    `in=${ordinaryBody.input_tokens} out=${ordinaryBody.output_tokens}`,
+  );
+}
 
 // ── safety, before anything can answer ──────────────────────────────────────
 const crisis = await call({ message: 'hace semanas que me quiero morir', country: 'CL' }, authed);
@@ -154,6 +232,14 @@ check(
     outcomes.filter((o) => o === 'refused_quota').length === 1,
   outcomes.join(','),
 );
+
+if (ordinary.status === 200) {
+  check(
+    'and so is the turn that succeeded',
+    outcomes.filter((o) => o === 'ok').length === 1,
+    outcomes.join(','),
+  );
+}
 
 const failed = results.filter((r) => !r.pass);
 console.log(`\n${results.length - failed.length}/${results.length} passed`);

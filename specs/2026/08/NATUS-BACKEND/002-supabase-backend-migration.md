@@ -778,6 +778,67 @@ actually enforced" found it.
 Still to do in this phase: the model call, the four remaining functions, and
 bringing `src/ai/prompts` across.
 
+**Verification — the chat model call, 2026-08-18.**
+
+Two of the three are now done: the model call is wired for `chat`, and the
+prompts cross. The four remaining functions are not built.
+
+- ADD `supabase/functions/_shared/anthropic.ts` — the call, the retry-once of
+  PDR 6.5 step 6, the zod parse and the copy lint, on `claude-opus-5`.
+- ADD `supabase/functions/_shared/chat-request.ts` — the request contract.
+- ADD `src/lib/model-json.ts` — the tolerant JSON reader, moved out of
+  `src/ai/client.ts` so both sides share one parser rather than two that
+  eventually tolerate different things.
+- MODIFY `sync:shared`, `deno.json` and `shared-parity.test.ts` — the two
+  portable prompts cross under the same guarantee `src/lib` crosses under.
+- MODIFY `src/ai/client.ts` — a third implementation, `server`, between BYOK
+  and the fixtures. `docs/DECISIONS.md` §14 records the order and why.
+
+- `pnpm verify:chat` — 13/13 against the local Edge runtime, and the script
+  now covers the model call itself when a key is configured.
+- Walked it in a browser against the local stack: onboarding through to a chat
+  turn, the function answering `no_model`, and the curated fixture rendering
+  in its place. Console clean apart from the two expected 503s.
+- `pnpm typecheck` clean, `pnpm test` 680 across 28 files (+27),
+  `pnpm build` succeeds.
+
+- [FINDING] **The Edge runtime would not boot on `from './shared'`.** Deno's
+  `sloppy-imports`, which `deno.json` declares and which the copied `src/lib`
+  relies on for `@/lib/schemas`, did not cover it. Neither the type checker
+  nor the test suite saw it — the module graph is only real when something
+  serves it. Every prompt import now carries its extension and the parity test
+  asserts it, because the next person will write it the Vite way by reflex.
+- [FINDING] **Validating the whole body up front broke the safety ordering.**
+  The first version parsed message, context and history together, so a person
+  in crisis whose synthesis was stale or half-built got `400 invalid_body`
+  instead of a hotline — the same failure Step 5.3 exists to prevent, arriving
+  through a door nobody had thought to guard. The body is split now: the
+  envelope is what safety needs, the context is parsed after the quota. The
+  verify script caught it on the first run.
+- [FINDING] **`runAi` would have surfaced a 401 where it used to answer.** A
+  visitor without a session on a configured deployment reaches the function,
+  which refuses without a JWT. That is a supported way to run the demo, not a
+  fault, so the server path is now guarded by a session check and lands on the
+  fixtures instead.
+
+- [DEVIATION] `runAi` holds **three** implementations rather than the two the
+  phase describes, and Step 5.7 is deliberately not done. Deleting BYOK now
+  would leave the Soul Map, matching, meditations and comparison with no way
+  to show real generation at all, since none of them has a function yet. The
+  three-path shape is the intermediate state; 5.7 collapses it back to two and
+  belongs after the four remaining functions, which is where the phase already
+  lists it.
+- [DEVIATION] Only `chat.ts` and `shared.ts` crossed. `soul-map.ts` reaches
+  into `@/store/session` for a type and `meditation.ts` into `@/audio/ssml`
+  for four constants; both need untangling before they travel, and doing it
+  now would have been work for functions that do not exist yet.
+
+**Unverified, and named so it is not mistaken for done:** the model call
+itself. No Anthropic key was available, so the gate was exercised only in its
+`no_model` form. `scripts/verify-chat-function.mjs` covers the real call,
+prints `note the model path is UNVERIFIED` when it cannot, and is what should
+run first against the deployed project.
+
 ---
 
 ### Phase 6: Deployment, configuration and documentation

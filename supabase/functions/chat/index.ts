@@ -4,6 +4,14 @@ import { currentQuota } from '../_shared/quota.ts';
 import { logCall } from '../_shared/log.ts';
 import { scanText } from '../_shared/lib/safety.ts';
 import { resourcesForCountry } from '../_shared/lib/crisis-resources.ts';
+import { chatContextSchema, chatEnvelopeSchema } from '../_shared/chat-request.ts';
+import { MODEL, ModelError, generate, hasKey } from '../_shared/anthropic.ts';
+import { chatResponseSchema } from '../_shared/lib/schemas/index.ts';
+import {
+  CHAT_PROMPT_VERSION,
+  CHAT_SYSTEM_PROMPT,
+  buildChatUserMessage,
+} from '../_shared/prompts/chat.ts';
 
 /**
  * The chat turn, server-side.
@@ -15,7 +23,7 @@ import { resourcesForCountry } from '../_shared/lib/crisis-resources.ts';
  *                              the token, never read from the body
  *   3. Layer 1 safety        — deterministic, before anything else can answer
  *   4. Quota                 — after safety, never before
- *   5. Model                 — not yet wired; see the note at step 5
+ *   5. Model                 — the key lives here and nowhere else
  *
  * **Safety precedes the quota and that ordering is load-bearing.** PDR 1.6
  * forbids meeting someone in crisis with a commercial fallback. If the quota
@@ -28,8 +36,12 @@ import { resourcesForCountry } from '../_shared/lib/crisis-resources.ts';
  * client: `refused_crisis` is logged and the quota is never consulted.
  */
 
-const MODEL = 'claude-sonnet-4-6';
-const PROMPT_VERSION = 'chat-v1-reconstructed';
+/**
+ * Read from the prompt rather than restated. A version that has to be kept in
+ * step by hand is a version that eventually labels the ledger with the wrong
+ * prompt, and the ledger is what says which prompt produced which cost.
+ */
+const PROMPT_VERSION = CHAT_PROMPT_VERSION;
 
 Deno.serve(async (request) => {
   const cors = preflight(request);
@@ -48,16 +60,19 @@ Deno.serve(async (request) => {
   const { userId, elevated } = auth;
   const started = Date.now();
 
-  let body: { message?: unknown; country?: unknown };
+  let body: unknown;
   try {
     body = await request.json();
   } catch {
     return json(request, { error: 'invalid_body' }, 400);
   }
 
-  const message = typeof body.message === 'string' ? body.message : '';
-  const country = typeof body.country === 'string' ? body.country : 'CL';
-  if (message.trim() === '') return json(request, { error: 'empty_message' }, 400);
+  // Only what safety needs. The model context is parsed at step 5, so that a
+  // malformed one cannot come between a person and a hotline.
+  const envelope = chatEnvelopeSchema.safeParse(body);
+  if (!envelope.success) return json(request, { error: 'invalid_body' }, 400);
+
+  const { message, country } = envelope.data;
 
   // ── 3. Safety, deterministically, in front ────────────────────────────────
   const verdict = scanText(message);
@@ -101,15 +116,12 @@ Deno.serve(async (request) => {
 
   // ── 5. The model ──────────────────────────────────────────────────────────
   //
-  // Not wired. The Anthropic key is not configured in any environment yet, and
-  // the prompts still live in `src/ai/prompts`, which does not cross into
-  // `_shared` — bringing them over is part of finishing this phase.
-  //
-  // Answering with a made-up reply would be worse than answering with nothing:
-  // the client already holds curated fixtures and a `runAi` that falls back to
-  // them, so `no_model` routes the turn down the path that has always worked
-  // rather than inventing a second, lower-quality one here.
-  if (!Deno.env.get('ANTHROPIC_API_KEY')) {
+  // `no_model` is a declared state, not a failure. A deployment without a key
+  // is the fixture demo, which runs every screen offline and has always
+  // worked; `runAi` reads this exact code and falls back to the curated path.
+  // Answering with something invented here would be worse than answering with
+  // nothing, because the person could not tell the difference.
+  if (!hasKey()) {
     return json(
       request,
       { error: 'no_model', remaining: quota.remaining, unlimited: quota.unlimited },
@@ -117,5 +129,63 @@ Deno.serve(async (request) => {
     );
   }
 
-  return json(request, { error: 'not_implemented' }, 501);
+  const context = chatContextSchema.safeParse(body);
+  if (!context.success) return json(request, { error: 'invalid_context' }, 400);
+
+  // The prompt is built here, from the contract in `_shared/prompts`, and
+  // never accepted from the caller. A function that takes a system prompt in
+  // its body is a general-purpose model endpoint with somebody else's key in
+  // it, whatever the rest of the file says it is.
+  try {
+    const generated = await generate({
+      system: CHAT_SYSTEM_PROMPT,
+      user: buildChatUserMessage({
+        question: message,
+        synthesis: context.data.synthesis,
+        numerology: context.data.numerology,
+        risk: context.data.risk,
+        recommendedSlugs: context.data.recommendedSlugs,
+        history: context.data.history,
+      }),
+      schema: chatResponseSchema,
+    });
+
+    await logCall(elevated, {
+      userId,
+      purpose: 'chat',
+      promptVersion: PROMPT_VERSION,
+      model: MODEL,
+      mode: 'server',
+      outcome: 'ok',
+      inputTokens: generated.inputTokens,
+      outputTokens: generated.outputTokens,
+      latencyMs: Date.now() - started,
+    });
+
+    return json(request, {
+      result: generated.value,
+      input_tokens: generated.inputTokens,
+      output_tokens: generated.outputTokens,
+      remaining: quota.remaining - 1,
+      unlimited: quota.unlimited,
+    });
+  } catch (error) {
+    const kind = error instanceof ModelError ? error.kind : 'api_error';
+
+    await logCall(elevated, {
+      userId,
+      purpose: 'chat',
+      promptVersion: PROMPT_VERSION,
+      model: MODEL,
+      mode: 'server',
+      outcome: kind,
+      latencyMs: Date.now() - started,
+      errorKind: kind,
+    });
+
+    // The turn is not charged and the detail does not travel: an upstream
+    // error message can carry the request back to the caller, and the request
+    // is what this whole file exists to keep from leaking.
+    return json(request, { error: 'model_failed', kind }, 502);
+  }
 });

@@ -9,10 +9,14 @@
     "code concerns — mapping them here keeps the promise docs/MIGRATION.md makes,",
     "which is that the library crosses the boundary unchanged.",
     "",
-    "src/lib/shared-parity.test.ts fails if the two copies ever diverge."
+    "The same mapping now carries src/ai/prompts: a prompt that reaches @/lib/schemas",
+    "for a type resolves through here rather than being rewritten on the way over.",
+    "",
+    "src/lib/shared-parity.test.ts fails if any of the copies ever diverge."
   ],
   "imports": {
     "@data/": "./_shared/data/",
+    "@/lib/": "./_shared/lib/",
     "zod": "npm:zod@4.4.3"
   },
   "unstable": ["sloppy-imports"]

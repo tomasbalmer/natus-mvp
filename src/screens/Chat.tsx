@@ -130,6 +130,7 @@ export function Chat() {
         // PDR 10.2: a derived level, never the clinical answers themselves.
         risk: riskLevel({ clinicalBasics: profile.draft.clinical_basics }),
         recommendedSlugs,
+        country: profile.draft.country,
         history: listMessages(conversation.id)
           .filter((m) => m.id !== user.id)
           .map((m) => ({ role: m.role, text: m.text })),

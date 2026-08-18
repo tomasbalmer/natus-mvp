@@ -23,7 +23,8 @@ authenticated Edge Functions.
 | Onboarding, dashboard, library | **Real** | `localStorage` in place of Postgres |
 | Meditation voice and sound bed | **Real** | Web Speech API + `OscillatorNode` |
 | Consent, quota, two-step delete, export | **Real** | Enforced in code, not only in the UI |
-| Soul Map, matching prose, chat, meditations, comparison | Fixtures or BYOK | see below |
+| Chat | **Real with backend** | Edge Function: safety, then quota, then the model |
+| Soul Map, matching prose, meditations, comparison | Fixtures or BYOK | see below |
 | Natal chart | **Real with backend** | Astrologer API via an authenticated Edge Function |
 | Payments, transactional email | Simulated | no charge, no mail is sent |
 
@@ -31,19 +32,28 @@ authenticated Edge Functions.
 Those files are meant to be copied into `supabase/functions/_shared/lib`
 unchanged when the real backend is built. See `docs/MIGRATION.md`.
 
-## The two AI modes
+## The three AI paths
 
-**Fixture mode (default).** Curated responses for three seeded profiles.
-Works offline, never fails during a live presentation, and nothing you type
-leaves the browser.
+**BYOK (opt in, wins when set).** Paste your own Anthropic API key and the
+demo calls the model from the browser. The key is kept in `localStorage` and
+is never sent anywhere except Anthropic. In this mode, what you type is sent
+to Anthropic — the banner says so while it is on. It comes first on purpose:
+somebody who typed their own credential asked for their own credential to be
+spent.
 
-**BYOK mode (opt in).** Paste your own Anthropic API key and the demo calls
-the real model. The key is kept in `localStorage` and is never sent anywhere
-except Anthropic. In this mode, what you type is sent to Anthropic — the
-banner says so while it is on.
+**Server (signed in, backend configured).** An authenticated Edge Function
+holds the key, runs crisis detection before anything else can answer, counts
+the quota where the person cannot reach it, and records the call. Only `chat`
+is wired so far — the other four surfaces reach the fixtures.
 
-Both modes validate their output against the same zod schemas, so a fixture
-that drifts from the contract breaks a test rather than the demo.
+**Fixtures (default, and the offline path).** Curated responses for three
+seeded profiles. Works offline, never fails during a live presentation, and
+nothing you type leaves the browser. A deployment with no key answers
+`no_model` and the app lands here deliberately.
+
+All three validate their output against the same zod schemas and the same copy
+lint, so a fixture that drifts from the contract breaks a test rather than the
+demo.
 
 ## Running it
 
@@ -75,6 +85,33 @@ The Edge Function resolves the birth city through Open-Meteo's geocoding API,
 then sends its coordinates and IANA timezone to Astrologer. The app calls
 `/api/v5/context/birth-chart` and stores the returned XML context with the
 person's profile so the chart can be reused by the Soul Map.
+
+### Chat model service
+
+The browser never receives the Anthropic key either:
+
+```bash
+supabase secrets set ANTHROPIC_API_KEY=...
+supabase functions deploy chat
+```
+
+Without it the function answers `no_model` and the app falls back to the
+curated fixtures, which is a supported way to run the deployment rather than a
+broken one.
+
+The prompts the function uses are copied from `src/ai/prompts` by
+`pnpm sync:shared`, the same way `src/lib` is, and `shared-parity.test.ts`
+fails if a copy drifts. Run it after touching either.
+
+To exercise the function against the real Edge runtime:
+
+```bash
+supabase start && supabase functions serve
+node scripts/verify-chat-function.mjs
+```
+
+That covers everything up to the model gate and says so when the model itself
+is not configured. Add `--env-file` with a key to cover the call too.
 
 ## Deliberate omissions
 

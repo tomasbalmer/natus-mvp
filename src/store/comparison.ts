@@ -1,6 +1,7 @@
 import { read, write } from './db';
 import type { ComparisonResult } from '@/lib/schemas';
 import type { ComparisonScope } from '@/lib/comparison-payload';
+import type { AiRunMode } from '@/ai/mode';
 
 /**
  * `external_profiles`, `comparison_consents` and `chart_comparisons` from
@@ -46,7 +47,7 @@ export type StoredComparison = {
   consent_id: string;
   prompt_version: string;
   result: ComparisonResult;
-  mode: 'fixture' | 'byok';
+  mode: AiRunMode;
   created_at: number;
 };
 
@@ -157,7 +158,7 @@ export function saveComparison(input: {
   consentId: string;
   result: ComparisonResult;
   promptVersion: string;
-  mode: 'fixture' | 'byok';
+  mode: AiRunMode;
   now?: number;
 }): StoredComparison {
   const record: StoredComparison = {

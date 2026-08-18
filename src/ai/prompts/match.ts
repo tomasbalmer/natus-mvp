@@ -1,4 +1,4 @@
-import { JSON_DISCIPLINE, TONE_RULES } from './shared';
+import { JSON_DISCIPLINE, TONE_RULES } from './shared.ts';
 import type { FilterOutcome } from '@/lib/matching';
 import type { SoulMapSynthesis } from '@/lib/schemas';
 

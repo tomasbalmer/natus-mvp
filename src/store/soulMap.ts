@@ -1,5 +1,6 @@
 import { read, write } from './db';
 import type { Numerology, SoulMapSynthesis } from '@/lib/schemas';
+import type { AiRunMode } from '@/ai/mode';
 
 /**
  * The current synthesis. Mirrors `soul_map_syntheses` with its
@@ -16,7 +17,7 @@ export type StoredSynthesis = {
   prompt_version: string;
   synthesis: SoulMapSynthesis;
   numerology: Numerology | null;
-  mode: 'fixture' | 'byok';
+  mode: AiRunMode;
   latency_ms: number;
   created_at: number;
   is_current: boolean;
@@ -38,7 +39,7 @@ export function saveSynthesis(input: {
   synthesis: SoulMapSynthesis;
   numerology: Numerology | null;
   promptVersion: string;
-  mode: 'fixture' | 'byok';
+  mode: AiRunMode;
   latencyMs: number;
   now?: number;
 }): StoredSynthesis {

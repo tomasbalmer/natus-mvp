@@ -1,5 +1,6 @@
 import { read, write } from './db';
 import type { MeditationScript } from '@/lib/schemas';
+import type { AiRunMode } from '@/ai/mode';
 
 /**
  * The `meditations` table of PDR 5.7.
@@ -22,7 +23,7 @@ export type StoredMeditation = {
   estimated_minutes: number;
   script: MeditationScript;
   prompt_version: string;
-  mode: 'fixture' | 'byok';
+  mode: AiRunMode;
   created_at: number;
 };
 
@@ -44,7 +45,7 @@ export function saveMeditation(input: {
   estimatedMinutes: number;
   script: MeditationScript;
   promptVersion: string;
-  mode: 'fixture' | 'byok';
+  mode: AiRunMode;
   now?: number;
 }): StoredMeditation {
   const record: StoredMeditation = {

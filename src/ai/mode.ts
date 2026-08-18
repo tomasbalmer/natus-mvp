@@ -13,6 +13,14 @@ import { read, write } from '@/store/db';
 
 export type AiMode = 'fixture' | 'byok';
 
+/**
+ * Which path actually produced a stored value, as opposed to which mode the
+ * viewer selected. `server` rather than `edge` because that is the word the
+ * `*_mode_check` constraints and `claude_api_calls.mode` already use, and one
+ * vocabulary for one thing is worth more than a more literal second one.
+ */
+export type AiRunMode = 'fixture' | 'byok' | 'server';
+
 type StoredMode = { mode: AiMode; apiKey: string | null };
 
 const DEFAULT: StoredMode = { mode: 'fixture', apiKey: null };

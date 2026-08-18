@@ -1,4 +1,4 @@
-import { JSON_DISCIPLINE, TONE_RULES } from './shared';
+import { JSON_DISCIPLINE, TONE_RULES } from './shared.ts';
 import { BREAK_MAX_MS, BREAK_MIN_MS, RATE_MAX, RATE_MIN } from '@/audio/ssml';
 import type { BedTrack, SoulMapSynthesis } from '@/lib/schemas';
 

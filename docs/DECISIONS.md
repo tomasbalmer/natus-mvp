@@ -379,3 +379,63 @@ alternative was a list nobody could enforce.
 provider block in `supabase/config.toml`. The anonymous path is not deleted: it
 remains the only path when no backend is configured, which is what keeps the
 fixture demo running offline.
+
+---
+
+## 14. The model gets a third path, and the browser keeps the other two
+
+**Decision.** `runAi` now chooses between three implementations rather than
+two: a pasted key calls Anthropic from the browser, a signed-in person on a
+configured deployment calls an Edge Function, and everyone else gets the
+curated fixtures. Only `chat` has the server implementation so far.
+
+**Why the order is BYOK, then server, then fixtures.** Someone who went to
+Ajustes and typed their own credential asked for their own credential to be
+spent. Quietly routing them through our key instead would make that switch a
+lie, and the switch is the one place the demo tells the truth about where
+typed text goes. The server comes second because it is what the deployed
+product runs on: it holds the key, counts the quota where the person cannot
+reach it, and writes `claude_api_calls`. Fixtures are last and are not a
+failure state — they are the offline demo, and they are what a deployment
+answering `no_model` is asking for.
+
+**`no_model` is the only failure that falls back.** Every other server error
+throws. A fixture substituted for a broken server is a screen that looks like
+it worked, and the whole point of §10 was that a real backend is now something
+that can break visibly rather than something that cannot exist.
+
+**No session, no server path.** The function derives the person from the JWT
+and refuses without one. A 401 there is not a fault to surface — it is
+somebody using the demo without signing in, which is a supported way to run
+this application, so `runAi` checks for a session first and lands on the
+fixtures rather than on an error the person cannot act on.
+
+**Prompts cross the boundary now, and only two of them can.** `chat.ts` and
+`shared.ts` reach for `@/lib` and nothing else, so `deno.json` maps that
+prefix and they are copied verbatim. `soul-map.ts` reaches into `@/store` and
+`meditation.ts` into `@/audio`; both would have to be untangled before they
+travel, which is why the other four surfaces still have no server path. The
+parity test now fails if a copied prompt grows an import that cannot resolve.
+
+**Extensions are required rather than hoped for.** The Edge runtime refused to
+boot on `from './shared'` — `sloppy-imports` in `deno.json` did not save it,
+the type checker did not see it, and the test suite did not see it. Serving
+the function did. The parity test now asserts the extension, because the next
+person to add a prompt will write it the Vite way by reflex.
+
+**The request body is split in two, and the split is the safety ordering.**
+The envelope — message and country — is all that stands between a request and
+`scanText`. The model context is parsed after safety and the quota have both
+had their say. Validating the whole body up front, which is how this was first
+written, meant a person in crisis with a half-built context got a 400 instead
+of a hotline. `scripts/verify-chat-function.mjs` is what caught it.
+
+**What is still unverified.** The model call itself. No Anthropic key was
+available while this was written, so every check above the model gate passed
+against the local Edge runtime and the gate itself was exercised only in its
+`no_model` form. The verify script covers the real call and says out loud that
+it did not run; the first deployment with a key is where that gets closed.
+
+**Model.** `claude-opus-5`, in the browser and on the server, from one
+constant each kept deliberately identical. Somebody on their own key and
+somebody on the deployment should be reading the same product.
