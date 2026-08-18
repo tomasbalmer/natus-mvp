@@ -766,7 +766,9 @@ actually enforced" found it.
   `Access-Control-Allow-Origin` to `*` on every response whatever the function
   sets. The delivered header is therefore unobservable on a laptop — which is
   the exact condition under which a wildcard reaches production — so it must
-  be confirmed against the deployed project in Phase 6.
+  be confirmed against the deployed project in Phase 6. **Confirmed there, and
+  it was wrong** — `ALLOWED_ORIGINS` was unset and the deployed functions were
+  answering only localhost. See the Phase 6 finding.
 - [DEVIATION] `FREE_QUESTIONS` moved from `store/chat.ts` into `lib/quota.ts`
   and is re-exported. The client renders the counter and the function enforces
   it; two copies would eventually disagree and the person would be shown a
@@ -970,13 +972,31 @@ document in the repository still describes the project as having no backend.
 - MODIFY `CLAUDE.md`, `package.json` — neither describes a static demo any
   more, and `CLAUDE.md` now points at this plan rather than the finished one.
 
-- [FINDING] **`ALLOWED_ORIGINS` is not set on the deployed project.**
+- [FINDING] **`ALLOWED_ORIGINS` was not set on the deployed project — fixed.**
   `_shared/cors.ts` falls back to the two localhost origins when it is unset,
   which is the right default for a laptop and the wrong one in production: the
-  browser discards every answer, and to the application that is indistinguishable
-  from a network failure. It has been unset since `natal-chart` was deployed,
-  so the chart has never worked from the Pages origin. Documented in
-  `HANDOFF.md`; setting it is a production change and is not made from here.
+  browser discards every answer, and to the application that is
+  indistinguishable from a network failure. It had been unset since
+  `natal-chart` was deployed, so the chart never worked from the Pages origin.
+
+  Measured against the deployed function before and after, which is the only
+  way to see it — the local Supabase gateway rewrites this header to `*` on
+  every response, so the whole thing is invisible on a laptop, exactly as the
+  Phase 5 deviation note warned:
+
+  ```
+  before   https://tomasbalmer.github.io   allow-origin=(none)
+           http://localhost:5173           allow-origin=http://localhost:5173
+  after    https://tomasbalmer.github.io   allow-origin=https://tomasbalmer.github.io
+           http://localhost:5173           allow-origin=http://localhost:5173
+  ```
+
+  Set to the Pages origin plus both localhost origins. Localhost is kept
+  deliberately: it lets a laptop run against the deployed project, and CORS is
+  not the boundary — the JWT is, which is the whole argument at the top of
+  `cors.ts`. **This also discharges the Phase 5 deviation**, which said the
+  delivered header had to be confirmed against the deployed project because it
+  could not be observed locally. It has been.
 - [FINDING] **A missing function was a fault rather than an absence.** Writing
   the ordering comment for the deploy job surfaced it: `runOnEdge` treated the
   404 from an undeployed function as an error, so the live site — which has
