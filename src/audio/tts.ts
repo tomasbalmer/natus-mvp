@@ -1,4 +1,4 @@
-import { parseSsml, type SsmlSegment } from './ssml';
+import { parseSsml, type SsmlSegment } from '@/lib/ssml';
 
 /**
  * Speech, behind the shape PDR 9.5 defines for the server provider.

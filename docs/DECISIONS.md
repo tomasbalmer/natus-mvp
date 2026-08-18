@@ -382,22 +382,29 @@ fixture demo running offline.
 
 ---
 
-## 14. The model gets a third path, and the browser keeps the other two
+## 14. The model moves to the server, and BYOK goes with the move
 
-**Decision.** `runAi` now chooses between three implementations rather than
-two: a pasted key calls Anthropic from the browser, a signed-in person on a
-configured deployment calls an Edge Function, and everyone else gets the
-curated fixtures. Only `chat` has the server implementation so far.
+**Decision.** `runAi` chooses between two implementations: a signed-in person
+on a configured deployment calls an Edge Function, and everyone else gets the
+curated fixtures. All five purposes have a function. The pasted-key path is
+deleted.
 
-**Why the order is BYOK, then server, then fixtures.** Someone who went to
-Ajustes and typed their own credential asked for their own credential to be
-spent. Quietly routing them through our key instead would make that switch a
-lie, and the switch is the one place the demo tells the truth about where
-typed text goes. The server comes second because it is what the deployed
-product runs on: it holds the key, counts the quota where the person cannot
-reach it, and writes `claude_api_calls`. Fixtures are last and are not a
-failure state — they are the offline demo, and they are what a deployment
-answering `no_model` is asking for.
+**BYOK survived exactly as long as it was the only way.** It existed because a
+static demo had no other route to real generation, and while only `chat` had a
+server it still was — deleting it then would have left four surfaces with
+nothing but fixtures. Once all five had functions its cost stopped being paid
+for: it kept a working Anthropic credential in `localStorage`, it was the one
+path whose spend nobody could account for, it bypassed the server-side crisis
+scan and the quota, and it forced the demo banner to explain a third state
+that only a handful of people ever entered. `src/store/db.ts` clears the
+stored key from browsers that already have one — removing the feature and
+leaving the secret behind would have been the worse half of the change.
+
+**Fixtures are not a failure state.** They are the offline demo, they are what
+a deployment answering `no_model` is asking for, and they are what a visitor
+who has not signed in gets. They are also the only thing that proves the
+contracts hold without spending tokens, which is why §10 refused to delete
+them and why that refusal outlived BYOK.
 
 **`no_model` is the only failure that falls back.** Every other server error
 throws. A fixture substituted for a broken server is a screen that looks like
@@ -410,12 +417,22 @@ somebody using the demo without signing in, which is a supported way to run
 this application, so `runAi` checks for a session first and lands on the
 fixtures rather than on an error the person cannot act on.
 
-**Prompts cross the boundary now, and only two of them can.** `chat.ts` and
-`shared.ts` reach for `@/lib` and nothing else, so `deno.json` maps that
-prefix and they are copied verbatim. `soul-map.ts` reaches into `@/store` and
-`meditation.ts` into `@/audio`; both would have to be untangled before they
-travel, which is why the other four surfaces still have no server path. The
-parity test now fails if a copied prompt grows an import that cannot resolve.
+**Every prompt crosses the boundary, and two of them had to be untangled
+first.** `soul-map.ts` reached into `@/store/session` for the draft type and
+`meditation.ts` into `@/audio/ssml` for the prosody bounds. The first is fixed
+by `soulMapDraftSchema`, which narrows the draft to what the prompt actually
+reads — and, not incidentally, makes PDR 10.2 a shape rather than an
+intention, since the narrowed object has nowhere to put `clinical_basics` and
+`parse` strips it on the way out. The second is fixed by moving `ssml.ts` into
+`src/lib`, where its own header had said it belonged since it was written. The
+parity test fails if a copied prompt grows an import that cannot resolve.
+
+**The catalogue is the server's, not the caller's.** `match` receives modality
+slugs and rehydrates them from its own `data/modalities.json`; `meditation`
+receives no bed list at all and offers the model its own. Sending the objects
+would have worked and would have let a caller describe a therapy that does not
+exist, or quietly edit the contraindications of one that does — which the
+model then reads out as ours.
 
 **Extensions are required rather than hoped for.** The Edge runtime refused to
 boot on `from './shared'` — `sloppy-imports` in `deno.json` did not save it,
@@ -429,6 +446,15 @@ The envelope — message and country — is all that stands between a request an
 had their say. Validating the whole body up front, which is how this was first
 written, meant a person in crisis with a half-built context got a 400 instead
 of a hotline. `scripts/verify-chat-function.mjs` is what caught it.
+
+**One handler, five deployables.** `_shared/serve-model.ts` holds the sequence
+four of the functions share — authenticate, refuse to spend a token on
+somebody in crisis, call, validate, log — because four hand-written copies of
+that sequence is four chances to put the safety check in the wrong place. Each
+purpose still has its own directory, URL and worker, which is what step 5.1
+asked for. `chat` does not use it: it has a quota to consult between safety
+and the model, and a crisis reply that is a product surface rather than a
+refusal.
 
 **What is still unverified.** The model call itself. No Anthropic key was
 available while this was written, so every check above the model gate passed

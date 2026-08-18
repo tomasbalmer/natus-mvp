@@ -11,6 +11,8 @@ const SNAPSHOT: Record<string, unknown> = {
   modality_matches: [{ id: 'm1', reactions: { 'terapia-somatica': { reaction: 'saved' } } }],
   recommendation_checkins: [{ practice_title: 'Caminar sin auriculares', checked_on: '2026-08-10' }],
   crisis_events: [{ id: 'e1', severity: 'low', false_positive: null }],
+  // A retired namespace, kept as the fixture on purpose: what is under test
+  // is the redactor, not the shape that happened to need it first.
   ai_mode: { mode: 'byok', apiKey: 'sk-ant-api03-real-looking-secret-value-here' },
   preferences: { locale: 'es' },
 };

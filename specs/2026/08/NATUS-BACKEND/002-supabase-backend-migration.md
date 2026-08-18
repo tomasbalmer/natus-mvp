@@ -685,7 +685,7 @@ two were found by reading. The compiler does not get tired.
 
 ### Phase 5: The AI moves server-side
 
-- [~] Step 5.1: One Edge Function per purpose
+- [x] Step 5.1: One Edge Function per purpose
   - ADD `supabase/functions/{soul-map,match,chat,meditation,comparison}/index.ts` —
     each reusing the existing prompts, zod schemas and copy lint from
     `_shared/lib`. Each validates the JWT and derives the user from it.
@@ -717,7 +717,7 @@ two were found by reading. The compiler does not get tired.
 - [x] Step 5.6: Logging
   - ADD the `claude_api_calls` table and writes from each function — PDR 4,
     which had no equivalent in the demo because there was no server to log from.
-- [ ] Step 5.7: Delete the BYOK path
+- [x] Step 5.7: Delete the BYOK path
   - DELETE `src/ai/mode.ts`, `src/components/AiModeToggle.tsx`.
   - MODIFY `src/ai/client.ts` — the BYOK branch goes; **the fixture branch
     stays** and becomes the degraded path.
@@ -838,6 +838,72 @@ itself. No Anthropic key was available, so the gate was exercised only in its
 `no_model` form. `scripts/verify-chat-function.mjs` covers the real call,
 prints `note the model path is UNVERIFIED` when it cannot, and is what should
 run first against the deployed project.
+
+**Verification — the phase closes, 2026-08-18.**
+
+The four remaining functions exist, every prompt crosses, and BYOK is gone.
+
+- ADD `supabase/functions/{soul-map,match,meditation,comparison}/index.ts`.
+- ADD `supabase/functions/_shared/serve-model.ts` — the sequence those four
+  share. `chat` keeps its own body: it has a quota to consult between safety
+  and the model, and a crisis reply that is a product surface rather than a
+  refusal.
+- ADD `src/lib/model-input.ts` — the request contract for all five, in one
+  file so they can be read side by side. `chat-request.ts` folded into it and
+  is now under the parity test, which it was not before.
+- MOVE `src/audio/ssml.ts` to `src/lib/ssml.ts`. Its own header said it was
+  written to run server-side; this is that becoming true.
+- ADD `scripts/verify-model-functions.mjs`, wired as `pnpm verify:models`.
+- DELETE `src/ai/mode.ts`, `src/components/AiModeToggle.tsx`, the BYOK branch,
+  and the `ai_mode` namespace.
+
+- `pnpm verify:models` — 12/12, and `pnpm verify:chat` still 13/13, both
+  against the local Edge runtime.
+- All six functions boot and all six refuse an unauthenticated POST 401,
+  checked one by one. This is the assertion that matters most in this phase:
+  five separate workers, each resolving the shared library, the shared prompts
+  and zod through the import map, and none of that is visible to `tsc`.
+- **Safety in front of the model survives a deployment with no model.** A
+  crisis presenting need and a crisis meditation intent are both refused 403
+  and logged, on a runtime with no key configured — so the scan sits in front
+  of the key check rather than behind it. Reversing those two blocks makes a
+  person in crisis receive `503 no_model` instead, which is silence.
+- The catalogue is the server's: `match` refuses a slug that names no therapy
+  rather than describing one, 400.
+- Walked it in a browser against the local stack: the mode toggle is gone from
+  the landing, the banner now says where text goes on a build that has a
+  backend, and a chat turn still answers from the fixtures when the function
+  reports `no_model`.
+- `pnpm typecheck` clean, `pnpm test` 694 across 28 files, `pnpm build`
+  succeeds.
+
+- [FINDING] **The narrowing found a leak that was one careless line away.**
+  `generateSoulMap` takes an `OnboardingDraft`, which carries
+  `clinical_basics`. Forwarding it as the request body would have shipped the
+  clinical answers to a model payload — the exact thing `CLAUDE.md` lists as
+  non-negotiable and §7 forbids. `soulMapDraftSchema` narrows it on the way
+  out and `parse` strips the rest, so the body cannot carry them even if a
+  later caller passes the whole draft. There is a test asserting the absence
+  rather than a comment asking for it.
+- [FINDING] **The parity test caught a stale copy on the first run after
+  editing `export.ts`.** Working as designed, and worth recording because it
+  is the failure mode the test was written for: a good edit made in one place.
+
+- [DEVIATION] `serve-model.ts` is shared by four of the five, which reads
+  against step 5.1's "not one function with a `purpose` parameter". It is not
+  one function: each purpose still has its own directory, URL and worker, so a
+  broken meditation prompt still cannot take the Soul Map down. What is shared
+  is a module, and the alternative was four hand-written copies of the
+  authenticate-scan-call-validate-log sequence — four chances to put the
+  safety check in the wrong place.
+- [DEVIATION] The post-model guards stay client-side: the match pool-size
+  check and its deterministic fallback, the meditation SSML and bed-id checks,
+  and the comparison rule-5 check. They are decisions about what to show
+  somebody when the model under-delivers, which is the caller's call. `ssml.ts`
+  now crosses, so moving them costs nothing later.
+
+**Still unverified, and it is the same thing:** the model call. Both verify
+scripts cover it and both say out loud when they could not run it.
 
 ---
 

@@ -1,17 +1,29 @@
 import type { ZodType } from 'zod';
-import { getAiMode, type AiRunMode } from './mode';
 import { lintDeep } from '@/lib/copy-lint';
-import { MalformedJson, parseJsonLoosely } from '@/lib/model-json';
 import { isBackendConfigured, supabase } from '@/supabase/client';
 
 /**
  * One interface, two implementations, one validation path.
  *
- * Both the curated fixtures and the live API return values that must parse
- * against the same zod schema and survive the same copy lint. That symmetry
- * is the point: a fixture that drifts from the contract, or that quietly
- * breaks a copy rule, fails a test instead of shipping.
+ * Both the curated fixtures and the Edge Function return values that must
+ * parse against the same zod schema and survive the same copy lint. That
+ * symmetry is the point: a fixture that drifts from the contract, or that
+ * quietly breaks a copy rule, fails a test instead of shipping.
+ *
+ * There used to be a third — a key the viewer pasted, spent from the browser.
+ * It was how a static demo showed real generation, and it stopped being worth
+ * its cost the moment all five surfaces had a server: it put a working
+ * credential in `localStorage`, it was the one path whose spend nobody could
+ * account for, and it answered from a place the banner had to keep explaining.
+ * `docs/DECISIONS.md` §14 records the removal.
  */
+
+/**
+ * Which path produced a value. `server` rather than `edge` because that is the
+ * word the `*_mode_check` constraints and `claude_api_calls.mode` already use,
+ * and one vocabulary for one thing is worth more than a more literal second.
+ */
+export type AiRunMode = 'fixture' | 'server';
 
 export type AiCall<T> = {
   purpose: 'soul_map' | 'match' | 'chat' | 'meditation' | 'comparison';
@@ -22,15 +34,12 @@ export type AiCall<T> = {
   /** Returned when no key is present. Chosen deterministically from input. */
   fixture: () => T;
   /**
-   * The server-side path, for the surfaces that have an Edge Function.
-   *
-   * Absent means this purpose has no server implementation yet, which is the
-   * state four of the five are still in. The function builds its own prompt
-   * from `body` rather than receiving `system` and `user`: the prompt is the
-   * thing that must not be caller-supplied, or the quota buys whatever text
+   * The server-side path. The function builds its own prompt from `body`
+   * rather than receiving `system` and `user`: the prompt is the thing that
+   * must not be caller-supplied, or the deployment's key buys whatever text
    * somebody feels like sending.
    */
-  edge?: { fn: string; body: Record<string, unknown> };
+  edge: { fn: string; body: Record<string, unknown> };
 };
 
 export type AiResult<T> = {
@@ -51,57 +60,30 @@ export class AiError extends Error {
 }
 
 /**
- * Kept identical to the model the Edge Functions call, in
- * `supabase/functions/_shared/anthropic.ts`. A person on their own key and a
- * person on the server should be reading the same product.
- */
-const MODEL = 'claude-opus-5';
-const TIMEOUT_MS = 45_000;
-
-/**
  * PDR 6.5 step 6: validate, and on failure retry exactly once before showing
  * an empathetic error. Retrying more would burn the person's key and their
  * patience for a model that has already shown it cannot hold the contract.
  */
 export async function runAi<T>(call: AiCall<T>): Promise<AiResult<T>> {
-  const { mode, apiKey } = getAiMode();
   const started = performance.now();
 
-  const fixture = (): AiResult<T> => {
-    const value = call.schema.parse(call.fixture());
-    assertCleanCopy(value);
-    // A token of latency so the generating screen is not a flash. The real
-    // call takes ten to thirty seconds; pretending it is instant would
-    // misrepresent the product being demonstrated.
-    return {
-      value,
-      mode: 'fixture',
-      latencyMs: performance.now() - started,
-      inputTokens: null,
-      outputTokens: null,
-    };
-  };
-
-  // Three paths, in this order, and the order is a decision.
-  //
-  // A pasted key wins. Someone who went to Ajustes and typed their own
-  // credential asked for their own credential to be spent; quietly routing
-  // them through our server instead would make that switch a lie.
-  //
-  // The server comes next, and it is what the deployed product runs on. It
-  // holds the key, counts the quota where the person cannot reach it, and
-  // writes the ledger — none of which the browser can be trusted to do.
-  //
-  // Fixtures are last and are not a failure state. They are the offline demo,
-  // and they are what a server that says `no_model` is asking for.
-  if (mode !== 'fixture' && apiKey) return await byok(call, apiKey, started);
-
-  if (call.edge && isBackendConfigured && supabase) {
+  if (isBackendConfigured && supabase) {
     const result = await runOnEdge(call, started);
     if (result) return result;
   }
 
-  return fixture();
+  const value = call.schema.parse(call.fixture());
+  assertCleanCopy(value);
+  // A token of latency so the generating screen is not a flash. The real call
+  // takes ten to thirty seconds; pretending it is instant would misrepresent
+  // the product being demonstrated.
+  return {
+    value,
+    mode: 'fixture',
+    latencyMs: performance.now() - started,
+    inputTokens: null,
+    outputTokens: null,
+  };
 }
 
 /**
@@ -163,34 +145,6 @@ function numberOrNull(value: unknown): number | null {
   return typeof value === 'number' ? value : null;
 }
 
-async function byok<T>(call: AiCall<T>, apiKey: string, started: number): Promise<AiResult<T>> {
-
-  let lastError: unknown;
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const response = await callAnthropic(call, apiKey);
-      const parsed = call.schema.parse(response.json);
-      assertCleanCopy(parsed);
-      return {
-        value: parsed,
-        mode: 'byok',
-        latencyMs: performance.now() - started,
-        inputTokens: response.inputTokens,
-        outputTokens: response.outputTokens,
-      };
-    } catch (error) {
-      lastError = error;
-      // A copy violation is a property of the prompt, not of a bad roll.
-      // Retrying it wastes a call to get the same answer.
-      if (error instanceof AiError && error.kind === 'copy_violation') break;
-    }
-  }
-
-  throw lastError instanceof AiError
-    ? lastError
-    : new AiError(String(lastError), 'invalid_json');
-}
-
 function assertCleanCopy(value: unknown): void {
   const violations = lintDeep(value);
   if (violations.length === 0) return;
@@ -199,69 +153,4 @@ function assertCleanCopy(value: unknown): void {
     `Copy rule "${first?.rule}" broken at ${first?.path}: "${first?.match}" — ${first?.why}`,
     'copy_violation',
   );
-}
-
-async function callAnthropic<T>(
-  call: AiCall<T>,
-  apiKey: string,
-): Promise<{ json: unknown; inputTokens: number | null; outputTokens: number | null }> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      signal: controller.signal,
-      headers: {
-        'content-type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        // Without this header the browser call is refused. Its name is a
-        // warning worth keeping in view: the key is exposed to whoever holds
-        // this browser, which is why BYOK is opt-in and never a default.
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 4000,
-        temperature: 0.7,
-        system: [{ type: 'text', text: call.system, cache_control: { type: 'ephemeral' } }],
-        messages: [{ role: 'user', content: call.user }],
-      }),
-    });
-
-    if (!response.ok) {
-      const detail = await response.text().catch(() => '');
-      throw new AiError(`Anthropic returned ${response.status}. ${detail.slice(0, 200)}`, 'api_error');
-    }
-
-    const body = (await response.json()) as {
-      content?: { type: string; text?: string }[];
-      usage?: { input_tokens?: number; output_tokens?: number };
-    };
-
-    const text = body.content?.find((c) => c.type === 'text')?.text ?? '';
-    return {
-      json: readModelJson(text),
-      inputTokens: body.usage?.input_tokens ?? null,
-      outputTokens: body.usage?.output_tokens ?? null,
-    };
-  } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') {
-      throw new AiError('The model took longer than 45 seconds', 'timeout');
-    }
-    throw error;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-/** `@/lib/model-json` holds the parser so the server shares it verbatim. */
-function readModelJson(text: string): unknown {
-  try {
-    return parseJsonLoosely(text);
-  } catch (error) {
-    if (error instanceof MalformedJson) throw new AiError(error.message, 'invalid_json');
-    throw error;
-  }
 }

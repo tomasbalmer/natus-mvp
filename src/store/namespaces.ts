@@ -20,14 +20,16 @@ export type Namespace =
   | 'chart_comparisons'
   | 'crisis_events'
   | 'subscription'
-  | 'preferences'
-  /**
-   * Local only, and it must stay that way: this namespace holds a pasted
-   * Anthropic key. It is never hydrated from Postgres and never persisted to
-   * it — `REMOTE_NAMESPACES` below omits it deliberately, not by oversight.
-   * Phase 5 deletes it along with the BYOK path.
-   */
-  | 'ai_mode';
+  | 'preferences';
+
+/**
+ * `ai_mode` used to live at the end of that union and held a pasted Anthropic
+ * key. Phase 5 step 5.7 removed the BYOK path, so the namespace is gone with
+ * it — and `purgeRetiredNamespaces` in `db.ts` clears the bucket from browsers
+ * that already have one, because a credential nobody can reach any more is
+ * still a credential sitting on somebody's disk.
+ */
+
 
 /** The namespaces backed by Postgres. Anything absent stays in this browser. */
 export const REMOTE_NAMESPACES = [

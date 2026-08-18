@@ -1,6 +1,6 @@
 import { read, write } from './db';
 import type { MeditationScript } from '@/lib/schemas';
-import type { AiRunMode } from '@/ai/mode';
+import type { AiRunMode } from '@/ai/client';
 
 /**
  * The `meditations` table of PDR 5.7.

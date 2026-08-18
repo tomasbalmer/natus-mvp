@@ -4,7 +4,7 @@ import { currentQuota } from '../_shared/quota.ts';
 import { logCall } from '../_shared/log.ts';
 import { scanText } from '../_shared/lib/safety.ts';
 import { resourcesForCountry } from '../_shared/lib/crisis-resources.ts';
-import { chatContextSchema, chatEnvelopeSchema } from '../_shared/chat-request.ts';
+import { chatContextSchema, chatEnvelopeSchema } from '../_shared/lib/model-input.ts';
 import { MODEL, ModelError, generate, hasKey } from '../_shared/anthropic.ts';
 import { chatResponseSchema } from '../_shared/lib/schemas/index.ts';
 import {

@@ -1,6 +1,6 @@
 import { read, write } from './db';
 import type { Numerology, SoulMapSynthesis } from '@/lib/schemas';
-import type { AiRunMode } from '@/ai/mode';
+import type { AiRunMode } from '@/ai/client';
 
 /**
  * The current synthesis. Mirrors `soul_map_syntheses` with its

@@ -1,6 +1,6 @@
 import { createBed, type Bed } from './bed';
 import { webSpeechProvider, type SpeechHandle } from './tts';
-import { estimateDurationMs, parseSsml, type SsmlSegment } from './ssml';
+import { estimateDurationMs, parseSsml, type SsmlSegment } from '@/lib/ssml';
 import type { BedTrack } from '@/lib/schemas';
 
 /**

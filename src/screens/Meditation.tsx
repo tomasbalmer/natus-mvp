@@ -4,7 +4,7 @@ import { Screen } from '@/components/Screen';
 import { CrisisScreen } from '@/screens/CrisisScreen';
 import { BED_TRACKS } from '@/lib/catalog';
 import { detectCrisis, riskLevel } from '@/lib/safety';
-import { estimateDurationMs, parseSsml } from '@/audio/ssml';
+import { estimateDurationMs, parseSsml } from '@/lib/ssml';
 import { createPlayer, isPlaybackAvailable, type MeditationPlayer } from '@/audio/player';
 import { generateMeditation } from '@/ai/meditation';
 import { MEDITATION_PROMPT_VERSION } from '@/ai/prompts/meditation';

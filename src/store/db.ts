@@ -40,6 +40,35 @@ function storage(): Storage | null {
   }
 }
 
+/**
+ * Namespaces this application used to write and no longer reads.
+ *
+ * `ai_mode` held a pasted Anthropic key. Step 5.7 removed the path that used
+ * it, which removes the *use* and not the credential: anybody who tried BYOK
+ * still has a working key sitting in their browser, now with no screen that
+ * would ever show it to them again. Deleting the feature and leaving the
+ * secret behind would be the worse half of the change.
+ *
+ * Run on module load rather than behind a version flag. It is one `removeItem`
+ * against a key nothing writes, so the cost of running it forever is lower
+ * than the cost of deciding when it may stop.
+ */
+const RETIRED = ['ai_mode'];
+
+export function purgeRetiredNamespaces(): void {
+  const store = storage();
+  if (!store) return;
+  for (const ns of RETIRED) {
+    try {
+      store.removeItem(`${PREFIX}${ns}`);
+    } catch {
+      // A full or blocked store is not a reason to fail the application.
+    }
+  }
+}
+
+purgeRetiredNamespaces();
+
 // ── the mirror ──────────────────────────────────────────────────────────────
 
 const mirror = new Map<Namespace, unknown>();

@@ -5,7 +5,7 @@ import {
   buildMeditationUserMessage,
 } from './prompts/meditation';
 import { buildMeditationFixture } from './fixtures/meditation';
-import { parseSsml, validateMeditation } from '@/audio/ssml';
+import { parseSsml, validateMeditation } from '@/lib/ssml';
 import { AiError } from './client';
 import { BED_TRACKS } from '@/lib/catalog';
 import { meditationScriptSchema, type MeditationScript, type SoulMapSynthesis } from '@/lib/schemas';
@@ -24,6 +24,17 @@ export async function generateMeditation(input: {
     system: MEDITATION_SYSTEM_PROMPT,
     user: buildMeditationUserMessage({ ...input, beds: ACTIVE_BEDS }),
     schema: meditationScriptSchema,
+    // The beds are absent on purpose: the function offers the model its own
+    // catalogue, so a caller cannot name a track the player cannot load.
+    edge: {
+      fn: 'meditation',
+      body: {
+        intent: input.intent,
+        minutes: input.minutes,
+        synthesis: input.synthesis,
+        risk: input.risk,
+      },
+    },
     fixture: () => buildMeditationFixture({ intent: input.intent, minutes: input.minutes }),
   });
 

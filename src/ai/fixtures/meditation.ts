@@ -1,6 +1,6 @@
 import { BED_TRACKS } from '@/lib/catalog';
 import { normalize } from '@/lib/safety';
-import { RATE_DEFAULT, estimateDurationMs, parseSsml, transcriptOf } from '@/audio/ssml';
+import { RATE_DEFAULT, estimateDurationMs, parseSsml, transcriptOf } from '@/lib/ssml';
 import type { MeditationScript } from '@/lib/schemas';
 
 /**

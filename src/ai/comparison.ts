@@ -21,6 +21,10 @@ export async function compareCharts(payload: ComparisonPayload): Promise<AiResul
     system: COMPARISON_SYSTEM_PROMPT,
     user: buildComparisonUserMessage(payload),
     schema: comparisonResultSchema,
+    // The payload crosses as it was built. `buildComparisonPayload` decided
+    // what may leave this browser; `comparisonInputSchema` decides again on
+    // arrival what the deployment's key will pay to read.
+    edge: { fn: 'comparison', body: { ...payload } },
     fixture: () => buildComparisonFixture(payload),
   });
 

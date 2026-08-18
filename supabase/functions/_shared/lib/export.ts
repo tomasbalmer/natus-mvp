@@ -6,11 +6,12 @@
  * caller's job, which is what lets the same function run server-side once
  * there is a server to run it on.
  *
- * The one rule with teeth is the redaction. A BYOK viewer's Anthropic key
- * lives in the same storage as everything else, and an export that swept it up
- * would put a working credential into a file people mail to themselves.
- * `src/ai/mode.ts` states that the key is never included in an export; this is
- * where that sentence is enforced rather than promised.
+ * The one rule with teeth is the redaction. It was written for a pasted
+ * Anthropic key living in the same storage as everything else, where an export
+ * that swept it up would have put a working credential into a file people mail
+ * to themselves. Step 5.7 removed that key, and the rule stays: it matches any
+ * field named like a secret at any depth, so it covers the next credential
+ * somebody stores here before anyone has to remember to add it.
  */
 
 export const EXPORT_FORMAT = 'natus-export';

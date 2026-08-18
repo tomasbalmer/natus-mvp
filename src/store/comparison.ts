@@ -1,7 +1,7 @@
 import { read, write } from './db';
 import type { ComparisonResult } from '@/lib/schemas';
 import type { ComparisonScope } from '@/lib/comparison-payload';
-import type { AiRunMode } from '@/ai/mode';
+import type { AiRunMode } from '@/ai/client';
 
 /**
  * `external_profiles`, `comparison_consents` and `chart_comparisons` from

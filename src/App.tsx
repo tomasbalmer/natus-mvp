@@ -19,7 +19,6 @@ import { Library } from '@/screens/Library';
 import { ExternalProfile } from '@/screens/comparison/ExternalProfile';
 import { Consent } from '@/screens/comparison/Consent';
 import { Result } from '@/screens/comparison/Result';
-import { getAiMode, type AiMode } from '@/ai/mode';
 import { activeHighSeverityEvent } from '@/store/crisis';
 import { hydrate } from '@/store/hydrate.ts';
 import { isBackendConfigured, requiresInvite } from '@/supabase/client.ts';
@@ -50,9 +49,6 @@ function showsNav(pathname: string): boolean {
 }
 
 export function App() {
-  // The banner has to tell the truth about where typed text goes, so it reads
-  // the live mode rather than a constant.
-  const [aiMode, setAiMode] = useState<AiMode>(() => getAiMode().mode);
   const { pathname } = useLocation();
 
   // Load the dataset before anything reads it.
@@ -111,11 +107,11 @@ export function App() {
   return (
     <PhoneFrame>
       <div className="absolute inset-x-0 top-0 z-50 flex flex-col gap-1.5 p-2">
-        <DemoBanner aiMode={aiMode} />
+        <DemoBanner />
         <SaveFailureNotice />
       </div>
       <Routes>
-        <Route path="/" element={<Landing onAiModeChange={setAiMode} />} />
+        <Route path="/" element={<Landing />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/mapa" element={<SoulMap />} />
         <Route path="/recomendaciones" element={<Recommendations />} />
@@ -130,7 +126,7 @@ export function App() {
         <Route path="/comparacion/consentimiento/:id" element={<Consent />} />
         <Route path="/comparacion/resultado/:id" element={<Result />} />
         <Route path="/lab/safety" element={<SafetyLab />} />
-        <Route path="*" element={<Landing onAiModeChange={setAiMode} />} />
+        <Route path="*" element={<Landing />} />
       </Routes>
       {/*
         A crisis takeover has to actually take the screen over. Leaving a glass

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { isBackendConfigured } from '@/supabase/client';
 
 /**
  * This demo asks people about anxiety, grief and suicidal ideation. It would
@@ -6,10 +7,18 @@ import { useState } from 'react';
  * vague about where the text they type ends up.
  *
  * So the banner says two things plainly: this is a prototype, and here is
- * where your words go in the mode you are currently in. It is dismissible per
- * session but returns on reload — it is a disclosure, not a cookie notice.
+ * where your words go. It is dismissible per session but returns on reload —
+ * it is a disclosure, not a cookie notice.
+ *
+ * It reads the build rather than a stored preference, because the preference
+ * is gone. Until step 5.7 a viewer chose between hand-written fixtures and
+ * their own pasted key, and the banner named whichever was live. Now the
+ * answer is a property of the deployment: without a backend nothing leaves
+ * the browser at all, and with one, a signed-in person's words reach our
+ * servers and Anthropic. Saying "no se envía a ningún servidor" on a build
+ * that has one would be the exact dishonesty this component exists against.
  */
-export function DemoBanner({ aiMode }: { aiMode: 'fixture' | 'byok' }) {
+export function DemoBanner() {
   const [open, setOpen] = useState(false);
 
   return (
@@ -37,9 +46,9 @@ export function DemoBanner({ aiMode }: { aiMode: 'fixture' | 'byok' }) {
 
       {open && (
         <p className="px-3.5 pb-2.5 text-[11px] leading-relaxed text-crema/60">
-          {aiMode === 'fixture'
-            ? 'Las respuestas vienen de guiones escritos a mano. Lo que escribas queda en este navegador y no se envía a ningún servidor.'
-            : 'Modo IA activo: lo que escribas se envía a la API de Anthropic usando tu propia clave.'}{' '}
+          {isBackendConfigured
+            ? 'Si iniciaste sesión, lo que escribas se envía a los servidores de Natus y desde ahí a la API de Anthropic. Sin sesión, las respuestas vienen de guiones escritos a mano y nada sale de este navegador.'
+            : 'Las respuestas vienen de guiones escritos a mano. Lo que escribas queda en este navegador y no se envía a ningún servidor.'}{' '}
           Los números de crisis todavía no fueron verificados uno por uno.
         </p>
       )}

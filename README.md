@@ -23,8 +23,7 @@ authenticated Edge Functions.
 | Onboarding, dashboard, library | **Real** | `localStorage` in place of Postgres |
 | Meditation voice and sound bed | **Real** | Web Speech API + `OscillatorNode` |
 | Consent, quota, two-step delete, export | **Real** | Enforced in code, not only in the UI |
-| Chat | **Real with backend** | Edge Function: safety, then quota, then the model |
-| Soul Map, matching prose, meditations, comparison | Fixtures or BYOK | see below |
+| Soul Map, matching, chat, meditations, comparison | **Real with backend** | five Edge Functions; fixtures without one |
 | Natal chart | **Real with backend** | Astrologer API via an authenticated Edge Function |
 | Payments, transactional email | Simulated | no charge, no mail is sent |
 
@@ -32,28 +31,29 @@ authenticated Edge Functions.
 Those files are meant to be copied into `supabase/functions/_shared/lib`
 unchanged when the real backend is built. See `docs/MIGRATION.md`.
 
-## The three AI paths
+## The two AI paths
 
-**BYOK (opt in, wins when set).** Paste your own Anthropic API key and the
-demo calls the model from the browser. The key is kept in `localStorage` and
-is never sent anywhere except Anthropic. In this mode, what you type is sent
-to Anthropic — the banner says so while it is on. It comes first on purpose:
-somebody who typed their own credential asked for their own credential to be
-spent.
+**Server (signed in, backend configured).** Five authenticated Edge Functions
+— one per purpose, so a broken meditation prompt cannot take the Soul Map
+down. Each holds the key, refuses to spend a token on somebody the
+deterministic crisis scan flags, validates the answer against the same zod
+schema the browser would, and records the call. The chat one also counts the
+quota where the person cannot reach it.
 
-**Server (signed in, backend configured).** An authenticated Edge Function
-holds the key, runs crisis detection before anything else can answer, counts
-the quota where the person cannot reach it, and records the call. Only `chat`
-is wired so far — the other four surfaces reach the fixtures.
-
-**Fixtures (default, and the offline path).** Curated responses for three
+**Fixtures (the default, and the offline path).** Curated responses for three
 seeded profiles. Works offline, never fails during a live presentation, and
 nothing you type leaves the browser. A deployment with no key answers
-`no_model` and the app lands here deliberately.
+`no_model`; a visitor who is not signed in never reaches the function at all.
+Both land here deliberately.
 
-All three validate their output against the same zod schemas and the same copy
-lint, so a fixture that drifts from the contract breaks a test rather than the
-demo.
+Both paths validate against the same zod schemas and the same copy lint, so a
+fixture that drifts from the contract breaks a test rather than the demo.
+
+There used to be a third: paste your own Anthropic key and the browser called
+the model directly. It was how a static demo showed real generation, and it
+was removed once every surface had a server — it kept a working credential in
+`localStorage` and was the one path whose spend nobody could account for.
+`docs/DECISIONS.md` §14.
 
 ## Running it
 
@@ -86,18 +86,22 @@ then sends its coordinates and IANA timezone to Astrologer. The app calls
 `/api/v5/context/birth-chart` and stores the returned XML context with the
 person's profile so the chart can be reused by the Soul Map.
 
-### Chat model service
+### The model services
 
 The browser never receives the Anthropic key either:
 
 ```bash
 supabase secrets set ANTHROPIC_API_KEY=...
+supabase functions deploy soul-map
+supabase functions deploy match
 supabase functions deploy chat
+supabase functions deploy meditation
+supabase functions deploy comparison
 ```
 
-Without it the function answers `no_model` and the app falls back to the
-curated fixtures, which is a supported way to run the deployment rather than a
-broken one.
+Without the key they answer `no_model` and the app falls back to the curated
+fixtures, which is a supported way to run the deployment rather than a broken
+one.
 
 The prompts the function uses are copied from `src/ai/prompts` by
 `pnpm sync:shared`, the same way `src/lib` is, and `shared-parity.test.ts`

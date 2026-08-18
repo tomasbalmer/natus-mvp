@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildMeditationFixture, estimatedMinutes, selectCore } from './meditation';
-import { parseSsml, transcriptOf, validateMeditation } from '@/audio/ssml';
+import { parseSsml, transcriptOf, validateMeditation } from '@/lib/ssml';
 import { meditationScriptSchema } from '@/lib/schemas';
 import { lintDeep } from '@/lib/copy-lint';
 import { BED_TRACKS } from '@/lib/catalog';

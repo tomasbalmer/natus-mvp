@@ -19,6 +19,21 @@ export async function matchModalities(input: {
       system: MATCH_SYSTEM_PROMPT,
       user: buildMatchUserMessage(input),
       schema: matchResultSchema,
+      // Slugs, not modalities. The server rehydrates them from its own
+      // catalogue so the descriptions the model reads out are ours.
+      edge: {
+        fn: 'match',
+        body: {
+          synthesis: input.synthesis,
+          presentingNeedText: input.presentingNeedText,
+          candidateSlugs: input.outcome.candidates.map((m) => m.slug),
+          strategy: input.outcome.strategy,
+          excludedForVulnerability: input.outcome.excludedForVulnerability,
+          excludedForDismissal: input.outcome.excludedForDismissal,
+          droppedForSize: input.outcome.droppedForSize,
+          poolBeforeTruncation: input.outcome.poolBeforeTruncation,
+        },
+      },
       fixture: () => buildMatchFixture({ outcome: input.outcome, synthesis: input.synthesis }),
     });
 

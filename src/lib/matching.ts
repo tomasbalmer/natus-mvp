@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { ACTIVE_MODALITIES } from './catalog.ts';
 import type { Modality } from './schemas/index.ts';
 
@@ -25,13 +26,20 @@ import type { Modality } from './schemas/index.ts';
 
 export const MAX_POOL = 12;
 
-export type FilterStrategy =
+/**
+ * Written as a schema and the type derived from it, because the strategy now
+ * crosses to the server in a request body and a second hand-written union
+ * would be one more thing to keep in step.
+ */
+export const filterStrategySchema = z.enum([
   /** All three predicates applied. The ordinary case. */
-  | 'topical'
+  'topical',
   /** Topical relevance dropped because it emptied the pool. */
-  | 'relaxed'
+  'relaxed',
   /** Nothing survived even relaxed; contemplative practices as a starting point. */
-  | 'contemplative-fallback';
+  'contemplative-fallback',
+]);
+export type FilterStrategy = z.infer<typeof filterStrategySchema>;
 
 export type FilterOutcome = {
   candidates: Modality[];
