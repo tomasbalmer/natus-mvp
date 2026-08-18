@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Screen } from '@/components/Screen';
 import { generateSoulMap } from '@/ai/soul-map';
+import {
+  calculateNatalChart,
+  hasNatalChartInput,
+  NatalChartError,
+} from '@/astrology/natal-chart';
 import { saveSynthesis } from '@/store/soulMap';
-import { attachSoulMap } from '@/store/session';
+import { attachSoulMap, updateDraft } from '@/store/session';
 import { attachSoulMapToClient } from '@/store/account';
 import { AiError } from '@/ai/client';
 import type { Numerology } from '@/lib/schemas';
@@ -24,6 +29,7 @@ import { SOUL_MAP_PROMPT_VERSION } from '@/ai/prompts/soul-map';
 
 const STAGES = [
   'Calculando tus números',
+  'Calculando tu carta natal',
   'Leyendo lo que contaste',
   'Buscando el hilo',
   'Escribiendo tu mapa',
@@ -58,7 +64,27 @@ export function Generating({
     const run = async () => {
       const floor = new Promise((resolve) => setTimeout(resolve, MINIMUM_MS));
       try {
-        const [result] = await Promise.all([generateSoulMap({ draft, numerology }), floor]);
+        const generation = async () => {
+          let enrichedDraft = draft;
+
+          // There is no chart step in the UI. If the person supplied exact
+          // birth data, calculate it here and persist it for every later use.
+          // The chart remains optional: provider or network failure falls
+          // back to the existing numerology-and-context path.
+          if (!draft.natal_chart && hasNatalChartInput(draft)) {
+            try {
+              const chart = await calculateNatalChart(draft);
+              updateDraft({ natal_chart: chart });
+              enrichedDraft = { ...draft, natal_chart: chart };
+            } catch (error) {
+              if (!(error instanceof NatalChartError)) throw error;
+            }
+          }
+
+          return generateSoulMap({ draft: enrichedDraft, numerology });
+        };
+
+        const [result] = await Promise.all([generation(), floor]);
         const stored = saveSynthesis({
           synthesis: result.value,
           numerology,

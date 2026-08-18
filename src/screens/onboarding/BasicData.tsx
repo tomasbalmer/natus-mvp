@@ -10,6 +10,31 @@ const COUNTRIES: [string, string][] = [
   ['XX', 'Otro país'],
 ];
 
+const BIRTH_COUNTRIES: [string, string][] = [
+  ['', 'Elegí un país'],
+  ['AR', 'Argentina'],
+  ['BO', 'Bolivia'],
+  ['BR', 'Brasil'],
+  ['CL', 'Chile'],
+  ['CO', 'Colombia'],
+  ['CR', 'Costa Rica'],
+  ['CU', 'Cuba'],
+  ['DO', 'República Dominicana'],
+  ['EC', 'Ecuador'],
+  ['SV', 'El Salvador'],
+  ['GT', 'Guatemala'],
+  ['HN', 'Honduras'],
+  ['MX', 'México'],
+  ['NI', 'Nicaragua'],
+  ['PA', 'Panamá'],
+  ['PY', 'Paraguay'],
+  ['PE', 'Perú'],
+  ['PR', 'Puerto Rico'],
+  ['UY', 'Uruguay'],
+  ['US', 'Estados Unidos'],
+  ['VE', 'Venezuela'],
+];
+
 const fieldClass =
   'glass w-full rounded-[var(--radius-option)] px-4 py-3 text-sm text-blanco placeholder:text-crema/55 [color-scheme:dark]';
 
@@ -53,7 +78,7 @@ export function BasicData({
             id="legal-name"
             className={fieldClass}
             value={draft.legal_birth_name}
-            onChange={(e) => onChange({ legal_birth_name: e.target.value })}
+            onChange={(e) => onChange({ legal_birth_name: e.target.value, natal_chart: null })}
             placeholder="Como figura en tu partida"
             autoComplete="name"
           />
@@ -72,7 +97,7 @@ export function BasicData({
             type="date"
             className={fieldClass}
             value={draft.birth_date}
-            onChange={(e) => onChange({ birth_date: e.target.value })}
+            onChange={(e) => onChange({ birth_date: e.target.value, natal_chart: null })}
           />
         </div>
 
@@ -91,7 +116,7 @@ export function BasicData({
               type="time"
               className={fieldClass}
               value={draft.birth_time}
-              onChange={(e) => onChange({ birth_time: e.target.value })}
+              onChange={(e) => onChange({ birth_time: e.target.value, natal_chart: null })}
             />
           </div>
           <div>
@@ -102,7 +127,7 @@ export function BasicData({
               id="birth-city"
               className={fieldClass}
               value={draft.birth_city}
-              onChange={(e) => onChange({ birth_city: e.target.value })}
+              onChange={(e) => onChange({ birth_city: e.target.value, natal_chart: null })}
               placeholder="Santiago"
             />
           </div>
@@ -111,6 +136,27 @@ export function BasicData({
           Si no las sabés, seguí sin ellas. Sin hora exacta no hablamos de Ascendente ni de
           casas, y el resto funciona igual.
         </p>
+
+        <div>
+          <label className={labelClass} htmlFor="birth-country">
+            País de nacimiento
+          </label>
+          <select
+            id="birth-country"
+            className={fieldClass}
+            value={draft.birth_country}
+            onChange={(e) => onChange({ birth_country: e.target.value, natal_chart: null })}
+          >
+            {BIRTH_COUNTRIES.map(([code, name]) => (
+              <option key={code || 'empty'} value={code} className="bg-negro">
+                {name}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1.5 text-[11px] leading-relaxed text-crema/55">
+            Sólo hace falta si querés que calculemos tu carta natal.
+          </p>
+        </div>
 
         <div>
           <label className={labelClass} htmlFor="country">

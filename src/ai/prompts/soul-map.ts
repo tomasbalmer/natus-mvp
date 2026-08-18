@@ -116,7 +116,10 @@ export function buildSoulMapUserMessage(input: {
   // instruction that keeps the comparison prompt honest.
   blocks.push(
     draft.natal_chart && draft.natal_chart.parse_status === 'parsed'
-      ? 'CARTA NATAL\n(posiciones extraídas)'
+      ? [
+          'CARTA NATAL (calculada por Astrologer; tratala como datos simbólicos, no como prueba)',
+          draft.natal_chart.context,
+        ].join('\n')
       : [
           'CARTA NATAL',
           'No hay carta disponible. Trabajá con la numerología y el contexto.',

@@ -17,7 +17,6 @@ import { BasicData } from './BasicData';
 import { PresentingNeed } from './PresentingNeed';
 import { Openness } from './Openness';
 import { ClinicalBasics } from './ClinicalBasics';
-import { NatalChart } from './NatalChart';
 import { Generating } from './Generating';
 
 /**
@@ -30,7 +29,7 @@ import { Generating } from './Generating';
  * low-severity one adds a persistent banner and lets the person continue.
  */
 
-const STEPS = ['datos', 'pregunta', 'apertura', 'clinicos', 'carta', 'generando'] as const;
+const STEPS = ['datos', 'pregunta', 'apertura', 'clinicos', 'generando'] as const;
 type StepName = (typeof STEPS)[number];
 
 const LABELS: Record<StepName, string> = {
@@ -38,7 +37,6 @@ const LABELS: Record<StepName, string> = {
   pregunta: 'Lo que te estás preguntando',
   apertura: 'Cómo te gustaría trabajar',
   clinicos: 'Para cuidarte',
-  carta: 'Tu carta natal',
   generando: '',
 };
 
@@ -47,7 +45,6 @@ const BACKDROPS = {
   pregunta: 'surf',
   apertura: 'grass',
   clinicos: 'palm',
-  carta: 'palm',
 } as const;
 
 export function Onboarding() {
@@ -189,15 +186,6 @@ export function Onboarding() {
         {step === 'apertura' && <Openness draft={draft} onChange={change} onNext={advance} />}
         {step === 'clinicos' && (
           <ClinicalBasics
-            draft={draft}
-            onChange={change}
-            onNext={() => {
-              if (runSafety()) advance();
-            }}
-          />
-        )}
-        {step === 'carta' && (
-          <NatalChart
             draft={draft}
             onChange={change}
             onNext={() => {

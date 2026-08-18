@@ -14,10 +14,11 @@ import type { ClinicalBasics } from '@/lib/safety';
  */
 
 export type NatalChartDraft = {
-  file_name: string;
-  size_bytes: number;
-  page_count: number | null;
-  parse_status: 'pending' | 'parsed' | 'failed' | 'unreadable';
+  provider: 'astrologer';
+  api_version: 'v5';
+  context: string;
+  calculated_at: number;
+  parse_status: 'parsed';
 };
 
 export type OnboardingDraft = {

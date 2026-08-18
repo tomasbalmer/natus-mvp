@@ -269,6 +269,12 @@ write. It also speaks Spanish, which matters for anything rendered.
 **Cost shape.** One call per person for the life of their account, not one per
 session. Fifty users is fifty calls, ever.
 
+**Location resolution.** Astrologer needs coordinates and an IANA timezone.
+The Edge Function resolves both from city and ISO country through Open-Meteo's
+geocoding endpoint, so the onboarding does not ask people for coordinates or
+require a second service credential. The RapidAPI key remains a Supabase
+secret; it is not a `VITE_` variable and does not reach the browser.
+
 **The trap in the same API.** `/compatibility-score` returns a number — a Ciro
 Discepolo score. §7 forbids match percentages and the chart comparison is
 explicitly verdict-free. `/chart-data/synastry` gives the aspects without the

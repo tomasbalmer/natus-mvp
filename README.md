@@ -1,4 +1,4 @@
-# Natus MVP — static demo
+# Natus MVP
 
 A navigable demo of the Natus user product: onboarding, Soul Map, therapy
 modality recommendations, routine, chat, meditations and chart comparison.
@@ -10,8 +10,9 @@ nobody is on the other end.
 
 ## What is real and what is staged
 
-The demo runs entirely in the browser. There is no backend, no database and no
-server-held secret — GitHub Pages serves static files and nothing else.
+Without Supabase configuration the demo still runs entirely in the browser.
+With it, profile data persists in Postgres and server-held integrations run in
+authenticated Edge Functions.
 
 | Module | Status | How |
 |--------|--------|-----|
@@ -23,7 +24,7 @@ server-held secret — GitHub Pages serves static files and nothing else.
 | Meditation voice and sound bed | **Real** | Web Speech API + `OscillatorNode` |
 | Consent, quota, two-step delete, export | **Real** | Enforced in code, not only in the UI |
 | Soul Map, matching prose, chat, meditations, comparison | Fixtures or BYOK | see below |
-| Natal chart PDF parsing | Stubbed | needs Vision, BYOK only |
+| Natal chart | **Real with backend** | Astrologer API via an authenticated Edge Function |
 | Payments, transactional email | Simulated | no charge, no mail is sent |
 
 `src/lib` is written to migrate: no React, no `localStorage`, no browser API.
@@ -59,6 +60,21 @@ pnpm dev
 | `pnpm build` | Production build into `dist/` |
 
 Deployment is automatic on push to `main` via `.github/workflows/deploy.yml`.
+
+### Natal chart service
+
+The browser never receives the RapidAPI key. Configure both secrets on the
+Supabase project, then deploy the function:
+
+```bash
+supabase secrets set RAPIDAPI_KEY=...
+supabase functions deploy natal-chart
+```
+
+The Edge Function resolves the birth city through Open-Meteo's geocoding API,
+then sends its coordinates and IANA timezone to Astrologer. The app calls
+`/api/v5/context/birth-chart` and stores the returned XML context with the
+person's profile so the chart can be reused by the Soul Map.
 
 ## Deliberate omissions
 
