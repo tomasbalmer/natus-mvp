@@ -23,6 +23,29 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    rolldownOptions: {
+      output: {
+        // Split by how often the code changes, not by route.
+        //
+        // Route splitting would buy almost nothing here: the application is
+        // ~140 kB of source against ~2 MB of dependencies, and every screen
+        // reaches the same zod schemas and the same store, so each route
+        // chunk would drag the whole vendor graph in behind it.
+        //
+        // These three groups have three different lifetimes. React and the
+        // router change when a dependency is bumped; supabase-js changes
+        // even less often and, in the fixture build, is never called at all;
+        // the application changes on every deploy. Separating them keeps a
+        // returning visitor from re-downloading 300 kB because a paragraph
+        // of Spanish moved.
+        codeSplitting: {
+          groups: [
+            { name: 'react', test: /node_modules\/\.pnpm\/(react|react-dom|react-router|scheduler)@/ },
+            { name: 'supabase', test: /node_modules\/\.pnpm\/(@supabase\+|iceberg-js@)/ },
+          ],
+        },
+      },
+    },
   },
   test: {
     environment: 'node',
