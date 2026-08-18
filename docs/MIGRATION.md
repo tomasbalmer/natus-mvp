@@ -1,5 +1,10 @@
 # From this demo to Supabase
 
+**Steps 1 to 5 are done.** This document is kept as the map it was, with each
+step marked, because the reasoning is what makes the remaining step legible —
+and because the line it draws through `src/` is still the line the parity test
+enforces every time the suite runs.
+
 This demo was written to be thrown away in one specific place and kept in
 another. The line runs through `src/`:
 
@@ -10,8 +15,8 @@ another. The line runs through `src/`:
   src/store/   ──────────────►  deleted. Replaced by SQL, per file.
                call sites do not move; implementations do.
 
-  src/ai/      ──────────────►  moves server-side, minus the BYOK path.
-  src/screens/ ──────────────►  stays, minus the direct store imports.
+  src/ai/      ──────────────►  moved server-side. BYOK deleted.
+  src/screens/ ──────────────►  stayed. No screen changed for any of it.
 ```
 
 Keeping `src/lib` clean is the whole point. If anything in there ever imports
@@ -75,9 +80,16 @@ sits behind `read`. `DECISIONS.md` §12 records how, and what it costs.
 
 ## `src/ai` — most of it moves server-side
 
-`runAi` currently has two paths: curated fixtures and a key the viewer pasted.
-In production the key lives in the Edge Function's environment, and the BYOK
-path is deleted along with `mode.ts` and `AiModeToggle.tsx`.
+**Done.** `runAi` had two paths: curated fixtures and a key the viewer pasted.
+The key now lives in the Edge Functions' environment, and the BYOK path is
+gone along with `mode.ts` and `AiModeToggle.tsx`. What it kept is the shape:
+two implementations, one validation path.
+
+Two prompts had to be untangled to travel — `soul-map.ts` reached into
+`src/store` for a type and `meditation.ts` into `src/audio` for the prosody
+bounds. The first became `soulMapDraftSchema`, the second moved `ssml.ts` into
+`src/lib`. Both are the boundary above doing its job: neither would have been
+noticed until the server refused to boot.
 
 Everything else survives intact:
 
@@ -107,16 +119,24 @@ to log from. It lands with the Edge Function.
 
 ## The order to do it in
 
-Steps 1 to 4 are planned phase by phase in
+Steps 1 to 5 were planned phase by phase in
 `specs/2026/08/NATUS-BACKEND/002-supabase-backend-migration.md`, with auth
 inserted between 1 and 2 — anonymous sign-in with an optional upgrade to email,
 because `auth.uid()` has to mean something before the policies in step 1 do
-anything. Steps 5 and 6 are not scheduled.
+anything. Step 6 is still not scheduled.
 
-1. Tables and RLS. The policies above are the ones worth writing tests for.
-2. `_shared/lib`, copied, with its existing tests. They pass unchanged; if they
-   do not, the boundary was already broken and this is where it shows.
-3. One Edge Function per purpose, reusing the prompts and schemas.
-4. Repoint `src/store` at Supabase. Screens do not change.
-5. Delete `mode.ts`, `AiModeToggle.tsx`, and the BYOK branch of `client.ts`.
-6. TTS, storage, email, payments — each independent of the others.
+1. ~~Tables and RLS.~~ Done. The policies above are the ones with tests.
+2. ~~`_shared/lib`, copied, with its existing tests.~~ Done — they passed
+   unchanged, and `shared-parity.test.ts` now fails if the copies drift.
+3. ~~One Edge Function per purpose, reusing the prompts and schemas.~~ Done.
+   Five of them, plus `natal-chart`, which this document did not anticipate.
+4. ~~Repoint `src/store` at Supabase.~~ Done, and no screen changed — which
+   was the promise this file made and the one most likely to have been broken
+   quietly.
+5. ~~Delete `mode.ts`, `AiModeToggle.tsx`, and the BYOK branch.~~ Done.
+6. TTS, storage, email, payments — each independent of the others. Not started.
+
+**What the plan did not have, and reality did:** the natal chart stopped being
+a PDF to parse and became an ephemeris call (`DECISIONS.md` §11), and a closed
+pilot needed a door in front of everything (§13). Both are in the repository;
+neither is in the list above, because the list is what was foreseen.

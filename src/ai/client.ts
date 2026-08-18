@@ -113,7 +113,15 @@ async function runOnEdge<T>(call: AiCall<T>, started: number): Promise<AiResult<
   if (error) {
     // `FunctionsHttpError` carries the response; anything else is transport.
     const status = (error as { context?: { status?: number } }).context?.status;
-    if (status === 503) return null;
+    // Two absences rather than faults. 503 is a deployment saying it has no
+    // key; 404 is a function that was never deployed — which is the state
+    // every purpose is in until the first push that carries it, and briefly
+    // again whenever one is added. Both mean the server path is not available
+    // to this person, which is exactly what the fixtures are for. Treating
+    // 404 as an error instead put a failure screen where a curated answer
+    // used to be, for the window between shipping a caller and shipping the
+    // function it calls.
+    if (status === 503 || status === 404) return null;
     throw new AiError(`The ${edge.fn} function returned ${status ?? 'no status'}.`, 'api_error');
   }
 

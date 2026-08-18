@@ -4,10 +4,16 @@ Guidance for Claude Code working in this repository.
 
 ## What this is
 
-A static demo of the Natus user product — the consumer side of a
-self-knowledge platform for Spanish-speaking LATAM. It is **not** a Waterplan
-project; it happens to live inside that workspace. It is expected to be
-transferred to another GitHub owner once presentable.
+The Natus user product — the consumer side of a self-knowledge platform for
+Spanish-speaking LATAM. It is **not** a Waterplan project; it happens to live
+inside that workspace. It is expected to be transferred to another GitHub
+owner once presentable.
+
+It began as a static demo and is no longer one: there is a Supabase project
+behind it, with Postgres under Row Level Security, Google sign-in, and Edge
+Functions holding the API keys. **The offline path is not vestigial** — a
+build with no backend configured, or a visitor who has not signed in, still
+renders every screen from curated fixtures. Keep it working.
 
 Live at https://tomasbalmer.github.io/natus-mvp/
 
@@ -20,7 +26,9 @@ is monitoring it and the hotline numbers are unverified.
 | File | Why |
 |------|-----|
 | `docs/DECISIONS.md` | Why things are the way they are, and what was rejected. Start here |
-| `specs/2026/08/NATUS-MVP/001-natus-mvp-static-demo.md` | The implementation plan, phase by phase, with verification results |
+| `specs/2026/08/NATUS-BACKEND/002-supabase-backend-migration.md` | The current plan. Phases 0 to 5 done; Phase 6 is where work resumes |
+| `specs/2026/08/NATUS-MVP/001-natus-mvp-static-demo.md` | The plan that built the demo. Complete — history, not instructions |
+| `docs/HANDOFF.md` | What a transfer moves and what it silently breaks |
 
 The source documents are `PDR — MVP Natus_ Producto del Usuario.txt` and
 `natus-mockups (3).html`, both in `~/Downloads`. You rarely need them —
@@ -30,15 +38,20 @@ The source documents are `PDR — MVP Natus_ Producto del Usuario.txt` and
 
 ## Resuming work
 
-The plan is at `Stage: Act`. Phases 0 to 5 are complete and verified.
+The demo plan (001) is finished. The backend plan (002) is at Phase 6, its
+last: deployment, configuration and documentation.
 
 ```
-/dev:pair act specs/2026/08/NATUS-MVP/001-natus-mvp-static-demo.md
+/dev:pair act specs/2026/08/NATUS-BACKEND/002-supabase-backend-migration.md
 ```
 
 That reads the stage, finds the first unchecked `- [ ]`, and continues.
-Remaining: F6 dashboard, F7 chat, F8 meditations, F9 chart comparison,
-F10 hardening.
+
+**Two things have never been verified against the real thing**, and neither is
+code: the model call has never run with an `ANTHROPIC_API_KEY` configured, and
+the natal chart has never been calculated against Astrologer. `pnpm
+verify:chat` and `pnpm verify:models` cover the first and say out loud when
+they could not.
 
 Update the plan as you go — check steps off, record deviations inline, and
 write the verification results under each phase. That file is how the next
@@ -46,32 +59,55 @@ session picks up.
 
 ## Architecture
 
-Static SPA. No backend, no database, no server-held secret. GitHub Pages
-serves files and nothing else.
+An SPA on GitHub Pages, a Supabase project behind it. No secret is ever in the
+bundle: the publishable key is a public identifier and is safe only because
+RLS is on for every table.
 
 ```
-src/lib/     Deterministic core. NO React, NO localStorage, NO browser API.
-             numerology · safety · matching · copy-lint · schemas
-             These migrate to supabase/functions/_shared/lib unchanged.
-             Keeping them clean is the point — do not import from here.
+src/lib/     Deterministic core. NO React, NO localStorage, NO browser API,
+             NO `@/` imports, and relative imports carry their extension.
+             numerology · safety · matching · copy-lint · schemas · ssml
+             · model-input · model-json
+             Copied verbatim into supabase/functions/_shared/lib by
+             `pnpm sync:shared`. `shared-parity.test.ts` fails if the two
+             ever differ — run the sync after touching anything in here.
 
-src/store/   localStorage standing in for Postgres, one namespace per PDR
-             table. Replaced wholesale by Supabase later; callers do not move.
+src/store/   Postgres behind a synchronous in-memory mirror, hydrated once at
+             session start. localStorage is the last-known-good fallback.
+             Call sites stayed synchronous; DECISIONS.md §12.
 
-src/ai/      One runAi with two paths: curated fixtures (default) and BYOK.
-             Both parse the same zod schema and pass the same copy lint.
+src/ai/      One runAi with two paths: an Edge Function when the backend is
+             configured and the person is signed in, curated fixtures
+             otherwise. Both parse the same zod schema and pass the same copy
+             lint. Prompts also cross into _shared, under the same parity test.
 
 src/screens/ Route-level components.
 data/        Seed JSON: modalities, topics, crisis resources, bed tracks.
+
+supabase/functions/
+             soul-map · match · chat · meditation · comparison · natal-chart
+             One directory, URL and worker each. Four share the sequence in
+             _shared/serve-model.ts; chat has a quota to consult mid-flow.
+```
+
+**The module graph is only real when something serves it.** `tsc` does not see
+the Edge runtime's resolution, and a missing file extension once took every
+function down with nothing in the suite noticing. Before trusting a change to
+`_shared`, run it:
+
+```
+supabase start && supabase functions serve
+pnpm verify:chat && pnpm verify:models
 ```
 
 ## Validation
 
 ```
 pnpm typecheck      tsc --noEmit
-pnpm test           vitest, 244 tests
+pnpm test           vitest, 694 tests
 pnpm build          production build
 pnpm dev            development server
+pnpm sync:shared    re-copy src/lib and src/ai/prompts into _shared
 ```
 
 All three must pass before a commit. CI runs the same and deploys on push to

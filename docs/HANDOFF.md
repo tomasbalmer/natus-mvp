@@ -1,8 +1,8 @@
 # Handing the repository to a new owner
 
 This repository was created under `tomasbalmer` with the expectation of being
-transferred. Three separate things look like "the URL" and each moves on its
-own track.
+transferred. Four separate things look like "the project" and each moves on
+its own track.
 
 ```
 Local checkout        Repositorios/natus-mvp
@@ -13,6 +13,10 @@ GitHub repository     github.com/tomasbalmer/natus-mvp
 
 Custom domain         Lives at a registrar, not at GitHub.
                       Transferring the repository does NOT move the domain.
+
+Supabase project      A separate account, with its own owner and its own
+                      billing. It does NOT move with the repository, and
+                      the repository is useless to a new owner without it.
 ```
 
 ## Checklist
@@ -37,7 +41,9 @@ Custom domain         Lives at a registrar, not at GitHub.
 | Existing clones and remotes | Redirect automatically |
 | Issues, pull requests, stars | Move with the repository |
 | Actions workflow | Moves with the repository |
-| Actions secrets | **Do not move.** This project has none |
+| Actions secrets | **Do not move.** `SUPABASE_ACCESS_TOKEN` must be recreated |
+| Actions variables | **Do not move.** `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `REQUIRE_INVITE` |
+| Supabase project | Does not move. See below |
 | GitHub Pages URL | **Changes**, and does not redirect |
 
 The Pages URL is the only casualty, and only if no custom domain is attached.
@@ -56,6 +62,53 @@ requires no source change.
 It is set in one place: the `Build` step of `.github/workflows/deploy.yml`.
 `BrowserRouter` reads the same value through `import.meta.env.BASE_URL`, so
 routing follows automatically.
+
+## The Supabase side
+
+Transferring the repository moves none of this. Either the Supabase project is
+transferred too — Supabase supports moving a project between organisations —
+or a new one is created and these are reapplied.
+
+**Three things are keyed to the public URL, and all three break silently when
+it changes.** None of them produces a useful error: the auth redirect returns
+somebody to a page that does not exist, and a blocked CORS response looks to
+the application exactly like a network failure.
+
+| What | Where | Holds |
+|------|-------|-------|
+| Redirect allow-list | Supabase → Authentication → URL Configuration | Site URL and every exact URL Google may return to |
+| CORS allow-list | Edge Function secret `ALLOWED_ORIGINS` | Comma-separated origins. Scheme and host, no path |
+| Google OAuth client | Google Cloud console | Authorised redirect URI, pointing at the Supabase callback |
+
+`ALLOWED_ORIGINS` is configuration rather than source for the same reason
+`VITE_BASE` is: changing owner changes the origin, and neither should mean
+editing a file. `supabase/functions/_shared/cors.ts` falls back to the two
+localhost origins when it is unset — which is the right default for a laptop
+and the wrong one for a deployment, where it means the browser silently
+discards every answer.
+
+```bash
+supabase secrets set ALLOWED_ORIGINS=https://<owner>.github.io
+# or, with a custom domain
+supabase secrets set ALLOWED_ORIGINS=https://natus.example
+```
+
+The other two secrets the functions need:
+
+```bash
+supabase secrets set ANTHROPIC_API_KEY=...   # the five model functions
+supabase secrets set RAPIDAPI_KEY=...        # natal-chart, via Astrologer
+```
+
+Without either, the functions that need them answer `no_model` or
+`astrologer_not_configured` and the application degrades to its curated
+fixtures rather than failing. That is the designed behaviour, not a fallback
+to be relied on.
+
+Deployment is automatic on push to `main`, from the `functions` job in
+`.github/workflows/deploy.yml`, which needs a `SUPABASE_ACCESS_TOKEN`
+repository **secret**. Without it the job skips, the site still ships, and the
+functions stay at whatever version was last deployed by hand.
 
 ## Before making the repository public-facing
 

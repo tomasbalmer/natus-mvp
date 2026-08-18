@@ -181,18 +181,20 @@ at install time — these numbers age.
 
 Implementation cannot start until these exist. None of them are code.
 
-- [ ] **Create the Supabase project.** Region: `sa-east-1` (São Paulo) is the
+- [x] **Create the Supabase project.** Region: `sa-east-1` (São Paulo) is the
       closest to the LATAM audience. Region cannot be changed after creation.
-- [ ] **Decide the free-tier pause question.** Either accept the cold start,
+- [ ] **Decide the free-tier pause question.** Still open. Either accept the cold start,
       add a scheduled ping to keep the project warm, or take the paid tier.
       This affects whether a demo opens instantly in a meeting. Deciding it
       late means deciding it during a demo.
 - [ ] **Anthropic API key with billing enabled.** Goes into Edge Function
       secrets in Phase 5, never into the repository and never into the bundle.
-- [ ] **Install the Supabase CLI locally.** Migrations and functions are
+      **Still outstanding, and now the only thing between the five model
+      functions and working.** `RAPIDAPI_KEY` is set; this is not.
+- [x] **Install the Supabase CLI locally.** Migrations and functions are
       developed and tested against a local stack before anything reaches the
       hosted project.
-- [ ] **Add the CI variables** to the repository: `SUPABASE_URL` and
+- [x] **Add the CI variables** to the repository: `SUPABASE_URL` and
       `SUPABASE_ANON_KEY`, as GitHub **variables**, not secrets. They are public
       by design — they ship in the bundle — and filing them as secrets tells the
       next reader something false about them.
@@ -929,18 +931,18 @@ scripts cover it and both say out loud when they could not run it.
   - _Rationale: added to a phone, the app wore Chrome's icon. Not in the plan
     because the plan never imagined anyone installing it. No service worker,
     so this is a name and a face, not an offline app._
-- [ ] Step 6.2: Function deployment
+- [x] Step 6.2: Function deployment
   - MODIFY `.github/workflows/deploy.yml` or ADD a second workflow — deploy Edge
     Functions on push. Anthropic key from secrets, which genuinely are secret.
   - _Pin any new action to an exact release tag and check it against the same
     7-day gate as everything else, per the existing comment in that file._
-- [ ] Step 6.3: Handover documentation
+- [x] Step 6.3: Handover documentation
   - MODIFY `docs/HANDOFF.md` — a transfer now also means a new Supabase redirect
     allowlist and a new CORS allowlist. Environment, not source, exactly like
     `VITE_BASE`.
-- [ ] Step 6.4: Close out the migration document
+- [x] Step 6.4: Close out the migration document
   - MODIFY `docs/MIGRATION.md` — mark steps 1 to 4 done, leave 5 and 6 standing.
-- [ ] Step 6.5: Project documentation
+- [x] Step 6.5: Project documentation
   - MODIFY `CLAUDE.md` — the architecture section still says "No backend, no
     database, no server-held secret". Update it, including the validation
     commands if the local stack becomes part of them.
@@ -951,6 +953,40 @@ scripts cover it and both say out loud when they could not run it.
 deployed site acquires a session, generates a Soul Map and persists it across a
 refresh. A nested route still resolves through the `404.html` fallback. No
 document in the repository still describes the project as having no backend.
+
+**Verification — the documentation half, 2026-08-18.**
+
+- MODIFY `.github/workflows/deploy.yml` — a `functions` job ahead of `build`,
+  `supabase/setup-cli@v3.0.0` with the CLI pinned to 2.113.0. The site job
+  waits on it: a front end whose backend did not update is how the two drift
+  apart without anybody noticing. The job skips itself when
+  `SUPABASE_ACCESS_TOKEN` is absent rather than failing the build, so a
+  repository without the secret still ships a site that runs on fixtures.
+- MODIFY `docs/HANDOFF.md` — the Supabase project as a fourth thing that looks
+  like "the project" and moves on its own track, and the three settings keyed
+  to the public URL that all break silently when it changes.
+- MODIFY `docs/MIGRATION.md` — steps 1 to 5 struck through, 6 left standing,
+  with a note on the two things the plan did not foresee and reality did.
+- MODIFY `CLAUDE.md`, `package.json` — neither describes a static demo any
+  more, and `CLAUDE.md` now points at this plan rather than the finished one.
+
+- [FINDING] **`ALLOWED_ORIGINS` is not set on the deployed project.**
+  `_shared/cors.ts` falls back to the two localhost origins when it is unset,
+  which is the right default for a laptop and the wrong one in production: the
+  browser discards every answer, and to the application that is indistinguishable
+  from a network failure. It has been unset since `natal-chart` was deployed,
+  so the chart has never worked from the Pages origin. Documented in
+  `HANDOFF.md`; setting it is a production change and is not made from here.
+- [FINDING] **A missing function was a fault rather than an absence.** Writing
+  the ordering comment for the deploy job surfaced it: `runOnEdge` treated the
+  404 from an undeployed function as an error, so the live site — which has
+  five callers and, until this push, none of the functions — showed a failure
+  screen to any signed-in person where the fixture used to answer. 404 now
+  falls back exactly as `no_model` does. The ordering in CI stands anyway:
+  degrading is not the same as working.
+
+**Still unverified:** the model call, and the Astrologer call. Both wait on
+secrets, neither on code.
 
 ## Success Criteria
 
