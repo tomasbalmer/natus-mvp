@@ -1026,8 +1026,27 @@ Deploying by hand is the stopgap, not the plan. Until the secret exists, every
 push ships a site whose functions did not move with it — which is the exact
 drift the job ordering was written to prevent.
 
-**Still unverified:** the model call, and the Astrologer call. Both wait on
-secrets or on a production session, neither on code.
+**The Astrologer call is verified, 2026-08-19.** Against the deployed
+function, from an anonymous session on the production project — the first time
+a real chart has been calculated by this system.
+
+```
+answered in 2857 ms · status OK · api_version v5 · 10240 chars of context
+Santiago resolved to lat -33.46 lng -70.65, tz America/Santiago
+Tropical zodiac, Placidus houses, planets with positions and declinations
+```
+
+Everything §11 claimed the design would do, it does: the city and the ISO
+country are enough, Open-Meteo supplies the coordinates and the IANA timezone,
+and what comes back is XML shaped for a model rather than an SVG somebody
+would have had to parse. The browser never sees the RapidAPI key.
+
+It left one anonymous `auth.users` row behind. That is what the product
+creates by design — PDR 5.1, seven-day expiry — so it is not litter of a
+different kind from the rest.
+
+**Still unverified:** the model call, and only that. It waits on a key, not on
+code.
 
 ## Success Criteria
 

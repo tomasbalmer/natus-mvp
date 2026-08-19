@@ -281,6 +281,11 @@ explicitly verdict-free. `/chart-data/synastry` gives the aspects without the
 score and is the endpoint to use. This is written down because the wrong one is
 the more obviously named of the two.
 
+**Verified against the provider, 2026-08-19.** A real chart, from the deployed
+function, on the production project: Santiago resolved to its coordinates and
+`America/Santiago`, and 10 kB of XML came back with Placidus houses and every
+planet's position. Until then this whole section described an intention.
+
 **What still needs a fallback.** Houses and the ascendant need an exact birth
 time and many people do not know theirs. The existing path — numerology plus
 stated context, with the chart absent — already covers it and does not become a
