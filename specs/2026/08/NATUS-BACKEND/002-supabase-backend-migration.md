@@ -1005,8 +1005,29 @@ document in the repository still describes the project as having no backend.
   falls back exactly as `no_model` does. The ordering in CI stands anyway:
   degrading is not the same as working.
 
+**The functions reached production, 2026-08-19, by hand.** `supabase functions
+deploy` from a linked CLI, because `SUPABASE_ACCESS_TOKEN` is still not a
+repository secret and the `functions` job therefore skips itself on every
+push. All six are live and each was probed from the Pages origin:
+
+```
+soul-map · match · chat · meditation · comparison · natal-chart
+  preflight 204, allow-origin https://tomasbalmer.github.io
+  POST without a token 401
+```
+
+The 401 comes from the gateway rather than from `auth.ts` — `verify_jwt` is on
+for every deployed function, so the JWT is checked twice, once before our code
+runs and once inside it. Neither check is redundant: the gateway cannot tell a
+valid anonymous key from a user session, and `authenticate` is what refuses
+the first.
+
+Deploying by hand is the stopgap, not the plan. Until the secret exists, every
+push ships a site whose functions did not move with it — which is the exact
+drift the job ordering was written to prevent.
+
 **Still unverified:** the model call, and the Astrologer call. Both wait on
-secrets, neither on code.
+secrets or on a production session, neither on code.
 
 ## Success Criteria
 
