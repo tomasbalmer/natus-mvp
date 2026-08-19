@@ -7,6 +7,9 @@ const SYNASTRY_ENDPOINT = `https://${HOST}/api/v5/chart-data/synastry`;
 
 export type Located = { latitude: number; longitude: number; timezone: string };
 
+/** How many aspects reach the prompt. See the note where they are sorted. */
+const MAX_ASPECTS = 8;
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -147,5 +150,18 @@ export async function synastryAspects(
   // nothing inside orb — but it is indistinguishable here from a response
   // shape that changed under us. Null makes the caller say "no chart to
   // cross", which is true either way and never invents a reading.
-  return aspects.length > 0 ? aspects : null;
+  if (aspects.length === 0) return null;
+
+  // The tightest few, not all of them.
+  //
+  // A full synastry returns thirty-odd aspects. Asking for a reading of each
+  // produced two things that were both wrong: a model call that ran past its
+  // forty-five second timeout, and — had it finished — a wall of thirty
+  // paragraphs, which is a data dump rather than the material for a
+  // conversation that PDR 8.5 asks for.
+  //
+  // Ordered by orb because that is what the tradition means by strength: an
+  // aspect within a degree is exact, one at eight degrees is barely speaking.
+  // Taking the tightest is the same choice an astrologer makes out loud.
+  return [...aspects].sort((a, b) => Math.abs(a.orb) - Math.abs(b.orb)).slice(0, MAX_ASPECTS);
 }
