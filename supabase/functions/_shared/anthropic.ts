@@ -105,9 +105,28 @@ export async function generate<T>(call: {
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const response = await post(call.system, call.user, call.effort ?? 'medium', call.maxTokens, apiKey);
-      const value = call.schema.parse(readJson(response.text));
-      assertCleanCopy(value);
-      return { value, inputTokens: response.inputTokens, outputTokens: response.outputTokens };
+      const json = readJson(response.text);
+
+      // Parsed separately from the JSON read so the two failures stop being
+      // one. A schema mismatch was reporting as `invalid_json`, which is what
+      // a model returning prose reports as — and the difference is the whole
+      // diagnosis. The first synastry returned valid, complete JSON that was
+      // missing two fields, and `invalid_json` sent the search in exactly the
+      // wrong direction, twice, at the cost of a call each time.
+      const parsed = call.schema.safeParse(json);
+      if (!parsed.success) {
+        // Field paths, never values. `astro_dialogue.aspects.2.a_body` names
+        // the shape that was wrong and quotes nothing anybody wrote.
+        const paths = [...new Set(parsed.error.issues.map((i) => i.path.join('.') || '(root)'))];
+        throw new ModelError(
+          `The answer did not match the contract: ${paths.join(', ')}`,
+          'invalid_json',
+          `schema:${paths.slice(0, 4).join(',')}`,
+        );
+      }
+
+      assertCleanCopy(parsed.data);
+      return { value: parsed.data, inputTokens: response.inputTokens, outputTokens: response.outputTokens };
     } catch (error) {
       last = error;
       // Neither of these is a bad roll, and retrying both wastes a full

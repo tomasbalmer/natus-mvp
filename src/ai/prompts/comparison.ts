@@ -64,12 +64,23 @@ CONTRATO
     "summary": "...",
     "pairs": [{ "a_number": 0, "b_number": 0, "kind": "life_path|expression|soul_urge|personality|birthday", "reading": "..." }]
   },
-  "astro_dialogue": { "available": false, "summary": "...", "aspects": [] },
+  "astro_dialogue": {
+    "available": false,
+    "summary": "...",
+    "aspects": [{ "a_body": "Sun", "b_body": "Moon", "type": "trine", "reading": "..." }]
+  },
   "where_you_flow": ["...", "..."],
   "where_you_friction": ["...", "..."],
   "questions_to_explore": ["¿...?", "¿...?"],
   "disclaimer": "..."
 }
+
+CANTIDADES
+- "aspects": uno por cada aspecto que te llegue, con los cuatro campos
+  siempre. "a_body", "b_body" y "type" los copiás tal cual vinieron; sólo
+  "reading" lo escribís vos.
+- "where_you_flow" y "where_you_friction": entre 2 y 4 cada una.
+- "questions_to_explore": entre 2 y 3.
 `.trim();
 
 export function buildComparisonUserMessage(payload: ComparisonPayload): string {
