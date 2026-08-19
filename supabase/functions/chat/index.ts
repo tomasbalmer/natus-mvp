@@ -204,9 +204,13 @@ Deno.serve(async (request) => {
       errorKind: detail,
     });
 
-    // The turn is not charged and the detail does not travel: an upstream
-    // error message can carry the request back to the caller, and the request
-    // is what this whole file exists to keep from leaking.
-    return json(request, { error: 'model_failed', kind }, 502);
+    // The turn is not charged. The provider's message does not travel — it
+    // can carry the request back — but its error class does, because
+    // `authentication_error` describes the deployment rather than the person.
+    return json(
+      request,
+      { error: 'model_failed', kind, ...(error instanceof ModelError && error.detail ? { detail: error.detail } : {}) },
+      502,
+    );
   }
 });

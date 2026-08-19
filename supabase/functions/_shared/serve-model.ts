@@ -165,10 +165,16 @@ export function serveModel<I, O>(route: ModelRoute<I, O>): (request: Request) =>
         latencyMs: Date.now() - started,
         errorKind: detail,
       });
-      // The detail does not travel: an upstream error message can carry the
-      // request back out, and the request is what these functions exist to
-      // keep from leaking.
-      return json(request, { error: 'model_failed', kind }, 502);
+      // The provider's *message* does not travel — it can quote the request
+      // back, and the request is what these functions exist to keep from
+      // leaking. Its error *class* does: `authentication_error` describes the
+      // deployment, not the person, and without it a caller cannot tell a
+      // rejected key from a model the account cannot reach.
+      return json(
+        request,
+        { error: 'model_failed', kind, ...(error instanceof ModelError && error.detail ? { detail: error.detail } : {}) },
+        502,
+      );
     }
   };
 }
