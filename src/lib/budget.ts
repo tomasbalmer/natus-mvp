@@ -100,5 +100,11 @@ export const MAX_OUTPUT_TOKENS: Record<Purpose, number> = {
   match: 4000,
   chat: 3000,
   meditation: 6000,
-  comparison: 4000,
+  // Raised from 4000 after the first synastry came back as truncated JSON.
+  // The contract is the longest one — a headline, a pair per number, a
+  // reading per aspect, flow, friction, questions and a disclaimer — and
+  // thinking tokens count against the same ceiling, so 4000 left the answer
+  // cut off mid-object. Too low does not save money: it spends the whole call
+  // and returns nothing parseable.
+  comparison: 8000,
 };
