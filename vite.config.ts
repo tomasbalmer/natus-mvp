@@ -10,7 +10,9 @@ import tailwindcss from '@tailwindcss/vite';
 //   <owner>.github.io/<repo> -> VITE_BASE='/natus-mvp/'
 //
 // Attaching a domain, or transferring the repository to a new owner, is a
-// change of environment rather than a change of source. See docs/HANDOFF.md.
+// change of environment rather than a change of source. It is set in one
+// place: the `Build` step of `.github/workflows/deploy.yml`. `BrowserRouter`
+// reads the same value through `import.meta.env.BASE_URL`, so routing follows.
 export default defineConfig({
   base: process.env['VITE_BASE'] ?? '/',
   plugins: [react(), tailwindcss()],

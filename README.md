@@ -28,8 +28,8 @@ authenticated Edge Functions.
 | Payments, transactional email | Simulated | no charge, no mail is sent |
 
 `src/lib` is written to migrate: no React, no `localStorage`, no browser API.
-Those files are meant to be copied into `supabase/functions/_shared/lib`
-unchanged when the real backend is built. See `docs/MIGRATION.md`.
+Those files are copied into `supabase/functions/_shared/lib` unchanged by
+`pnpm sync:shared`, and `shared-parity.test.ts` fails if the two ever differ.
 
 ## The two AI paths
 
@@ -53,7 +53,7 @@ There used to be a third: paste your own Anthropic key and the browser called
 the model directly. It was how a static demo showed real generation, and it
 was removed once every surface had a server — it kept a working credential in
 `localStorage` and was the one path whose spend nobody could account for.
-`docs/DECISIONS.md` §14.
+`api.anthropic.com` now appears nowhere in `src` or in the built bundle.
 
 ## Running it
 
@@ -117,6 +117,43 @@ node scripts/verify-chat-function.mjs
 That covers everything up to the model gate and says so when the model itself
 is not configured. Add `--env-file` with a key to cover the call too.
 
+### Deployment configuration
+
+Nothing here is source. All of it is environment, because changing owner or
+attaching a domain changes the answers and should not mean editing a file.
+
+| Secret | Where | Without it |
+|--------|-------|------------|
+| `ANTHROPIC_API_KEY` | Supabase project | The five model functions answer `no_model` |
+| `RAPIDAPI_KEY` | Supabase project | `natal-chart` answers `astrologer_not_configured` |
+| `ALLOWED_ORIGINS` | Supabase project | CORS falls back to the two localhost origins, and a deployed browser silently discards every answer |
+| `MONTHLY_BUDGET_USD` | Supabase project | Defaults to 50 |
+| `SUPABASE_ACCESS_TOKEN` | GitHub repository **secret** | The `functions` job skips; the site still ships and the functions stay at the last hand-deployed version |
+
+`ALLOWED_ORIGINS` is comma-separated, scheme and host, no path:
+
+```bash
+supabase secrets set ALLOWED_ORIGINS=https://<owner>.github.io
+```
+
+`MONTHLY_BUDGET_USD` is the ceiling on what the whole deployment may spend at
+Anthropic in a rolling thirty days, counted from `claude_api_calls`. Past it
+every model call is refused with 429 and the application falls back to its
+curated fixtures. Per-person ceilings sit under it in `src/lib/budget.ts`.
+
+Three more things are keyed to the public URL and all three break silently
+when it changes: the Supabase redirect allow-list (Authentication → URL
+Configuration), `ALLOWED_ORIGINS`, and the authorised redirect URI on the
+Google OAuth client. None of them produces a useful error.
+
+`VITE_BASE` decides the base path, and is set in the `Build` step of
+`.github/workflows/deploy.yml`:
+
+| Situation | `VITE_BASE` |
+|-----------|-------------|
+| `<owner>.github.io/natus-mvp/` | `/natus-mvp/` |
+| Custom domain at the root | unset, or `/` |
+
 ## Deliberate omissions
 
 No streaks, badges, or re-engagement notifications. The product's stated goal
@@ -135,13 +172,9 @@ modalities, not people.
 
 | File | What |
 |------|------|
-| `specs/2026/08/NATUS-MVP/001-natus-mvp-static-demo.md` | Implementation plan, phase by phase |
-| `docs/DECISIONS.md` | Why things are the way they are, and what was rejected |
+| `CLAUDE.md` | Architecture, non-negotiables, and what is still open |
 | `docs/ASSETS.md` | Image origin and licensing |
-| `docs/HANDOFF.md` | Transferring the repository to a new owner |
-| `docs/MIGRATION.md` | Mapping this code onto Supabase, table by table |
 
-The PDR itself is not committed. It lives in Nico's vault; `docs/DECISIONS.md`
-distils the parts the code depends on, and every prompt reconstructed from it
-carries a `-reconstructed` suffix so nothing here can be mistaken for the
-original text.
+The PDR itself is not committed. It lives in Nico's vault, and every prompt
+reconstructed from it carries a `-reconstructed` suffix so nothing here can be
+mistaken for the original text.

@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { MVP_COUNTRIES, resourcesForCountry, telHref } from './crisis-resources.ts';
 
 /**
- * The honest-framing criterion of Phase 10, over the one screen where being
- * wrong costs the most.
+ * The honest-framing criterion, over the one screen where being wrong costs
+ * the most.
  *
  * Two properties, checked for every country and for the countries that are not
  * one: there is always something to call, and the screen never implies the

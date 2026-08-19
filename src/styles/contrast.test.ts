@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 /**
- * The accessibility criterion of Phase 10, made enforceable.
+ * The accessibility criterion, made enforceable.
  *
  * Every screen sets text in `crema` over a photograph under a black scrim. The
  * effective background sits between #0e0e0e and roughly #1f1f1c, and against

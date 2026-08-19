@@ -21,7 +21,7 @@ import { Generating } from './Generating';
 
 /**
  * Screens 2 to 7 of PDR 6.1. Screen 1 is the landing and screen 8 is the Soul
- * Map, which lands in Phase 4.
+ * Map.
  *
  * Layer 1 safety runs on leaving the clinical screen and again before
  * generation, which is where PDR 6.5 puts it in the pipeline. A high-severity

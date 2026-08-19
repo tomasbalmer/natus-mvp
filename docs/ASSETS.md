@@ -54,7 +54,7 @@ Cormorant Garamond and DM Sans, loaded from Google Fonts in `index.html`.
 Both are licensed under the SIL Open Font License. They are currently linked
 rather than self-hosted, which means the demo falls back to system serif and
 sans when offline. Self-hosting is worth doing before any presentation that
-cannot rely on a network — see Phase 10.
+cannot rely on a network.
 
 ## Audio
 

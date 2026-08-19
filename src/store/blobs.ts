@@ -2,8 +2,9 @@
  * The IndexedDB half of the delete-everything path in PDR 11.3.
  *
  * Nothing writes blobs yet — the natal-chart PDF is held in session state
- * because the demo never re-reads its bytes, and generated meditation audio
- * lands in Phase 8. The deletion path is written now anyway: a delete that
+ * because the demo never re-reads its bytes, and meditation audio is
+ * synthesised at playback rather than stored. The deletion path is written
+ * anyway: a delete that
  * quietly misses a store is the failure nobody notices, and the point of the
  * two-step confirmation is that afterwards there really is nothing left.
  *

@@ -21,45 +21,50 @@ Live at https://tomasbalmer.github.io/natus-mvp/
 asks about suicidal ideation because the product it demonstrates does. Nobody
 is monitoring it and the hotline numbers are unverified.
 
-## Read these before changing anything
+## Where the reasoning lives
 
-| File | Why |
-|------|-----|
-| `docs/DECISIONS.md` | Why things are the way they are, and what was rejected. Start here |
-| `specs/2026/08/NATUS-BACKEND/002-supabase-backend-migration.md` | The current plan. Phases 0 to 5 done; Phase 6 is where work resumes |
-| `specs/2026/08/NATUS-MVP/001-natus-mvp-static-demo.md` | The plan that built the demo. Complete — history, not instructions |
-| `docs/HANDOFF.md` | What a transfer moves and what it silently breaks |
+**This file is it.** The design record — two implementation plans, a decision
+log and a migration map, about 2,900 lines — was deleted once the product ran
+end to end, deliberately and with the owner's decision on record. What is
+below is what survived that, because it is still true rather than because it
+happened. `git log` has the rest.
+
+The consequence is worth stating plainly: nothing in this repository now
+explains why a rejected alternative was rejected. Before reversing something
+under **Non-negotiables**, ask — do not assume the absence of a reason means
+there was not one.
 
 The source documents are `PDR — MVP Natus_ Producto del Usuario.txt` and
-`natus-mockups (3).html`, both in `~/Downloads`. You rarely need them —
-`DECISIONS.md` distils what matters. When they disagree, the mockups are the
-**visual** truth (palette, typography, glass, photography) and the PDR is the
-**functional** truth (flow, scope, copy rules, safety).
+`natus-mockups (3).html`, both in `~/Downloads`. When they disagree, the
+mockups are the **visual** truth (palette, typography, glass, photography) and
+the PDR is the **functional** truth (flow, scope, copy rules, safety).
+`README.md` carries the deployment configuration; `docs/ASSETS.md` the image
+licensing.
 
 ## Resuming work
 
-Both plans are finished. 001 built the demo; 002 took it to Supabase and ran
-past its own last phase into two unplanned ones — synastry, and ceilings on
-what the model can cost. Everything in them is verified against production.
-
-```
-specs/2026/08/NATUS-BACKEND/002-supabase-backend-migration.md
-```
-
-Read its Phase 6, 7 and 8 verification blocks before touching the backend.
-They record what broke and why, and most of it was invisible until something
-real ran.
+The product runs end to end in production: onboarding, natal chart by
+ephemeris, Soul Map, recommendations, chat, meditations and synastry, all with
+real generation, all walked on the deployed site.
 
 **What is left is not code.** In rough order of weight:
 
 - The sixteen crisis numbers carry `2026-08-19`, which records the product
   owner accepting them as transcribed from the PDR — not a call placed to each
-  line. The calls are still owed. `docs/HANDOFF.md`.
-- Eight of those sixteen are short codes and cannot be dialled from abroad.
-  Nothing in the data records that.
+  line. The calls are still owed, and the PDR calls telephone verification an
+  absolute launch blocker. Verify by calling, not by searching, then set the
+  date again; re-verify every six months.
+- Eight of those sixteen — 1515, 131, 911, 192, 106, 135, 113, 123 — are short
+  codes and cannot be dialled from abroad. Nothing in the data records that, so
+  somebody living abroad who selected their home country is shown a number they
+  cannot ring. The international fallback on the same screen is all that covers
+  it today.
 - The door is open: `REQUIRE_INVITE=false`, so anybody with the link is in.
   Closing it needs a Google Cloud OAuth client first — the code is built and
-  waiting, the console work is not done. `DECISIONS.md` §13.
+  waiting, the console work is not done. Access control on GitHub Pages is an
+  Enterprise feature, so the site itself cannot be restricted; the gate is the
+  sign-in. Google rather than magic links because Supabase's built-in mail
+  refuses anyone outside the project team, at two messages an hour.
 - The free-tier pause question is still open.
 - `crisis-keywords.json` is `"status": "preliminary"` and wants a clinician.
 
@@ -75,9 +80,9 @@ available. Swapping in the real text is a change to constants in
 `src/ai/prompts/shared.ts` and the five version strings. Do not edit prompt
 text for any other reason without asking — the design is somebody's work.
 
-Update the plan as you go — check steps off, record deviations inline, and
-write the verification results under each phase. That file is how the next
-session picks up.
+Keep this section current. It is now the only handover there is: when one of
+the items above closes, delete it, and when something new is left open, write
+it down here.
 
 ## Architecture
 
@@ -96,7 +101,7 @@ src/lib/     Deterministic core. NO React, NO localStorage, NO browser API,
 
 src/store/   Postgres behind a synchronous in-memory mirror, hydrated once at
              session start. localStorage is the last-known-good fallback.
-             Call sites stayed synchronous; DECISIONS.md §12.
+             Call sites stayed synchronous by design.
 
 src/ai/      One runAi with two paths: an Edge Function when the backend is
              configured and the person is signed in, curated fixtures
@@ -126,7 +131,7 @@ pnpm verify:chat && pnpm verify:models
 
 ```
 pnpm typecheck      tsc --noEmit
-pnpm test           vitest, 694 tests
+pnpm test           vitest, 752 tests
 pnpm build          production build
 pnpm dev            development server
 pnpm sync:shared    re-copy src/lib and src/ai/prompts into _shared
@@ -139,14 +144,15 @@ while iterating on one.
 All three must pass before a commit. CI runs the same and deploys on push to
 `main`.
 
-Verify UI work in a browser, not by reasoning about it. Every defect found in
-phases 3 to 5 — a stopped wizard, an overlapping constellation, a stale match
-— was invisible to the type checker and the test suite.
+Verify UI work in a browser, not by reasoning about it. Every defect found
+during the build — a stopped wizard, an overlapping constellation, a stale
+match — was invisible to the type checker and the test suite.
 
 ## Non-negotiables
 
-These are product decisions, not preferences. `docs/DECISIONS.md` section 7
-has the reasoning.
+These are product decisions, not preferences. Each one was argued and settled;
+the argument is no longer written down, which is a reason to ask rather than a
+licence to reverse.
 
 - **No streaks, badges, or re-engagement notifications.** `store/matches.ts`
   computes a total, never a consecutive run. The number a streak needs is not
@@ -176,7 +182,7 @@ Everything else — code, comments, commits, docs, this file — is English.
 
 Automatic on push to `main`. `VITE_BASE` is set in the workflow, so attaching
 a custom domain or moving the repository to a new owner needs no source
-change. See `docs/HANDOFF.md`.
+change. See the deployment configuration table in `README.md`.
 
 A nested route returns HTTP 404 with the application as its body. That is the
 GitHub Pages SPA fallback working correctly, not a bug — the browser renders

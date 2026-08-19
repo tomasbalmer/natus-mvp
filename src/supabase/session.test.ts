@@ -9,9 +9,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
  *
  * What is NOT here: anonymous sign-in and the email upgrade against a live
  * stack. Those need Docker, and making `pnpm test` depend on it would break CI
- * on a machine that only wants to typecheck. They are verified against the
- * local stack instead and the result is recorded under Phase 2 of
- * specs/2026/08/NATUS-BACKEND/002-supabase-backend-migration.md.
+ * on a machine that only wants to typecheck. They are verified by hand
+ * against the local stack instead.
  */
 
 function user(overrides: Partial<User>): User {
@@ -105,8 +104,8 @@ describe('currentSession', () => {
     // StrictMode invokes the mount effect twice. Without the in-flight guard
     // both calls observe "no session" before either resolves and both sign
     // in — which produced two anonymous users eight microseconds apart the
-    // first time this ran in a browser, and in Phase 4 would mean rows keyed
-    // to a user_id the second sign-in had already replaced.
+    // first time this ran in a browser, and against Postgres would mean rows
+    // keyed to a user_id the second sign-in had already replaced.
     let release = () => {};
     const pending = new Promise<void>((r) => {
       release = r;

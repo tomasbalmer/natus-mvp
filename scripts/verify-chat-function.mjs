@@ -57,7 +57,7 @@ check('preflight answers 204', pre.status === 204, `status=${pre.status}`);
 // Supabase gateway rewrites it to `*` on every response whatever the function
 // sets, so this check could only ever confirm the gateway. The decision is
 // unit-tested in src/lib/cors.test.ts instead, and the delivered header has to
-// be confirmed against the deployed project in Phase 6.
+// be confirmed against the deployed project.
 
 // ── the JWT is the control ──────────────────────────────────────────────────
 const noToken = await call({ message: 'hola' });

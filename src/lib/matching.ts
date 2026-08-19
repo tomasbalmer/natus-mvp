@@ -15,7 +15,7 @@ import type { Modality } from './schemas/index.ts';
  * No React, no storage — copied into `_shared/lib` unchanged, and
  * `shared-parity.test.ts` fails if the two copies ever differ.
  *
- * **Which copy is authoritative.** From Phase 5, the one in the Edge Function.
+ * **Which copy is authoritative.** The one in the Edge Function.
  * A filter running in a browser can be edited by whoever is holding the
  * browser, and this one decides whether somebody in a fragile state is shown
  * a modality that opens things up — `clinicallyExcluded` below is not a
