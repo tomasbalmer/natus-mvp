@@ -45,7 +45,13 @@ export async function overPersonalLimit(
       .eq('user_id', userId)
       .eq('purpose', purpose)
       .eq('mode', 'server')
-      .eq('outcome', 'ok')
+      // Anything that reached the model, not only what came back usable.
+      // Counting successes alone let somebody loop a request the model
+      // cannot satisfy without ever consuming their allowance — the platform
+      // paying for every attempt while the person's counter stayed at zero.
+      // Rows that never reached it have null tokens and are not theirs to
+      // answer for: an outage must not spend somebody's quota.
+      .not('output_tokens', 'is', null)
       .gte('created_at', since);
 
     if (error) return false;
@@ -58,10 +64,12 @@ export async function overPersonalLimit(
 /**
  * What the deployment has spent in the last thirty days, against its budget.
  *
- * Only successful server calls are counted, because only those were billed
- * for a completion. A refused or failed call still cost input tokens, and
- * that undercount is accepted: the alternative is summing rows whose token
- * columns are null, which reads as zero and is a worse kind of wrong.
+ * **Every server row, not only the successful ones.** A call that reached the
+ * model and then failed its schema generated a full answer and was billed for
+ * it; counting only `ok` meant the most expensive failure mode — a contract
+ * the model cannot satisfy, retried, over and over — was the one the ceiling
+ * could not see. Rows that never reached the model carry null tokens and
+ * contribute nothing, which is the correct answer for them.
  */
 export async function overDeploymentBudget(elevated: SupabaseClient): Promise<boolean> {
   const budget = monthlyBudgetUsd(Deno.env.get('MONTHLY_BUDGET_USD'));
@@ -72,7 +80,6 @@ export async function overDeploymentBudget(elevated: SupabaseClient): Promise<bo
       .from('claude_api_calls')
       .select('input_tokens,output_tokens,cache_write_tokens,cache_read_tokens')
       .eq('mode', 'server')
-      .eq('outcome', 'ok')
       .gte('created_at', since);
 
     if (error || !data) return false;

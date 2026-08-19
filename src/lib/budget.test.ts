@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_MONTHLY_BUDGET_USD,
+  addUsage,
   MAX_OUTPUT_TOKENS,
   PURPOSE_LIMITS,
   costUsd,
@@ -50,6 +51,48 @@ describe('the cache, which was being counted as free', () => {
     const warm = costUsd({ inputTokens: 100, outputTokens: 500, cacheReadTokens: 1_900 });
     const uncached = costUsd({ inputTokens: 2_000, outputTokens: 500 });
     expect(warm).toBeLessThan(uncached);
+  });
+});
+
+describe('adding two attempts', () => {
+  it('sums a retry on top of the attempt it followed', () => {
+    // The reason this exists: keeping only the last attempt under-reports by
+    // exactly the amount that made retrying expensive.
+    const both = addUsage(
+      { inputTokens: 300, outputTokens: 2_000, cacheWriteTokens: 1_900, cacheReadTokens: 0 },
+      { inputTokens: 300, outputTokens: 2_100, cacheWriteTokens: 0, cacheReadTokens: 1_900 },
+    );
+    expect(both).toEqual({
+      inputTokens: 600,
+      outputTokens: 4_100,
+      cacheWriteTokens: 1_900,
+      cacheReadTokens: 1_900,
+    });
+  });
+
+  it('keeps an absence rather than turning it into a zero', () => {
+    // A call that never reached the model has no usage, and `0` would be a
+    // claim about what it cost instead of an admission that nobody knows.
+    expect(addUsage(undefined, undefined)).toBeUndefined();
+    const only = { inputTokens: 10, outputTokens: 20 };
+    expect(addUsage(undefined, only)).toBe(only);
+    expect(addUsage(only, undefined)).toBe(only);
+  });
+
+  it('treats one attempt reaching the model and one not as one attempt', () => {
+    const both = addUsage({ inputTokens: null, outputTokens: null }, { inputTokens: 300, outputTokens: 2_000 });
+    expect(both?.inputTokens).toBe(300);
+    expect(both?.outputTokens).toBe(2_000);
+  });
+
+  it('prices a failed pair of attempts at more than nothing', () => {
+    // The bug this whole change closes: two comparison calls generated four
+    // thousand tokens each, failed their schema, and were recorded as free.
+    const failed = addUsage(
+      { inputTokens: 288, outputTokens: 4_300 },
+      { inputTokens: 288, outputTokens: 4_300 },
+    );
+    expect(costUsd(failed ?? {})).toBeGreaterThan(0.2);
   });
 });
 

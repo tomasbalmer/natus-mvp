@@ -576,6 +576,28 @@ these have to add up against and one unit of time is what makes that sum
 checkable. `budget.test.ts` checks it, and would fail again on the same
 mistake.
 
+**The three places the ledger was lying, found by reading the bill.**
+
+Counting only `input_tokens` and `output_tokens` missed the two cache
+counts, and writing to the cache is billed at 1.25× — so every row understated
+its call. Worse, a call that reached the model and *then* failed its schema
+recorded no tokens at all, and the budget only summed `outcome = 'ok'`: the
+most expensive failure mode, a contract the model cannot satisfy retried over
+and over, was the one the ceiling could not see. And a retry's tokens were
+dropped along with the attempt that failed, which is precisely the amount that
+makes retrying expensive.
+
+All three are closed. `Usage` is nullable rather than zero-defaulted, because
+a call that never reached the model has no usage and `0` would be a claim
+about what it cost instead of an admission that nobody knows.
+
+**The cache is instrumented rather than assumed.** `cache_read_tokens` is the
+measurement: the marker has a five-minute window, and two people generating a
+Soul Map are rarely five minutes apart. The one direct observation showed zero
+reads. If that holds on the once-per-account surfaces, the marker there is a
+25% surcharge buying nothing and belongs only where turns repeat — but that is
+a decision to take from a week of rows, not from one reading.
+
 **What was deliberately not touched.** The prompts. They are reconstructed
 from the PDR rather than written by the product's author, and shortening them
 to save tokens would be editing somebody else's voice to save a few cents on a

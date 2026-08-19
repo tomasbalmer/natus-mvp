@@ -266,6 +266,8 @@ if (keyed) {
       outcome: 'ok',
       input_tokens: 3000,
       output_tokens: 1200,
+      cache_write_tokens: 1900,
+      cache_read_tokens: 0,
     }));
     const { error: seedError } = await elevated.from('claude_api_calls').insert(rows);
     check('the ledger accepts the elevated write', !seedError, seedError?.message ?? '');

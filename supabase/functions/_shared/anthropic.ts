@@ -1,6 +1,7 @@
 import type { ZodType } from 'zod';
 import { lintDeep } from './lib/copy-lint.ts';
 import { MalformedJson, parseJsonLoosely } from './lib/model-json.ts';
+import { addUsage, type Usage } from './lib/budget.ts';
 
 /**
  * The model call, held where the key is.
@@ -58,10 +59,23 @@ export class ModelError extends Error {
      * error class, never the payload".
      */
     readonly detail?: string,
+    /**
+     * What the failed call cost, when it reached the model at all.
+     *
+     * The usage is measured and was being thrown away: it lived inside the
+     * try block and a schema mismatch left it there. Four calls in one
+     * afternoon generated four thousand tokens each and recorded as zero,
+     * and the deployment ceiling — which sums the ledger — could not see a
+     * cent of it. The failure mode that costs most was the one the ceiling
+     * was blind to.
+     */
+    readonly usage?: Usage,
   ) {
     super(message);
   }
 }
+
+
 
 export type Generation<T> = {
   value: T;
@@ -105,6 +119,7 @@ export async function generate<T>(call: {
   if (!apiKey) throw new ModelError('No key is configured.', 'api_error');
 
   let last: unknown;
+  let billed: Usage | undefined;
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const response = await post(call.system, call.user, call.effort ?? 'medium', call.maxTokens, apiKey);
@@ -116,6 +131,13 @@ export async function generate<T>(call: {
       // diagnosis. The first synastry returned valid, complete JSON that was
       // missing two fields, and `invalid_json` sent the search in exactly the
       // wrong direction, twice, at the cost of a call each time.
+      const spent: Usage = {
+        inputTokens: response.inputTokens,
+        outputTokens: response.outputTokens,
+        cacheWriteTokens: response.cacheWriteTokens,
+        cacheReadTokens: response.cacheReadTokens,
+      };
+
       const parsed = call.schema.safeParse(json);
       if (!parsed.success) {
         // Field paths, never values. `astro_dialogue.aspects.2.a_body` names
@@ -125,10 +147,11 @@ export async function generate<T>(call: {
           `The answer did not match the contract: ${paths.join(', ')}`,
           'invalid_json',
           `schema:${paths.slice(0, 4).join(',')}`,
+          spent,
         );
       }
 
-      assertCleanCopy(parsed.data);
+      assertCleanCopy(parsed.data, spent);
       return {
         value: parsed.data,
         inputTokens: response.inputTokens,
@@ -138,6 +161,9 @@ export async function generate<T>(call: {
       };
     } catch (error) {
       last = error;
+      // A retry is billed on top of the attempt that failed, so the record
+      // has to carry both rather than only the one that threw last.
+      if (error instanceof ModelError) billed = addUsage(billed, error.usage);
       // Neither of these is a bad roll, and retrying both wastes a full
       // second generation. A copy violation is a property of the prompt. A
       // timeout is a property of the contract's length — the second attempt
@@ -149,7 +175,10 @@ export async function generate<T>(call: {
     }
   }
 
-  throw last instanceof ModelError ? last : new ModelError(String(last), 'invalid_json');
+  if (last instanceof ModelError) {
+    throw new ModelError(last.message, last.kind, last.detail, billed);
+  }
+  throw new ModelError(String(last), 'invalid_json', undefined, billed);
 }
 
 function readJson(text: string): unknown {
@@ -161,13 +190,15 @@ function readJson(text: string): unknown {
   }
 }
 
-function assertCleanCopy(value: unknown): void {
+function assertCleanCopy(value: unknown, spent?: Usage): void {
   const violations = lintDeep(value);
   if (violations.length === 0) return;
   const first = violations[0];
   throw new ModelError(
     `Copy rule "${first?.rule}" broken at ${first?.path}: "${first?.match}" — ${first?.why}`,
     'copy_violation',
+    first?.rule ? `lint:${first.rule}` : undefined,
+    spent,
   );
 }
 

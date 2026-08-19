@@ -168,6 +168,16 @@ export function serveModel<I, O>(route: ModelRoute<I, O>): (request: Request) =>
         outcome: kind,
         latencyMs: Date.now() - started,
         errorKind: detail,
+        // A failure that reached the model still generated tokens, and the
+        // ceiling is blind to whatever the ledger does not hold.
+        ...(error instanceof ModelError && error.usage
+          ? {
+              inputTokens: error.usage.inputTokens,
+              outputTokens: error.usage.outputTokens,
+              cacheWriteTokens: error.usage.cacheWriteTokens,
+              cacheReadTokens: error.usage.cacheReadTokens,
+            }
+          : {}),
       });
       // The provider's *message* does not travel — it can quote the request
       // back, and the request is what these functions exist to keep from

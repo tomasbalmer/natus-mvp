@@ -39,23 +39,50 @@ export const PRICE_PER_MTOK = {
   cacheRead: 0.5,
 } as const;
 
+/**
+ * The four counts a call is billed on. Nullable because a call that never
+ * reached the model has none, and zero would be a claim rather than an
+ * absence.
+ */
 export type Usage = {
-  inputTokens: number;
-  outputTokens: number;
+  inputTokens?: number | null;
+  outputTokens?: number | null;
   /** Billed at 1.25×. Charged the first time a prefix is cached. */
-  cacheWriteTokens?: number;
+  cacheWriteTokens?: number | null;
   /** Billed at 0.1×. The saving, when the cache is still warm. */
-  cacheReadTokens?: number;
+  cacheReadTokens?: number | null;
 };
 
 export function costUsd(usage: Usage): number {
   return (
-    (usage.inputTokens * PRICE_PER_MTOK.input +
-      usage.outputTokens * PRICE_PER_MTOK.output +
+    ((usage.inputTokens ?? 0) * PRICE_PER_MTOK.input +
+      (usage.outputTokens ?? 0) * PRICE_PER_MTOK.output +
       (usage.cacheWriteTokens ?? 0) * PRICE_PER_MTOK.cacheWrite +
       (usage.cacheReadTokens ?? 0) * PRICE_PER_MTOK.cacheRead) /
     1_000_000
   );
+}
+
+/**
+ * Two attempts, added.
+ *
+ * A retry is billed on top of the attempt that failed, so a record that keeps
+ * only the last one under-reports by exactly the amount that made retrying
+ * expensive. Null plus null stays null — the absence survives — while null
+ * plus a number is that number, because one attempt reaching the model and
+ * the other not is still one attempt's worth of tokens.
+ */
+export function addUsage(a: Usage | undefined, b: Usage | undefined): Usage | undefined {
+  if (!a) return b;
+  if (!b) return a;
+  const sum = (x: number | null | undefined, y: number | null | undefined) =>
+    x === null || x === undefined ? (y ?? null) : (x ?? 0) + (y ?? 0);
+  return {
+    inputTokens: sum(a.inputTokens, b.inputTokens),
+    outputTokens: sum(a.outputTokens, b.outputTokens),
+    cacheWriteTokens: sum(a.cacheWriteTokens, b.cacheWriteTokens),
+    cacheReadTokens: sum(a.cacheReadTokens, b.cacheReadTokens),
+  };
 }
 
 export type PurposeLimit = {

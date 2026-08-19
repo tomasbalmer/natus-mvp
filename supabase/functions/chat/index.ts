@@ -204,6 +204,14 @@ Deno.serve(async (request) => {
       outcome: kind,
       latencyMs: Date.now() - started,
       errorKind: detail,
+      ...(error instanceof ModelError && error.usage
+        ? {
+            inputTokens: error.usage.inputTokens,
+            outputTokens: error.usage.outputTokens,
+            cacheWriteTokens: error.usage.cacheWriteTokens,
+            cacheReadTokens: error.usage.cacheReadTokens,
+          }
+        : {}),
     });
 
     // The turn is not charged. The provider's message does not travel — it
