@@ -117,6 +117,12 @@ if (ordinary.status === 503) {
     `remaining=${ordinaryBody.remaining}`,
   );
   console.log('note  the model path is UNVERIFIED — serve with ANTHROPIC_API_KEY to cover it');
+} else if (ordinary.status === 502 && ordinaryBody.kind === 'api_error') {
+  // A key that Anthropic refused — a dummy one, usually. Everything up to the
+  // call ran, which is what makes the gates behind the key check testable
+  // without spending anything. The answer itself stays unverified.
+  check('an ordinary turn reaches the model itself', true, `detail=${ordinaryBody.detail ?? 'none'}`);
+  console.log('note  the key was refused upstream — the answer itself is still UNVERIFIED');
 } else {
   // The last mile: the contract, the copy lint and the ledger, against the
   // real API. Costs a few cents per run, which is why it is opt-in.
