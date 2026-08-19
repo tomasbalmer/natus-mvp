@@ -191,10 +191,22 @@ Implementation cannot start until these exist. None of them are code.
       add a scheduled ping to keep the project warm, or take the paid tier.
       This affects whether a demo opens instantly in a meeting. Deciding it
       late means deciding it during a demo.
-- [ ] **Anthropic API key with billing enabled.** Goes into Edge Function
+- [~] **Anthropic API key with billing enabled.** Goes into Edge Function
       secrets in Phase 5, never into the repository and never into the bundle.
-      **Still outstanding, and now the only thing between the five model
-      functions and working.** `RAPIDAPI_KEY` is set; this is not.
+      **The key is set. The billing is not** — 2026-08-19, and the emphasis in
+      the line above turned out to be the whole point.
+
+      What the key being present proved, which was worth the round trip: the
+      functions reach Anthropic, the request shape is accepted, and the ledger
+      records the outcome. Every variant of the request was tried directly
+      against the API — minimal, with adaptive thinking, with `output_config`
+      effort, with the cached system array, and all of them together — and all
+      five returned the same thing:
+
+      > Your credit balance is too low to access the Anthropic API.
+
+      So nothing is wrong with the code. Add credit at
+      `console.anthropic.com` → Plans & Billing and the model path closes.
 - [x] **Install the Supabase CLI locally.** Migrations and functions are
       developed and tested against a local stack before anything reaches the
       hosted project.
@@ -1114,8 +1126,14 @@ that could never carry anything.
   rather than the sentence that happened to say it.
 
 **Unverified:** the synastry call itself. `enrich` runs after the model gate,
-so a deployment without an `ANTHROPIC_API_KEY` never reaches the ephemeris.
-Same box as the model call, same key.
+which is now passed — the block is the Anthropic account's credit balance, so
+this waits on billing rather than on a key.
+
+**And on one migration.** `20260819000000_external_profile_birth_country.sql`
+has not been applied to the hosted project: `external_profiles.birth_country`
+does not exist there. Until it does, the second person's birth place cannot be
+saved in production and the synastry path has nothing to compute from. It
+needs `supabase db push` from an authorised CLI, or the SQL editor.
 
 ### [UNPLANNED] Phase 8: Ceilings on what this can cost
 
