@@ -110,15 +110,9 @@ pnpm dev            development server
 pnpm sync:shared    re-copy src/lib and src/ai/prompts into _shared
 ```
 
-**Functions are deployed by hand.** `SUPABASE_ACCESS_TOKEN` is not a
-repository secret, so the CI job that would deploy them skips itself on every
-push. After any change under `supabase/functions/`, run:
-
-```
-pnpm deploy:functions
-```
-
-Forgetting it ships a site whose backend did not move with it.
+Functions deploy on push, from the `functions` job that the site job waits on.
+`pnpm deploy:functions` pushes them without a commit, which is what to use
+while iterating on one.
 
 All three must pass before a commit. CI runs the same and deploys on push to
 `main`.

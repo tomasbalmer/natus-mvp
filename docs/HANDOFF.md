@@ -110,21 +110,16 @@ Deployment is automatic on push to `main`, from the `functions` job in
 repository **secret**. Without it the job skips, the site still ships, and the
 functions stay at whatever version was last deployed by hand.
 
-**That secret does not exist yet, so the functions are deployed by hand:**
-
-```bash
-pnpm deploy:functions
-```
-
-Run it after any change under `supabase/functions/`. The site will have
-shipped without it otherwise, and the two will be describing different
-products to the same person. Create the token at
-`supabase.com/dashboard/account/tokens` — it is shown once — and the command
-stops being necessary:
+The token comes from `supabase.com/dashboard/account/tokens`, is shown once,
+and a new owner has to create their own — it is personal to an account, not to
+a project:
 
 ```bash
 gh secret set SUPABASE_ACCESS_TOKEN --repo <owner>/natus-mvp
 ```
+
+`pnpm deploy:functions` pushes the functions without a commit, for iterating
+on one without shipping the site alongside it.
 
 ## Before making the repository public-facing
 

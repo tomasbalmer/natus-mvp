@@ -1026,9 +1026,10 @@ runs and once inside it. Neither check is redundant: the gateway cannot tell a
 valid anonymous key from a user session, and `authenticate` is what refuses
 the first.
 
-Deploying by hand is the stopgap, not the plan. Until the secret exists, every
-push ships a site whose functions did not move with it — which is the exact
-drift the job ordering was written to prevent.
+**And then automatically, the same day.** `SUPABASE_ACCESS_TOKEN` was set as a
+repository secret and the workflow was run: the `functions` job bundled and
+deployed all six, and the site job followed it. The stopgap lasted a few
+hours; step 6.2 is verified by having run rather than by having been written.
 
 **The Astrologer call is verified, 2026-08-19.** Against the deployed
 function, from an anonymous session on the production project — the first time
@@ -1109,7 +1110,6 @@ the deployed project and against the local Edge runtime where it is not.
 | | Owner | Blocks |
 |---|---|---|
 | `ANTHROPIC_API_KEY` on the project | Tomás | The model call — the last unverified path in the system |
-| `SUPABASE_ACCESS_TOKEN` as a repository secret | Tomás | Automatic function deployment; every push ships a site whose functions did not move |
 | The free-tier pause decision | Tomás | Whether a demo opens instantly |
 | `REQUIRE_INVITE` back to `true` | Tomás | The door is open on the deployed site. §13 says it closes before the pilot |
 
