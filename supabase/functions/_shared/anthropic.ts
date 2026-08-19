@@ -26,7 +26,17 @@ import { MalformedJson, parseJsonLoosely } from './lib/model-json.ts';
 export const MODEL = 'claude-opus-5';
 
 const ENDPOINT = 'https://api.anthropic.com/v1/messages';
-const TIMEOUT_MS = 45_000;
+/**
+ * Ninety seconds, raised from forty-five.
+ *
+ * The comparison contract is the long one — a headline, a numerology pair per
+ * number, a reading per aspect, where it flows, where it rubs, and the
+ * questions to close on — and it took thirty-eight seconds before the
+ * ephemeris started supplying aspects to narrate. Forty-five was not a
+ * considered ceiling for that; it was the browser's number, copied over when
+ * the call moved to the server, where nobody is watching a spinner.
+ */
+const TIMEOUT_MS = 90_000;
 
 /** Aligned with `CallOutcome` in `log.ts`, so a failure logs as what it was. */
 export type ModelErrorKind = 'invalid_json' | 'api_error' | 'timeout' | 'copy_violation';
@@ -100,7 +110,14 @@ export async function generate<T>(call: {
       return { value, inputTokens: response.inputTokens, outputTokens: response.outputTokens };
     } catch (error) {
       last = error;
-      if (error instanceof ModelError && error.kind === 'copy_violation') break;
+      // Neither of these is a bad roll, and retrying both wastes a full
+      // second generation. A copy violation is a property of the prompt. A
+      // timeout is a property of the contract's length — the second attempt
+      // takes as long as the first and ends the same way, having billed for
+      // every token it produced before being cut off.
+      if (error instanceof ModelError && (error.kind === 'copy_violation' || error.kind === 'timeout')) {
+        break;
+      }
     }
   }
 
