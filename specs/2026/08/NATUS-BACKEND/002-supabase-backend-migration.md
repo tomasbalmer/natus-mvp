@@ -205,8 +205,11 @@ Implementation cannot start until these exist. None of them are code.
 
       > Your credit balance is too low to access the Anthropic API.
 
-      So nothing is wrong with the code. Add credit at
-      `console.anthropic.com` → Plans & Billing and the model path closes.
+      **Closed 2026-08-19.** Credit added, and all three paths verified against
+      the deployed project: a Soul Map (320 in / 2,080 out, $0.054), a chat
+      turn (293 / 369, $0.011) and a synastry comparison (496 / 3,827,
+      $0.098). The whole verification, including every failed attempt on the
+      way, cost about $1.20.
 - [x] **Install the Supabase CLI locally.** Migrations and functions are
       developed and tested against a local stack before anything reaches the
       hosted project.
@@ -1125,9 +1128,22 @@ that could never carry anything.
   true — that the section says it has no content and completes nothing —
   rather than the sentence that happened to say it.
 
-**Unverified:** the synastry call itself. `enrich` runs after the model gate,
-which is now passed — the block is the Anthropic account's credit balance, so
-this waits on billing rather than on a key.
+**Verified in production, 2026-08-19.** Eight aspects from the ephemeris,
+eight readings from the model, every one of them checked against the computed
+list before it was returned. 60.7 s, 496 in / 3,827 out, $0.098.
+
+Four things had to be fixed to get there, and each was invisible until a real
+call was made:
+
+- `zodiac_type: 'Tropic'` — Kerykeion's own value, not the API's. Rejected,
+  returned null, and read as "no chart to cross".
+- Thirty-odd aspects narrated one by one ran past the timeout. Capped at the
+  tightest eight by orb, which is also the better reading.
+- Forty-five seconds was the browser's ceiling, copied to a server where
+  nobody watches a spinner. Ninety now, and a timeout no longer retries — that
+  was paying for two full generations to fail the same way.
+- The `CONTRATO` block showed `"aspects": []` with no fields, so six of eight
+  came back with no `a_body`. Only the example and the counts changed.
 
 **And on one migration.** `20260819000000_external_profile_birth_country.sql`
 has not been applied to the hosted project: `external_profiles.birth_country`

@@ -524,10 +524,12 @@ or the comparison runs on numbers and themes. A date without a time gives a
 Moon that could be anywhere in a twelve-degree band, and an aspect computed
 from it would be stated with exactly the confidence of a real one.
 
-**What is unverified.** The synastry call itself. `enrich` runs after the
-model gate, so a deployment without an `ANTHROPIC_API_KEY` never reaches the
-ephemeris — the call cannot be exercised until the model exists. It is in the
-same box as the model call, for the same reason.
+**Verified in production, 2026-08-19.** Eight aspects computed, eight read,
+none invented. What it took to get there is the argument for this section
+existing: a wrong enum, a timeout, a retry that paid twice for the same
+failure, and a contract that never said what an aspect looks like — four
+failures, none of which any test, type or local run could see, because the
+ephemeris and the model only exist on the other side of a key.
 
 ---
 
