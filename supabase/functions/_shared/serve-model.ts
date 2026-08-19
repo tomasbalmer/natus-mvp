@@ -57,6 +57,8 @@ export type ModelRoute<I, O> = {
    * the model held the contract and broke the product rule.
    */
   check?: (output: O, input: I) => string | null;
+  /** Operational counts to return beside the token usage. Never content. */
+  meta?: (input: I) => Record<string, number>;
   effort?: 'low' | 'medium' | 'high' | 'xhigh' | 'max';
 };
 
@@ -152,6 +154,7 @@ export function serveModel<I, O>(route: ModelRoute<I, O>): (request: Request) =>
         result: generated.value,
         input_tokens: generated.inputTokens,
         output_tokens: generated.outputTokens,
+        ...(route.meta ? route.meta(input) : {}),
       });
     } catch (error) {
       const kind = error instanceof ModelError ? error.kind : 'api_error';

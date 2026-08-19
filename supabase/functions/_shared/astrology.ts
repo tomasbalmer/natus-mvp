@@ -99,7 +99,12 @@ export async function synastryAspects(
     latitude: birth.latitude,
     longitude: birth.longitude,
     timezone: birth.timezone,
-    zodiac_type: 'Tropic',
+    // No `zodiac_type`. The first version sent 'Tropic' — the value
+    // Kerykeion's own library uses — and the API wanted 'Tropical'; the
+    // request was rejected and this function returned null, which the caller
+    // reads as "no chart to cross". A wrong enum and no chart at all looked
+    // identical from outside. The natal-chart function has never sent the
+    // field and has always worked, so the default is the answer.
   });
 
   const response = await fetch(SYNASTRY_ENDPOINT, {

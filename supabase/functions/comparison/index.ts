@@ -63,6 +63,12 @@ async function withAspects<T extends Parameters<typeof canComputeSynastry>[0]>(
 Deno.serve(
   serveModel({
     purpose: 'comparison',
+    // How many the ephemeris returned, alongside the token counts. Operational
+    // metadata, no different in kind from those: it names a count, never a
+    // placement. Without it a synastry that quietly computed nothing is
+    // indistinguishable from two people who have no birth data, and the first
+    // time that happened it took a deploy to find out which.
+    meta: (payload) => ({ aspects_computed: payload.aspects.length }),
     promptVersion: COMPARISON_PROMPT_VERSION,
     input: comparisonInputSchema,
     output: comparisonResultSchema,
