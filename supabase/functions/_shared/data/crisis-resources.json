@@ -1,5 +1,5 @@
 {
-  "$comment": "Crisis resources per PDR 6.4. EVERY entry carries verified_at: null. The PDR calls telephone verification an absolute launch blocker, and a wrong number here is the worst possible bug in this product - so while verified_at is null the crisis screen renders an unverified notice and always shows the international fallback alongside. Verify by calling, not by searching, then set the date. Re-verify every 6 months. Numbers below are transcribed from the PDR and have NOT been called.",
+  "$comment": "Crisis resources per PDR 6.4. A wrong number here is the worst possible bug in this product. While verified_at is null the crisis screen renders an unverified notice and always shows the international fallback alongside; with a date set it shows the numbers plainly. The 2026-08-19 dates record the product owner accepting the numbers as transcribed from the PDR, which is where they came from - not a call placed to each line. That distinction is written down because the re-verification below is still owed, and because whoever reads this in six months needs to know what was and was not checked. Verify by calling, not by searching, then set the date again. Re-verify every 6 months. Note also: eight of these are short codes (1515, 131, 911, 192, 106, 135, 113, 123) and cannot be dialled from outside the country, which no field here records.",
   "version": "crisis-resources-v1-unverified",
   "resources": [
     {
@@ -10,7 +10,7 @@
       "note": "Orientación en salud mental, 24 horas.",
       "priority": 1,
       "is_active": true,
-      "verified_at": null
+      "verified_at": "2026-08-19"
     },
     {
       "country": "CL",
@@ -20,7 +20,7 @@
       "note": "Escucha y contención.",
       "priority": 2,
       "is_active": true,
-      "verified_at": null
+      "verified_at": "2026-08-19"
     },
     {
       "country": "CL",
@@ -30,7 +30,7 @@
       "note": "Para personas de 8 a 29 años.",
       "priority": 3,
       "is_active": true,
-      "verified_at": null
+      "verified_at": "2026-08-19"
     },
     {
       "country": "CL",
@@ -40,7 +40,7 @@
       "note": "Ambulancia SAMU.",
       "priority": 4,
       "is_active": true,
-      "verified_at": null
+      "verified_at": "2026-08-19"
     },
     {
       "country": "MX",
@@ -50,7 +50,7 @@
       "note": "Atención en crisis, 24 horas.",
       "priority": 1,
       "is_active": true,
-      "verified_at": null
+      "verified_at": "2026-08-19"
     },
     {
       "country": "MX",
@@ -60,7 +60,7 @@
       "note": "Apoyo psicológico por teléfono.",
       "priority": 2,
       "is_active": true,
-      "verified_at": null
+      "verified_at": "2026-08-19"
     },
     {
       "country": "MX",
@@ -70,7 +70,7 @@
       "note": null,
       "priority": 3,
       "is_active": true,
-      "verified_at": null
+      "verified_at": "2026-08-19"
     },
     {
       "country": "CO",
@@ -80,7 +80,7 @@
       "note": "Marcar 192 y elegir la opción 4.",
       "priority": 1,
       "is_active": true,
-      "verified_at": null
+      "verified_at": "2026-08-19"
     },
     {
       "country": "CO",
@@ -90,7 +90,7 @@
       "note": "Bogotá.",
       "priority": 2,
       "is_active": true,
-      "verified_at": null
+      "verified_at": "2026-08-19"
     },
     {
       "country": "CO",
@@ -100,7 +100,7 @@
       "note": null,
       "priority": 3,
       "is_active": true,
-      "verified_at": null
+      "verified_at": "2026-08-19"
     },
     {
       "country": "AR",
@@ -110,7 +110,7 @@
       "note": "Desde otras provincias: (011) 5275-1135.",
       "priority": 1,
       "is_active": true,
-      "verified_at": null
+      "verified_at": "2026-08-19"
     },
     {
       "country": "AR",
@@ -120,7 +120,7 @@
       "note": "Escucha y orientación.",
       "priority": 2,
       "is_active": true,
-      "verified_at": null
+      "verified_at": "2026-08-19"
     },
     {
       "country": "AR",
@@ -130,7 +130,7 @@
       "note": null,
       "priority": 3,
       "is_active": true,
-      "verified_at": null
+      "verified_at": "2026-08-19"
     },
     {
       "country": "PE",
@@ -140,7 +140,7 @@
       "note": "Marcar 113 y elegir la opción 5.",
       "priority": 1,
       "is_active": true,
-      "verified_at": null
+      "verified_at": "2026-08-19"
     },
     {
       "country": "PE",
@@ -150,7 +150,7 @@
       "note": "Prevención del suicidio.",
       "priority": 2,
       "is_active": true,
-      "verified_at": null
+      "verified_at": "2026-08-19"
     },
     {
       "country": "PE",
@@ -160,7 +160,7 @@
       "note": "Ambulancia SAMU.",
       "priority": 3,
       "is_active": true,
-      "verified_at": null
+      "verified_at": "2026-08-19"
     }
   ],
   "fallback": {

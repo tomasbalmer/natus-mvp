@@ -136,11 +136,19 @@ Private repositories need GitHub Pro or a Team organisation.
 
 Two things must be settled before the URL is circulated beyond a small group:
 
-- **Hotline verification.** `data/crisis-resources.json` carries
-  `verified_at: null` on every entry, and the crisis screen renders an
-  unverified notice while that is the case. The PDR calls telephone
-  verification an absolute launch blocker. Verify by calling, not by
-  searching, then set the date.
+- **Hotline verification.** `data/crisis-resources.json` now carries
+  `2026-08-19` on every entry, so the crisis screen shows the numbers without
+  a disclaimer. That date records the product owner accepting the numbers as
+  transcribed from the PDR — it is not a call placed to each line, and the PDR
+  calls telephone verification an absolute launch blocker. **The calls are
+  still owed.** Verify by calling, not by searching, and set the date again;
+  re-verify every six months.
+- **Short codes cannot be dialled from abroad.** Eight of the sixteen — 1515,
+  131, 911, 192, 106, 135, 113, 123 — work only inside their country, and
+  nothing in the data records that. Somebody who lives abroad and selected
+  their home country is shown a number they cannot ring. The international
+  fallback is always on the same screen, which is the only thing covering it
+  today.
 - **Clinical review of the crisis keywords.** `data/crisis-keywords.json` is
   marked `"status": "preliminary"`. It needs a clinical psychologist's review
   before anyone relies on it.

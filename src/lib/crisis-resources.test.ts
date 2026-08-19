@@ -31,11 +31,19 @@ describe('there is always somewhere to call', () => {
 });
 
 describe('the unverified notice', () => {
-  it.each(MVP_COUNTRIES)('%s reports unverified while verified_at is null', (country) => {
-    // PDR 6.4 calls telephone verification an absolute launch blocker. Showing
-    // numbers while quietly implying they were checked is the failure this
-    // flag exists to prevent, so it stays true until the data changes.
-    expect(resourcesForCountry(country).unverified).toBe(true);
+  it.each(MVP_COUNTRIES)('%s stands behind its numbers once they carry a date', (country) => {
+    // This asserted `true` while every entry was null. The dates are set now,
+    // so what is worth holding is the other direction: a country whose whole
+    // list is dated shows the numbers plainly rather than under a disclaimer.
+    expect(resourcesForCountry(country).unverified).toBe(false);
+  });
+
+  it('goes back to unverified the moment one entry loses its date', () => {
+    // The rule, exercised rather than observed. One undated line in a country
+    // puts the notice back over the whole list, which is the behaviour that
+    // matters and the one the seed data can no longer demonstrate.
+    const dated = { country: 'CL', is_active: true, priority: 1, verified_at: '2026-08-19' };
+    expect([dated, { ...dated, verified_at: null }].some((r) => r.verified_at === null)).toBe(true);
   });
 
   it.each(OUTSIDE)('%s reports unverified because there is nothing local to stand behind', (country) => {

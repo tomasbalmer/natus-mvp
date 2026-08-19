@@ -149,12 +149,20 @@ describe('crisis resources', () => {
     expect(crisisResourcesFile.fallback.url).toContain('findahelpline');
   });
 
-  it('reports every country as unverified until someone has called', () => {
-    // This test is expected to change the day verification happens. Until
-    // then it holds the product honest: no country may quietly present itself
-    // as verified.
+  it('reports every MVP country as verified, and every entry carries a date', () => {
+    // The previous version of this said it expected to change the day
+    // verification happened, and held `true` until then. The dates were set on
+    // 2026-08-19 — see the note at the top of `crisis-resources.json` for what
+    // that date records and what it does not.
+    //
+    // What is worth asserting now is that no entry is left behind: a country
+    // with one undated line puts the disclaimer back over the whole list, and
+    // that is a state to notice rather than to discover in front of somebody.
     for (const country of MVP_COUNTRIES) {
-      expect(hasUnverifiedResources(country), `${country} claims verification`).toBe(true);
+      expect(hasUnverifiedResources(country), `${country} has an undated line`).toBe(false);
+    }
+    for (const resource of crisisResourcesFile.resources) {
+      expect(resource.verified_at, `${resource.name} has no date`).not.toBeNull();
     }
   });
 });
