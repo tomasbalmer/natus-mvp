@@ -19,7 +19,8 @@
     "gen:types": "supabase gen types typescript --local > src/supabase/database.types.ts",
     "verify:adapters": "npx vite-node scripts/verify-adapters.mjs",
     "verify:chat": "npx vite-node scripts/verify-chat-function.mjs",
-    "verify:models": "npx vite-node scripts/verify-model-functions.mjs"
+    "verify:models": "npx vite-node scripts/verify-model-functions.mjs",
+    "deploy:functions": "supabase functions deploy --project-ref khwrauqgwopkgyvbonmp"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.112.1",
