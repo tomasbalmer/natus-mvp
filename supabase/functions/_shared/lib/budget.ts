@@ -21,14 +21,40 @@
 
 export type Purpose = 'soul_map' | 'match' | 'chat' | 'meditation' | 'comparison';
 
-/** Claude Opus 5, US dollars per million tokens. Kept beside the ceiling it
- *  feeds so a model change and a budget change are one edit. */
-export const PRICE_PER_MTOK = { input: 5, output: 25 } as const;
+/**
+ * Claude Opus 5, US dollars per million tokens. Kept beside the ceiling it
+ * feeds so a model change and a budget change are one edit.
+ *
+ * Four rates, not two. Writing to the prompt cache costs 1.25× the input
+ * rate and reading from it costs 0.1×, and both were being counted as zero:
+ * the response carries `cache_creation_input_tokens` and
+ * `cache_read_input_tokens` alongside `input_tokens`, and only the last was
+ * being read. Every call therefore under-reported, which means the ceiling
+ * below would have fired later than it was set to.
+ */
+export const PRICE_PER_MTOK = {
+  input: 5,
+  output: 25,
+  cacheWrite: 6.25,
+  cacheRead: 0.5,
+} as const;
 
-export function costUsd(inputTokens: number, outputTokens: number): number {
+export type Usage = {
+  inputTokens: number;
+  outputTokens: number;
+  /** Billed at 1.25×. Charged the first time a prefix is cached. */
+  cacheWriteTokens?: number;
+  /** Billed at 0.1×. The saving, when the cache is still warm. */
+  cacheReadTokens?: number;
+};
+
+export function costUsd(usage: Usage): number {
   return (
-    (inputTokens * PRICE_PER_MTOK.input) / 1_000_000 +
-    (outputTokens * PRICE_PER_MTOK.output) / 1_000_000
+    (usage.inputTokens * PRICE_PER_MTOK.input +
+      usage.outputTokens * PRICE_PER_MTOK.output +
+      (usage.cacheWriteTokens ?? 0) * PRICE_PER_MTOK.cacheWrite +
+      (usage.cacheReadTokens ?? 0) * PRICE_PER_MTOK.cacheRead) /
+    1_000_000
   );
 }
 

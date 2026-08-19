@@ -35,6 +35,8 @@ export type CallRecord = {
   outcome: CallOutcome;
   inputTokens?: number | null;
   outputTokens?: number | null;
+  cacheWriteTokens?: number | null;
+  cacheReadTokens?: number | null;
   latencyMs: number;
   errorKind?: string | null;
 };
@@ -50,6 +52,8 @@ export async function logCall(elevated: SupabaseClient, record: CallRecord): Pro
       outcome: record.outcome,
       input_tokens: record.inputTokens ?? null,
       output_tokens: record.outputTokens ?? null,
+      cache_write_tokens: record.cacheWriteTokens ?? null,
+      cache_read_tokens: record.cacheReadTokens ?? null,
       latency_ms: Math.round(record.latencyMs),
       error_kind: record.errorKind ?? null,
     });

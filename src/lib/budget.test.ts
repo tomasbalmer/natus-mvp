@@ -13,15 +13,43 @@ const PURPOSES: Purpose[] = ['soul_map', 'match', 'chat', 'meditation', 'compari
 describe('what a call costs', () => {
   it('prices input and output separately', () => {
     // A Soul Map with a real natal chart: about 3k in, 1.2k out.
-    expect(costUsd(3_000, 1_200)).toBeCloseTo(0.045, 3);
+    expect(costUsd({ inputTokens: 3_000, outputTokens: 1_200 })).toBeCloseTo(0.045, 3);
   });
 
   it('is dominated by output, which is why the ceilings are on output', () => {
-    expect(costUsd(0, 1_000)).toBeGreaterThan(costUsd(1_000, 0));
+    expect(costUsd({ inputTokens: 0, outputTokens: 1_000 })).toBeGreaterThan(
+      costUsd({ inputTokens: 1_000, outputTokens: 0 }),
+    );
   });
 
   it('costs nothing for a call that produced nothing', () => {
-    expect(costUsd(0, 0)).toBe(0);
+    expect(costUsd({ inputTokens: 0, outputTokens: 0 })).toBe(0);
+  });
+});
+
+describe('the cache, which was being counted as free', () => {
+  it('charges more to write than to read, and both are non-zero', () => {
+    // The bug this replaced: both were absent from the sum, so a call that
+    // wrote 1,926 tokens to the cache recorded as if it had written none.
+    const write = costUsd({ inputTokens: 0, outputTokens: 0, cacheWriteTokens: 1_000 });
+    const read = costUsd({ inputTokens: 0, outputTokens: 0, cacheReadTokens: 1_000 });
+    expect(write).toBeGreaterThan(0);
+    expect(read).toBeGreaterThan(0);
+    expect(write).toBeGreaterThan(read);
+  });
+
+  it('prices a cold cache above the same call with no caching at all', () => {
+    // Why the measurement matters. Writing costs 1.25x; if the prefix is
+    // never read back the marker is a surcharge and nothing else.
+    const cold = costUsd({ inputTokens: 100, outputTokens: 500, cacheWriteTokens: 1_900 });
+    const uncached = costUsd({ inputTokens: 2_000, outputTokens: 500 });
+    expect(cold).toBeGreaterThan(uncached);
+  });
+
+  it('prices a warm cache below it', () => {
+    const warm = costUsd({ inputTokens: 100, outputTokens: 500, cacheReadTokens: 1_900 });
+    const uncached = costUsd({ inputTokens: 2_000, outputTokens: 500 });
+    expect(warm).toBeLessThan(uncached);
   });
 });
 
@@ -49,7 +77,7 @@ describe('every purpose has a ceiling on what one answer can cost', () => {
     // The bound that matters: whatever the model does, one call cannot run
     // away. Input is bounded separately by the schemas in `model-input.ts`.
     for (const purpose of PURPOSES) {
-      expect(costUsd(0, MAX_OUTPUT_TOKENS[purpose])).toBeLessThan(1);
+      expect(costUsd({ inputTokens: 0, outputTokens: MAX_OUTPUT_TOKENS[purpose] })).toBeLessThan(1);
     }
   });
 
@@ -92,7 +120,9 @@ describe('per-person limits', () => {
     // limit there is and it arrives as an outage for everyone else.
     const worst = Object.entries(PURPOSE_LIMITS).reduce(
       (total, [purpose, limit]) =>
-        total + limit.calls * costUsd(4_000, MAX_OUTPUT_TOKENS[purpose as Purpose]),
+        total +
+        limit.calls *
+          costUsd({ inputTokens: 4_000, outputTokens: MAX_OUTPUT_TOKENS[purpose as Purpose] }),
       0,
     );
     expect(worst).toBeLessThan(DEFAULT_MONTHLY_BUDGET_USD / 3);
@@ -102,7 +132,10 @@ describe('per-person limits', () => {
     // What ordinary use actually costs: one Soul Map with a chart, one match,
     // a couple of meditations and the three free chat questions.
     const perPerson =
-      costUsd(3_000, 1_200) + costUsd(2_000, 900) + 2 * costUsd(1_200, 1_500) + 3 * costUsd(1_500, 400);
+      costUsd({ inputTokens: 3_000, outputTokens: 1_200 }) +
+      costUsd({ inputTokens: 2_000, outputTokens: 900 }) +
+      2 * costUsd({ inputTokens: 1_200, outputTokens: 1_500 }) +
+      3 * costUsd({ inputTokens: 1_500, outputTokens: 400 });
     expect(perPerson * 50).toBeLessThan(DEFAULT_MONTHLY_BUDGET_USD / 2);
   });
 });

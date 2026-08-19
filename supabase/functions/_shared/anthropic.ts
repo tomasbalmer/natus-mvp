@@ -67,6 +67,9 @@ export type Generation<T> = {
   value: T;
   inputTokens: number | null;
   outputTokens: number | null;
+  /** Both were being dropped, and both are billed. See `lib/budget.ts`. */
+  cacheWriteTokens: number | null;
+  cacheReadTokens: number | null;
 };
 
 export function hasKey(): boolean {
@@ -126,7 +129,13 @@ export async function generate<T>(call: {
       }
 
       assertCleanCopy(parsed.data);
-      return { value: parsed.data, inputTokens: response.inputTokens, outputTokens: response.outputTokens };
+      return {
+        value: parsed.data,
+        inputTokens: response.inputTokens,
+        outputTokens: response.outputTokens,
+        cacheWriteTokens: response.cacheWriteTokens,
+        cacheReadTokens: response.cacheReadTokens,
+      };
     } catch (error) {
       last = error;
       // Neither of these is a bad roll, and retrying both wastes a full
@@ -168,7 +177,13 @@ async function post(
   effort: string,
   maxTokens: number,
   apiKey: string,
-): Promise<{ text: string; inputTokens: number | null; outputTokens: number | null }> {
+): Promise<{
+  text: string;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  cacheWriteTokens: number | null;
+  cacheReadTokens: number | null;
+}> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
@@ -214,7 +229,12 @@ async function post(
 
     const body = (await response.json()) as {
       content?: { type: string; text?: string }[];
-      usage?: { input_tokens?: number; output_tokens?: number };
+      usage?: {
+        input_tokens?: number;
+        output_tokens?: number;
+        cache_creation_input_tokens?: number;
+        cache_read_input_tokens?: number;
+      };
     };
 
     // `find` rather than `[0]`: with thinking on, the first block is a
@@ -223,6 +243,14 @@ async function post(
       text: body.content?.find((block) => block.type === 'text')?.text ?? '',
       inputTokens: body.usage?.input_tokens ?? null,
       outputTokens: body.usage?.output_tokens ?? null,
+      // `cache_read_input_tokens` is also the measurement: it is zero on every
+      // call whose cached prefix has expired, and the five-minute window is
+      // shorter than the gap between two people generating a Soul Map. If it
+      // stays zero on the once-per-account surfaces, caching them is a 25%
+      // surcharge buying nothing, and the `cache_control` marker belongs only
+      // where turns repeat.
+      cacheWriteTokens: body.usage?.cache_creation_input_tokens ?? null,
+      cacheReadTokens: body.usage?.cache_read_input_tokens ?? null,
     };
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {

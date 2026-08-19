@@ -70,7 +70,7 @@ export async function overDeploymentBudget(elevated: SupabaseClient): Promise<bo
   try {
     const { data, error } = await elevated
       .from('claude_api_calls')
-      .select('input_tokens,output_tokens')
+      .select('input_tokens,output_tokens,cache_write_tokens,cache_read_tokens')
       .eq('mode', 'server')
       .eq('outcome', 'ok')
       .gte('created_at', since);
@@ -79,7 +79,12 @@ export async function overDeploymentBudget(elevated: SupabaseClient): Promise<bo
 
     let spent = 0;
     for (const row of data) {
-      spent += costUsd(row.input_tokens ?? 0, row.output_tokens ?? 0);
+      spent += costUsd({
+        inputTokens: row.input_tokens ?? 0,
+        outputTokens: row.output_tokens ?? 0,
+        cacheWriteTokens: row.cache_write_tokens ?? 0,
+        cacheReadTokens: row.cache_read_tokens ?? 0,
+      });
     }
     return spent >= budget;
   } catch {

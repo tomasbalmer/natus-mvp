@@ -147,6 +147,8 @@ export function serveModel<I, O>(route: ModelRoute<I, O>): (request: Request) =>
         outcome: 'ok',
         inputTokens: generated.inputTokens,
         outputTokens: generated.outputTokens,
+        cacheWriteTokens: generated.cacheWriteTokens,
+        cacheReadTokens: generated.cacheReadTokens,
         latencyMs: Date.now() - started,
       });
 

@@ -189,6 +189,8 @@ export type Database = {
       }
       claude_api_calls: {
         Row: {
+          cache_read_tokens: number | null
+          cache_write_tokens: number | null
           created_at: string
           error_kind: string | null
           id: string
@@ -203,6 +205,8 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          cache_read_tokens?: number | null
+          cache_write_tokens?: number | null
           created_at?: string
           error_kind?: string | null
           id?: string
@@ -217,6 +221,8 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          cache_read_tokens?: number | null
+          cache_write_tokens?: number | null
           created_at?: string
           error_kind?: string | null
           id?: string

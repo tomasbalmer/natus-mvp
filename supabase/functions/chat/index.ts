@@ -179,6 +179,8 @@ Deno.serve(async (request) => {
       outcome: 'ok',
       inputTokens: generated.inputTokens,
       outputTokens: generated.outputTokens,
+      cacheWriteTokens: generated.cacheWriteTokens,
+      cacheReadTokens: generated.cacheReadTokens,
       latencyMs: Date.now() - started,
     });
 
