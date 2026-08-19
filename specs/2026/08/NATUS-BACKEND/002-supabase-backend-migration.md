@@ -1145,11 +1145,17 @@ call was made:
 - The `CONTRATO` block showed `"aspects": []` with no fields, so six of eight
   came back with no `a_body`. Only the example and the counts changed.
 
-**And on one migration.** `20260819000000_external_profile_birth_country.sql`
-has not been applied to the hosted project: `external_profiles.birth_country`
-does not exist there. Until it does, the second person's birth place cannot be
-saved in production and the synastry path has nothing to compute from. It
-needs `supabase db push` from an authorised CLI, or the SQL editor.
+**The migration reached production, 2026-08-19.**
+`20260819000000_external_profile_birth_country.sql` was the only one behind —
+`supabase migration list --linked` showed seven applied and one not — and
+`db push` applied it. Verified afterwards through the path the application
+actually uses: the column reads, and the insert the external-profile form
+makes succeeds with a country on it. The test row was deleted.
+
+Worth recording as a habit rather than an incident: a migration written for a
+feature is not part of that feature until it has been pushed, and nothing in
+the deploy pipeline does it. The `functions` job ships code; the schema is
+still a hand-run command.
 
 ### [UNPLANNED] Phase 8: Ceilings on what this can cost
 
