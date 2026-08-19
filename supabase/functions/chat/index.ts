@@ -191,6 +191,7 @@ Deno.serve(async (request) => {
     });
   } catch (error) {
     const kind = error instanceof ModelError ? error.kind : 'api_error';
+    const detail = error instanceof ModelError && error.detail ? `${kind}:${error.detail}` : kind;
 
     await logCall(elevated, {
       userId,
@@ -200,7 +201,7 @@ Deno.serve(async (request) => {
       mode: 'server',
       outcome: kind,
       latencyMs: Date.now() - started,
-      errorKind: kind,
+      errorKind: detail,
     });
 
     // The turn is not charged and the detail does not travel: an upstream

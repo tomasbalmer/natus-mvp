@@ -35,6 +35,19 @@ export class ModelError extends Error {
   constructor(
     message: string,
     readonly kind: ModelErrorKind,
+    /**
+     * The upstream error *class*, when there is one — `authentication_error`,
+     * `not_found_error`, `rate_limit_error`. Never the message, which can
+     * quote the request back.
+     *
+     * It exists because `api_error` alone is undiagnosable from outside: the
+     * function deliberately does not pass the provider's detail to the
+     * caller, so without this the only way to tell a bad key from a model the
+     * account cannot reach is to have the deployment's logs open. This lands
+     * in `claude_api_calls.error_kind`, which is already documented as "the
+     * error class, never the payload".
+     */
+    readonly detail?: string,
   ) {
     super(message);
   }
@@ -148,10 +161,18 @@ async function post(
     });
 
     if (!response.ok) {
-      const detail = await response.text().catch(() => '');
+      const raw = await response.text().catch(() => '');
+      let type: string | undefined;
+      try {
+        const parsed = JSON.parse(raw) as { error?: { type?: unknown } };
+        if (typeof parsed.error?.type === 'string') type = parsed.error.type;
+      } catch {
+        // A non-JSON body from a gateway. The status is the class then.
+      }
       throw new ModelError(
-        `Anthropic returned ${response.status}. ${detail.slice(0, 200)}`,
+        `Anthropic returned ${response.status}. ${raw.slice(0, 200)}`,
         'api_error',
+        type ?? `http_${response.status}`,
       );
     }
 

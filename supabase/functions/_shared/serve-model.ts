@@ -155,11 +155,15 @@ export function serveModel<I, O>(route: ModelRoute<I, O>): (request: Request) =>
       });
     } catch (error) {
       const kind = error instanceof ModelError ? error.kind : 'api_error';
+    const detail = error instanceof ModelError && error.detail ? `${kind}:${error.detail}` : kind;
+      // `api_error:authentication_error` rather than `api_error`, so a bad
+      // key and an unreachable model are distinguishable from the ledger.
+      const detail = error instanceof ModelError && error.detail ? `${kind}:${error.detail}` : kind;
       await logCall(elevated, {
         ...record,
         outcome: kind,
         latencyMs: Date.now() - started,
-        errorKind: kind,
+        errorKind: detail,
       });
       // The detail does not travel: an upstream error message can carry the
       // request back out, and the request is what these functions exist to
