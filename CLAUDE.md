@@ -38,20 +38,42 @@ The source documents are `PDR — MVP Natus_ Producto del Usuario.txt` and
 
 ## Resuming work
 
-The demo plan (001) is finished. The backend plan (002) is at Phase 6, its
-last: deployment, configuration and documentation.
+Both plans are finished. 001 built the demo; 002 took it to Supabase and ran
+past its own last phase into two unplanned ones — synastry, and ceilings on
+what the model can cost. Everything in them is verified against production.
 
 ```
-/dev:pair act specs/2026/08/NATUS-BACKEND/002-supabase-backend-migration.md
+specs/2026/08/NATUS-BACKEND/002-supabase-backend-migration.md
 ```
 
-That reads the stage, finds the first unchecked `- [ ]`, and continues.
+Read its Phase 6, 7 and 8 verification blocks before touching the backend.
+They record what broke and why, and most of it was invisible until something
+real ran.
 
-**Two things have never been verified against the real thing**, and neither is
-code: the model call has never run with an `ANTHROPIC_API_KEY` configured, and
-the natal chart has never been calculated against Astrologer. `pnpm
-verify:chat` and `pnpm verify:models` cover the first and say out loud when
-they could not.
+**What is left is not code.** In rough order of weight:
+
+- The sixteen crisis numbers carry `2026-08-19`, which records the product
+  owner accepting them as transcribed from the PDR — not a call placed to each
+  line. The calls are still owed. `docs/HANDOFF.md`.
+- Eight of those sixteen are short codes and cannot be dialled from abroad.
+  Nothing in the data records that.
+- The door is open: `REQUIRE_INVITE=false`, so anybody with the link is in.
+  Closing it needs a Google Cloud OAuth client first — the code is built and
+  waiting, the console work is not done. `DECISIONS.md` §13.
+- The free-tier pause question is still open.
+- `crisis-keywords.json` is `"status": "preliminary"` and wants a clinician.
+
+**Two open questions with the data now being collected for them:** whether the
+prompt cache is worth its 25% write surcharge on the once-per-account surfaces
+(`cache_read_tokens` answers it), and whether a retry should tell the model
+what the first attempt got wrong (that adds text to the user message, so it is
+the owner's call).
+
+**The prompts are reconstructed, not the author's.** Every version string
+carries `-reconstructed` because `07 - System Prompt IA.md` was never
+available. Swapping in the real text is a change to constants in
+`src/ai/prompts/shared.ts` and the five version strings. Do not edit prompt
+text for any other reason without asking — the design is somebody's work.
 
 Update the plan as you go — check steps off, record deviations inline, and
 write the verification results under each phase. That file is how the next
