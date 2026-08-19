@@ -19,26 +19,30 @@ untouched.
 
 ## Mid-Level Objectives
 
-- [ ] Stand up a Supabase schema covering the seventeen namespaces declared in
+- [x] Stand up a Supabase schema covering the seventeen namespaces declared in
       `src/store/db.ts`, following the table mapping already written in
       `docs/MIGRATION.md`, with Row Level Security enabled on every table before
       any application code reads from it.
-- [ ] Prove the two load-bearing policies with tests: nobody reads a
+- [x] Prove the two load-bearing policies with tests: nobody reads a
       `chart_comparisons` row without a granted, unexpired consent, and nobody
       reads another client's `clinical_basics` by any route.
-- [ ] Give every visitor a real `auth.users` row via Supabase anonymous
+- [~] Give every visitor a real `auth.users` row via Supabase anonymous
       sign-in, and let anyone who wants to keep their data upgrade that same row
       to an email identity with no data migration.
-- [ ] Copy `src/lib` into `supabase/functions/_shared/lib` unchanged, with its
+      **Superseded in part by §13.** The identity is Google rather than email,
+      and a closed pilot admits nobody anonymously — anonymous sign-in still
+      exists and is what the verify scripts use, but it is no longer the front
+      door. The upgrade-without-migration property was never exercised.
+- [x] Copy `src/lib` into `supabase/functions/_shared/lib` unchanged, with its
       existing tests passing on the other side — the proof that the boundary
       held.
-- [ ] Repoint `src/store` at Supabase without rewriting `src/screens`, which
+- [x] Repoint `src/store` at Supabase without rewriting `src/screens`, which
       today calls the store synchronously from render bodies.
-- [ ] Move the Anthropic key server-side behind one Edge Function per purpose,
+- [x] Move the Anthropic key server-side behind one Edge Function per purpose,
       reusing the existing prompts, zod schemas and copy lint untouched.
-- [ ] Keep the fixture path alive as the degraded mode, and delete only the
+- [x] Keep the fixture path alive as the degraded mode, and delete only the
       BYOK path.
-- [ ] Make the chat quota real before the chat is open to anyone.
+- [x] Make the chat quota real before the chat is open to anyone.
 
 ## Context
 
@@ -1050,23 +1054,64 @@ code.
 
 ## Success Criteria
 
+Checked 2026-08-19, against the deployed project where the criterion is about
+the deployed project and against the local Edge runtime where it is not.
+
 - [ ] Fifty users' data persists in Postgres across sessions and devices, for
       anyone who upgraded to an email identity.
-- [ ] RLS is enabled on every table, and the two product-promise policies have
+      **Not verified, and partly superseded.** There are no fifty users, and
+      §13 replaced the email upgrade with Google. Persistence across a refresh
+      was verified in Phase 4; across devices and at that number, nothing has
+      been observed and this should not be ticked on inference.
+- [x] RLS is enabled on every table, and the two product-promise policies have
       non-vacuous negative tests.
-- [ ] No Anthropic key exists in the bundle, in the repository, or in any
+      `supabase test db` — 20/20.
+- [x] No Anthropic key exists in the bundle, in the repository, or in any
       browser. Verified by network inspection, not by reading the source.
-- [ ] The chat quota is enforced server-side and cannot be bypassed from the
+      Three checks: no `sk-ant-` string in `dist/` or in the repository; the
+      only three `import.meta.env` reads in `src` are `VITE_SUPABASE_URL`,
+      `VITE_SUPABASE_ANON_KEY` and `VITE_REQUIRE_INVITE`; and `api.anthropic.com`
+      appears nowhere in `src` or in the built bundle — the browser has no
+      route to Anthropic at all now that BYOK is deleted.
+- [x] The chat quota is enforced server-side and cannot be bypassed from the
       client.
-- [ ] Raw `clinical_basics` appears in no model payload.
-- [ ] Every non-negotiable in `CLAUDE.md` still holds: no streaks, no
+      `pnpm verify:chat` writes three counted messages **through the anon key
+      under RLS** — which is what somebody inflating their own allowance would
+      do — and the function still refuses the fourth turn, 402.
+- [x] Raw `clinical_basics` appears in no model payload.
+      Structural rather than observed: `soulMapDraftSchema` has no field for
+      it and `parse` strips it, with a test asserting the absence. No request
+      body in `src/ai` names it. The chat and meditation prompts carry a
+      derived risk level instead, per PDR 10.2.
+- [x] Every non-negotiable in `CLAUDE.md` still holds: no streaks, no
       percentages, no facilitator names, safety deterministic and in front, the
       copy lint governing fixtures as well as model output.
-- [ ] The fixture path still renders every screen with Supabase unreachable.
-- [ ] `pnpm typecheck`, `pnpm test` and `pnpm build` pass, and CI deploys on
+      694 unit tests, and the safety ordering additionally proved against the
+      Edge runtime in Phases 5 and 6 — including that a crisis is refused
+      before the model key is even checked.
+- [x] The fixture path still renders every screen with Supabase unreachable.
+      Walked with `VITE_SUPABASE_URL` pointed at a host that does not resolve:
+      onboarding through to a generated Soul Map, then every nav route. One
+      console error across the whole sweep, and it is the DNS failure being
+      tested for.
+- [x] `pnpm typecheck`, `pnpm test` and `pnpm build` pass, and CI deploys on
       push to `main`.
-- [ ] `docs/DECISIONS.md` records the superseded proxy decision with its
+      Green on the last push. **The functions half of that deploy skips
+      itself** until `SUPABASE_ACCESS_TOKEN` is a repository secret; the six
+      live functions were deployed by hand on 2026-08-19.
+- [x] `docs/DECISIONS.md` records the superseded proxy decision with its
       original reasoning intact.
+      §3 stands unedited; §10 supersedes its first half and says explicitly
+      which half it does not supersede.
+
+**What is left, and none of it is code.**
+
+| | Owner | Blocks |
+|---|---|---|
+| `ANTHROPIC_API_KEY` on the project | Tomás | The model call — the last unverified path in the system |
+| `SUPABASE_ACCESS_TOKEN` as a repository secret | Tomás | Automatic function deployment; every push ships a site whose functions did not move |
+| The free-tier pause decision | Tomás | Whether a demo opens instantly |
+| `REQUIRE_INVITE` back to `true` | Tomás | The door is open on the deployed site. §13 says it closes before the pilot |
 
 ## Notes
 
