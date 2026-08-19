@@ -29,7 +29,11 @@ import { isScopeUsable } from '@/lib/comparison-payload';
 
 const SCOPE_LABELS: [keyof ComparisonScope, string, string][] = [
   ['numerology', 'Los números', 'Camino de vida, expresión, alma, personalidad, cumpleaños.'],
-  ['astro', 'La carta natal', 'Solo si las dos partes tienen una carta cargada.'],
+  [
+    'astro',
+    'La carta natal',
+    'Los aspectos entre las dos cartas, calculados por efeméride. Hace falta fecha, hora, ciudad y país de nacimiento de las dos partes.',
+  ],
   ['soul_map_themes', 'Los temas del mapa', 'Los temas generales, nunca lo que escribió cada una.'],
 ];
 

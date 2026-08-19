@@ -1,4 +1,5 @@
 import { StepBody } from '@/components/onboarding/StepChrome';
+import { BIRTH_COUNTRIES } from '@/components/birth-countries';
 import type { OnboardingDraft } from '@/store/session';
 
 const COUNTRIES: [string, string][] = [
@@ -10,30 +11,6 @@ const COUNTRIES: [string, string][] = [
   ['XX', 'Otro país'],
 ];
 
-const BIRTH_COUNTRIES: [string, string][] = [
-  ['', 'Elegí un país'],
-  ['AR', 'Argentina'],
-  ['BO', 'Bolivia'],
-  ['BR', 'Brasil'],
-  ['CL', 'Chile'],
-  ['CO', 'Colombia'],
-  ['CR', 'Costa Rica'],
-  ['CU', 'Cuba'],
-  ['DO', 'República Dominicana'],
-  ['EC', 'Ecuador'],
-  ['SV', 'El Salvador'],
-  ['GT', 'Guatemala'],
-  ['HN', 'Honduras'],
-  ['MX', 'México'],
-  ['NI', 'Nicaragua'],
-  ['PA', 'Panamá'],
-  ['PY', 'Paraguay'],
-  ['PE', 'Perú'],
-  ['PR', 'Puerto Rico'],
-  ['UY', 'Uruguay'],
-  ['US', 'Estados Unidos'],
-  ['VE', 'Venezuela'],
-];
 
 const fieldClass =
   'glass w-full rounded-[var(--radius-option)] px-4 py-3 text-sm text-blanco placeholder:text-crema/55 [color-scheme:dark]';

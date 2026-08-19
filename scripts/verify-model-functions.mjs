@@ -173,6 +173,49 @@ check(
   `status=${crisisMeditation.status}`,
 );
 
+// ── the aspect list is the server's, not the caller's ───────────────────────
+const supplied = await call('comparison', {
+  ...BODIES.comparison,
+  scope: { numerology: true, astro: true, soul_map_themes: true },
+  aspects: [{ a_body: 'Sun', b_body: 'Moon', type: 'conjunction', orb: 1.2 }],
+});
+check(
+  'comparison: a caller-supplied aspect list is refused',
+  supplied.status === 400,
+  `status=${supplied.status}`,
+);
+
+// Birth data under the astro scope parses and reaches the gate. Whether the
+// ephemeris then answers cannot be checked here: RAPIDAPI_KEY lives on the
+// deployed project, and `enrich` runs after the model gate anyway, so a
+// runtime with no ANTHROPIC_API_KEY never reaches it.
+const BIRTH_A = { year: 1990, month: 4, day: 12, hour: 14, minute: 30, city: 'Santiago', nation: 'CL' };
+const BIRTH_B = { year: 1988, month: 9, day: 3, hour: 7, minute: 15, city: 'Buenos Aires', nation: 'AR' };
+const withBirth = await call('comparison', {
+  ...BODIES.comparison,
+  scope: { numerology: true, astro: true, soul_map_themes: true },
+  a: { ...BODIES.comparison.a, birth: BIRTH_A },
+  b: { ...BODIES.comparison.b, birth: BIRTH_B },
+});
+const withBirthBody = await withBirth.json();
+check(
+  'comparison: birth data under the astro scope is accepted',
+  withBirth.status === 503 ? withBirthBody.error === 'no_model' : withBirth.status === 200,
+  `status=${withBirth.status} error=${withBirthBody.error}`,
+);
+
+const badNation = await call('comparison', {
+  ...BODIES.comparison,
+  scope: { numerology: true, astro: true, soul_map_themes: true },
+  a: { ...BODIES.comparison.a, birth: { ...BIRTH_A, nation: 'Chile' } },
+  b: { ...BODIES.comparison.b, birth: BIRTH_B },
+});
+check(
+  'comparison: a country that is not an ISO code is refused',
+  badNation.status === 400,
+  `status=${badNation.status}`,
+);
+
 // ── the catalogue is the server's ───────────────────────────────────────────
 const invented = await call('match', { ...BODIES.match, candidateSlugs: ['terapia-inventada'] });
 check(

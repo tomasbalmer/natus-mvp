@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Screen } from '@/components/Screen';
 import { ComparisonGate } from './Gate';
+import { BIRTH_COUNTRIES } from '@/components/birth-countries';
 import {
   consentFor,
   deleteExternalProfile,
@@ -41,6 +42,9 @@ export function ExternalProfile() {
   const [name, setName] = useState('');
   const [legalName, setLegalName] = useState('');
   const [birthDate, setBirthDate] = useState('');
+  const [birthTime, setBirthTime] = useState('');
+  const [birthCity, setBirthCity] = useState('');
+  const [birthCountry, setBirthCountry] = useState('');
   const [confirming, setConfirming] = useState<string | null>(null);
 
   const canSave = name.trim() !== '' && /^\d{4}-\d{2}-\d{2}$/.test(birthDate);
@@ -50,8 +54,9 @@ export function ExternalProfile() {
       display_name: name.trim(),
       legal_birth_name: legalName.trim() || name.trim(),
       birth_date: birthDate,
-      birth_time: '',
-      birth_city: '',
+      birth_time: birthTime,
+      birth_city: birthCity.trim(),
+      birth_country: birthCountry,
     });
     setProfiles(listExternalProfiles());
     navigate(`/comparacion/consentimiento/${profile.id}`);
@@ -178,6 +183,61 @@ export function ExternalProfile() {
                   value={birthDate}
                   onChange={(e) => setBirthDate(e.target.value)}
                 />
+              </div>
+
+              {/*
+               * The three the ephemeris needs. Optional as a group: without
+               * them the comparison still runs on numbers and themes, which
+               * is the same degradation the Soul Map makes when somebody does
+               * not know their birth time.
+               */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelClass} htmlFor="external-birth-time">
+                    Su hora
+                  </label>
+                  <input
+                    id="external-birth-time"
+                    type="time"
+                    className={fieldClass}
+                    value={birthTime}
+                    onChange={(e) => setBirthTime(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass} htmlFor="external-birth-city">
+                    Su ciudad
+                  </label>
+                  <input
+                    id="external-birth-city"
+                    className={fieldClass}
+                    value={birthCity}
+                    onChange={(e) => setBirthCity(e.target.value)}
+                    placeholder="Santiago"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass} htmlFor="external-birth-country">
+                  Su país de nacimiento
+                </label>
+                <select
+                  id="external-birth-country"
+                  className={fieldClass}
+                  value={birthCountry}
+                  onChange={(e) => setBirthCountry(e.target.value)}
+                >
+                  {BIRTH_COUNTRIES.map(([code, label]) => (
+                    <option key={code || 'empty'} value={code} className="bg-negro">
+                      {label}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1.5 text-[11px] leading-relaxed text-crema/55">
+                  Hora, ciudad y país sólo hacen falta si querés que el cruce mire las dos
+                  cartas. Sin los tres, se lee con los números y los temas.
+                </p>
               </div>
 
               {/*

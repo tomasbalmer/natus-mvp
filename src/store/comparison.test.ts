@@ -36,6 +36,7 @@ function setup(now = T0) {
       birth_date: '1988-02-09',
       birth_time: '',
       birth_city: '',
+    birth_country: '',
     },
     now,
   );

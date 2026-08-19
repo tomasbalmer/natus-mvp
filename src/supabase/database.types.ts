@@ -187,6 +187,51 @@ export type Database = {
           },
         ]
       }
+      claude_api_calls: {
+        Row: {
+          created_at: string
+          error_kind: string | null
+          id: string
+          input_tokens: number | null
+          latency_ms: number
+          mode: string
+          model: string
+          outcome: string
+          output_tokens: number | null
+          prompt_version: string
+          purpose: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_kind?: string | null
+          id?: string
+          input_tokens?: number | null
+          latency_ms?: number
+          mode: string
+          model: string
+          outcome: string
+          output_tokens?: number | null
+          prompt_version: string
+          purpose: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_kind?: string | null
+          id?: string
+          input_tokens?: number | null
+          latency_ms?: number
+          mode?: string
+          model?: string
+          outcome?: string
+          output_tokens?: number | null
+          prompt_version?: string
+          purpose?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           birth_city: string
@@ -421,6 +466,7 @@ export type Database = {
       external_profiles: {
         Row: {
           birth_city: string
+          birth_country: string | null
           birth_date: string | null
           birth_time: string | null
           created_at: string
@@ -431,6 +477,7 @@ export type Database = {
         }
         Insert: {
           birth_city?: string
+          birth_country?: string | null
           birth_date?: string | null
           birth_time?: string | null
           created_at?: string
@@ -441,6 +488,7 @@ export type Database = {
         }
         Update: {
           birth_city?: string
+          birth_country?: string | null
           birth_date?: string | null
           birth_time?: string | null
           created_at?: string

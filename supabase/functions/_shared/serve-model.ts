@@ -39,6 +39,22 @@ export type ModelRoute<I, O> = {
    * are read by the model, so both are scanned before a token is spent.
    */
   prose?: (input: I) => string;
+  /**
+   * Anything that has to be fetched before the prompt can be built.
+   *
+   * Runs after the crisis scan and after the key check, so a refused turn and
+   * a deployment with no model both cost nothing upstream. `comparison` uses
+   * it to compute the synastry aspects: they are the one part of that prompt
+   * the caller must not supply, because a caller who could supply them would
+   * be telling the model which placements to read out.
+   */
+  enrich?: (input: I) => Promise<I>;
+  /**
+   * A rule about the answer that the schema cannot express. Returns a reason
+   * to reject, or null to accept. Rejection is logged as `copy_violation` —
+   * the model held the contract and broke the product rule.
+   */
+  check?: (output: O, input: I) => string | null;
   effort?: 'low' | 'medium' | 'high' | 'xhigh' | 'max';
 };
 
@@ -96,12 +112,16 @@ export function serveModel<I, O>(route: ModelRoute<I, O>): (request: Request) =>
     if (!hasKey()) return json(request, { error: 'no_model' }, 503);
 
     try {
+      const input = route.enrich ? await route.enrich(parsed.data) : parsed.data;
       const generated = await generate({
         system: route.system,
-        user: route.user(parsed.data),
+        user: route.user(input),
         schema: route.output,
         ...(route.effort ? { effort: route.effort } : {}),
       });
+
+      const rejection = route.check?.(generated.value, input);
+      if (rejection) throw new ModelError(rejection, 'copy_violation');
 
       await logCall(elevated, {
         ...record,

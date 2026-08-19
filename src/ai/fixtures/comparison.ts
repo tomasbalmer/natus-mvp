@@ -134,12 +134,17 @@ export function buildComparisonFixture(payload: ComparisonPayload): ComparisonRe
           : 'No hubo números consentidos en este cruce, así que esta parte queda vacía a propósito.',
       pairs,
     },
+    // Always empty, and it has to be.
+    //
+    // The aspects are computed by the ephemeris inside the Edge Function; a
+    // fixture has no access to one and never will. A hand-written aspect here
+    // would be a placement invented by us rather than by the model, presented
+    // as a reading of two real charts — the same lie with a different author,
+    // and `src/ai/comparison.ts` rejects it for exactly that reason.
     astro_dialogue: {
-      available: a.chart.available && b.chart.available,
+      available: false,
       summary:
-        a.chart.available && b.chart.available
-          ? 'Las posiciones que llegaron se leen abajo. Lo que no llegó no está completado.'
-          : 'No hay carta cargada de al menos una de las dos partes, así que esta sección queda sin contenido. Nada acá se completa por aproximación.',
+        'El cruce de las dos cartas se calcula por efeméride y esta lectura no la tiene, así que esta sección queda sin contenido. Nada acá se completa por aproximación.',
       aspects: [],
     },
     where_you_flow: flow.slice(0, 4),

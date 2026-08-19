@@ -27,6 +27,7 @@ function source(
     numerology: numbers(values),
     soul_map_themes: themes,
     chart: null,
+    birth: null,
     presenting_need_text: 'algo que no puede viajar',
   };
 }
@@ -124,7 +125,11 @@ describe('the six rules of PDR 8.5', () => {
     // empty astro section — not an approximated one.
     expect(result.astro_dialogue.available).toBe(false);
     expect(result.astro_dialogue.aspects).toEqual([]);
-    expect(result.astro_dialogue.summary).toMatch(/no hay carta/i);
+    // The wording changed when the aspects became real: what is missing is no
+    // longer a chart somebody failed to upload, it is a calculation a fixture
+    // cannot make. What must not change is that the section says so.
+    expect(result.astro_dialogue.summary).toMatch(/sin contenido/i);
+    expect(result.astro_dialogue.summary).toMatch(/no se completa|nada acá se completa/i);
   });
 
   it('carries neither subject’s private material', () => {

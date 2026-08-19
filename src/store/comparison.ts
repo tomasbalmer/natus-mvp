@@ -23,8 +23,12 @@ export type ExternalProfile = {
   display_name: string;
   legal_birth_name: string;
   birth_date: string;
+  /** All three are needed together or not at all: the ephemeris cannot place
+   *  a chart without a time, and cannot place a city without a country. The
+   *  comparison degrades to numbers and themes when any is missing. */
   birth_time: string;
   birth_city: string;
+  birth_country: string;
   created_at: number;
 };
 

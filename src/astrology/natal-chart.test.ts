@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { emptyDraft } from '@/store/session';
 import { hasNatalChartInput, NatalChartError, natalChartInput } from './natal-chart';
-import { parseAstrologerSubject } from '../../supabase/functions/_shared/astrology';
+import { parseAstrologerSubject } from '@/lib/astrology';
 
 describe('Astrologer natal chart input', () => {
   it('maps the onboarding fields to the provider subject', () => {

@@ -142,6 +142,16 @@ const chartPositionSchema = z.object({
   house: z.number().int().min(1).max(12).nullable(),
 });
 
+const comparisonBirthSchema = z.object({
+  year: z.number().int().min(1).max(3000),
+  month: z.number().int().min(1).max(12),
+  day: z.number().int().min(1).max(31),
+  hour: z.number().int().min(0).max(23),
+  minute: z.number().int().min(0).max(59),
+  city: z.string().trim().min(1).max(120),
+  nation: z.string().trim().length(2).regex(/^[A-Za-z]{2}$/),
+});
+
 const comparisonSubjectSchema = z.object({
   display_name: z.string().trim().min(1).max(120),
   numerology: numerologySchema.nullable(),
@@ -150,6 +160,15 @@ const comparisonSubjectSchema = z.object({
     available: z.boolean(),
     positions: z.array(chartPositionSchema).max(40),
   }),
+  /** Goes to the ephemeris and stops there. No prompt reads it. */
+  birth: comparisonBirthSchema.nullable().default(null),
+});
+
+const synastryAspectSchema = z.object({
+  a_body: z.string().trim().min(1).max(60),
+  b_body: z.string().trim().min(1).max(60),
+  type: z.string().trim().min(1).max(60),
+  orb: z.number(),
 });
 
 /**
@@ -167,4 +186,13 @@ export const comparisonInputSchema = z.object({
   }),
   a: comparisonSubjectSchema,
   b: comparisonSubjectSchema,
+  /**
+   * Must arrive empty, and `.max(0)` is what says so rather than a comment.
+   *
+   * The function fills this from the ephemeris. A caller who could supply
+   * aspects would be handing the model a list of placements to read out as
+   * fact — rule 5 of PDR 8.5 broken from outside the model, where the check
+   * that guards it would never look.
+   */
+  aspects: z.array(synastryAspectSchema).max(0).default([]),
 });

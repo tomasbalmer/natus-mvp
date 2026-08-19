@@ -1053,6 +1053,70 @@ different kind from the rest.
 **Still unverified:** the model call, and only that. It waits on a key, not on
 code.
 
+### [UNPLANNED] Phase 7: The chart comparison gets a chart
+
+Not in this plan, and not in 001 either. 001 Phase 9 built the comparison
+against a world where no chart existed anywhere; §11 then made charts real for
+one person, and the feature's own consent screen was left offering a scope
+that could never carry anything.
+
+- [x] Step 7.1: The second person gets a birth place
+  - MODIFY `src/store/comparison.ts`, `src/screens/comparison/ExternalProfile.tsx`,
+    `src/store/remote.ts`, ADD `supabase/migrations/*_external_profile_birth_country.sql`.
+  - ADD `src/components/birth-countries.ts` — one list, shared with the
+    onboarding, because two lists that disagree produce a comparison that
+    silently has no aspects.
+  - _The table already had `birth_time` and `birth_city`; the form only ever
+    asked for the date. The type, the table and the form disagreeing is why
+    this feature has never had a second chart to compare._
+- [x] Step 7.2: Birth data crosses, under one scope and no other
+  - MODIFY `src/lib/comparison-payload.ts` — `ComparisonBirth`, gated on
+    `scope.astro`, plus `toComparisonBirth` and `canComputeSynastry`.
+  - MODIFY `src/lib/comparison-payload.test.ts` — the isolation suite now also
+    asserts no birth data under any scope but `astro`.
+- [x] Step 7.3: The ephemeris computes the aspects
+  - MODIFY `supabase/functions/_shared/astrology.ts` — `resolveLocation` moved
+    out of `natal-chart` so both callers share it, and `synastryAspects`.
+  - MODIFY `supabase/functions/comparison/index.ts` — two geocodes and one
+    ephemeris call, behind the deployment's key, with every failure returning
+    an empty list rather than an error.
+  - MODIFY `supabase/functions/_shared/serve-model.ts` — `enrich` and `check`.
+  - _`include_relationship_score: false`. §11 warned about the wrong endpoint;
+    the right one carries the same number as a field._
+- [x] Step 7.4: Rule 5 grows teeth
+  - ADD `inventedAspect` to `src/lib/comparison-payload.ts`, with tests.
+  - MODIFY `src/ai/comparison.ts`, `src/ai/fixtures/comparison.ts`.
+  - _The old check could not catch the case the feature produced. See
+    `DECISIONS.md` §15._
+
+**Verification** — passed 2026-08-19
+
+- `pnpm verify:models` 15/15 against the local Edge runtime, including three
+  new assertions: a caller-supplied aspect list is refused 400, birth data
+  under the astro scope is accepted, and a country that is not an ISO code is
+  refused.
+- `pnpm typecheck` clean, `pnpm test` 719 across 28 files (+25), `pnpm build`
+  succeeds, `supabase test db` 20/20.
+- Walked the whole flow in a browser against the local stack: onboarding to a
+  Soul Map, loading a second person with time, city and country, granting the
+  consent with the chart scope on, and a reading that renders. With no model
+  configured the function answered `no_model` and the curated fixture rendered
+  in its place, saying the cross could not be calculated rather than claiming
+  nobody had a chart.
+
+- [FINDING] **The fixture's copy had become false.** It said "no hay carta
+  cargada de al menos una de las dos partes" — which was true when nobody
+  could have one and is not now that both people can. What is missing is a
+  calculation, not an upload, and the fixture says that.
+- [FINDING] **A test asserted the old wording.** `rule 5: never invents chart
+  positions` matched `/no hay carta/i`. Rewritten to assert what must stay
+  true — that the section says it has no content and completes nothing —
+  rather than the sentence that happened to say it.
+
+**Unverified:** the synastry call itself. `enrich` runs after the model gate,
+so a deployment without an `ANTHROPIC_API_KEY` never reaches the ephemeris.
+Same box as the model call, same key.
+
 ## Success Criteria
 
 Checked 2026-08-19, against the deployed project where the criterion is about

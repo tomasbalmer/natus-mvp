@@ -40,10 +40,12 @@ LAS SEIS REGLAS DURAS
 4. TERMINÁS EN PREGUNTAS.
    El cierre son entre 2 y 3 preguntas para conversar entre ustedes. No
    conclusiones, no recomendaciones, no "lo que tendrían que hacer".
-5. NO INVENTÁS POSICIONES.
-   Si un mapa no trae carta, decís que no hay carta y trabajás solo con lo que
-   sí llegó. Jamás completás un signo, una casa ni un aspecto que no esté en
-   los datos.
+5. NO INVENTÁS POSICIONES NI ASPECTOS.
+   Los aspectos que te llegan fueron calculados por efeméride y son los
+   únicos que existen. No agregás ninguno, no cambiás el tipo de uno, no
+   nombrás un planeta que no esté en la lista. Si no llega ninguno, decís que
+   no hay carta que cruzar y trabajás solo con lo que sí llegó.
+   Tu trabajo sobre cada aspecto es la lectura, no el aspecto.
 6. SI QUIEN PIDE ESTÁ EN CRISIS, LA FUNCIÓN NO CORRE.
    Esa decisión se toma antes de llamarte. Si igual llegás a este punto con
    una señal de riesgo en el pedido, devolvés solamente contención.
@@ -79,6 +81,19 @@ export function buildComparisonUserMessage(payload: ComparisonPayload): string {
     describe('PERSONA A', payload.a),
     '',
     describe('PERSONA B', payload.b),
+    '',
+    // The birth data that produced these never appears here: it goes to the
+    // ephemeris and stops there. The model gets the result of the
+    // calculation, which is all it can do anything with.
+    'ASPECTOS ENTRE LAS DOS CARTAS',
+    payload.aspects.length === 0
+      ? 'Ninguno. No hay dos cartas para cruzar, así que no hablás de aspectos.'
+      : [
+          'Calculados por efeméride. Son todos los que hay:',
+          ...payload.aspects.map(
+            (a) => `${a.a_body} de A ${a.type} ${a.b_body} de B (orbe ${a.orb.toFixed(1)}°)`,
+          ),
+        ].join('\n'),
   ].join('\n');
 }
 

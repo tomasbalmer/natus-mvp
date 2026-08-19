@@ -6,7 +6,7 @@ import {
 } from './prompts/comparison';
 import { buildComparisonFixture } from './fixtures/comparison';
 import { comparisonResultSchema, type ComparisonResult } from '@/lib/schemas';
-import { isScopeUsable, type ComparisonPayload } from '@/lib/comparison-payload';
+import { canComputeSynastry, isScopeUsable, type ComparisonPayload } from '@/lib/comparison-payload';
 
 export async function compareCharts(payload: ComparisonPayload): Promise<AiResult<ComparisonResult>> {
   if (!isScopeUsable(payload.scope)) {
@@ -28,11 +28,22 @@ export async function compareCharts(payload: ComparisonPayload): Promise<AiResul
     fixture: () => buildComparisonFixture(payload),
   });
 
-  // Rule 5, checked rather than trusted: a model that describes aspects for a
-  // chart nobody uploaded has invented them, and the reader has no way to tell.
-  const chartsPresent = payload.a.chart.available && payload.b.chart.available;
-  if (!chartsPresent && (result.value.astro_dialogue.available || result.value.astro_dialogue.aspects.length > 0)) {
-    throw new AiError('The model described chart positions that were never provided.', 'copy_violation');
+  // Rule 5, from this side.
+  //
+  // The Edge Function checks the strong version — every aspect the model
+  // returned has to match one the ephemeris actually computed — because it is
+  // the only place that holds the ephemeris list. This is the half the caller
+  // can still check: aspects may exist only when the server could have
+  // computed them, which means the scope allowed it, both birth places were
+  // complete, and the answer came from the server rather than a fixture.
+  //
+  // A fixture that grew an aspect would be a hand-written placement presented
+  // as a reading of two real charts, which is the same lie with a different
+  // author.
+  const couldHaveAspects = result.mode === 'server' && canComputeSynastry(payload);
+  const dialogue = result.value.astro_dialogue;
+  if (!couldHaveAspects && (dialogue.available || dialogue.aspects.length > 0)) {
+    throw new AiError('The model described chart aspects that were never computed.', 'copy_violation');
   }
 
   return result;

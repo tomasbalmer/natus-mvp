@@ -571,6 +571,7 @@ const externalProfiles: Adapter<ExternalProfile[]> = {
       birth_date: nullToBlank(r.birth_date),
       birth_time: nullToBlank(r.birth_time).slice(0, 5),
       birth_city: r.birth_city,
+      birth_country: r.birth_country ?? '',
       created_at: ms(r.created_at),
     }));
   },
@@ -587,6 +588,7 @@ const externalProfiles: Adapter<ExternalProfile[]> = {
         birth_date: blankToNull(p.birth_date),
         birth_time: blankToNull(p.birth_time),
         birth_city: p.birth_city,
+        birth_country: blankToNull(p.birth_country),
         created_at: iso(p.created_at),
       })),
     ),

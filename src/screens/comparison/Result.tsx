@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { Screen } from '@/components/Screen';
 import { ComparisonGate } from './Gate';
 import { computeNumerology, NumerologyInputError } from '@/lib/numerology';
-import { buildComparisonPayload } from '@/lib/comparison-payload';
+import { buildComparisonPayload, toComparisonBirth } from '@/lib/comparison-payload';
 import { compareCharts } from '@/ai/comparison';
 import { COMPARISON_PROMPT_VERSION } from '@/ai/prompts/comparison';
 import { activeProfile } from '@/store/account';
@@ -67,12 +67,17 @@ export function Result() {
           numerology: synthesis.numerology,
           soul_map_themes: synthesis.synthesis.inferred_topics,
           chart: null,
+          // The positions stay null: the function computes the aspects from
+          // the birth data and the browser never holds them. `chart` is what
+          // a future path that reads a stored chart would fill.
+          birth: toComparisonBirth(mine.draft),
         },
         b: {
           display_name: profile.display_name,
           numerology: numerologyOf(profile.legal_birth_name, profile.birth_date),
           soul_map_themes: [],
           chart: null,
+          birth: toComparisonBirth(profile),
         },
       });
 
@@ -181,6 +186,29 @@ export function Result() {
             <p className="text-[12.5px] leading-relaxed text-crema/60">
               {result.astro_dialogue.summary}
             </p>
+
+            {/*
+             * Every aspect here was computed by the ephemeris and checked
+             * against that list server-side before this rendered. The bodies
+             * and the aspect are the calculation; only the reading is the
+             * model's. Shown as a pair rather than a score — there is no
+             * number in this section and §7 is why.
+             */}
+            {result.astro_dialogue.aspects.length > 0 && (
+              <div className="mt-3 flex flex-col gap-2.5">
+                {result.astro_dialogue.aspects.map((aspect) => (
+                  <article
+                    key={`${aspect.a_body}-${aspect.type}-${aspect.b_body}`}
+                    className="glass rounded-[var(--radius-option)] px-4 py-3"
+                  >
+                    <p className="mb-1 text-[11px] tracking-wide text-crema/55 uppercase">
+                      {aspect.a_body} · {aspect.type} · {aspect.b_body}
+                    </p>
+                    <p className="text-[12.5px] leading-relaxed text-crema/70">{aspect.reading}</p>
+                  </article>
+                ))}
+              </div>
+            )}
           </section>
 
           <section className="mb-6">

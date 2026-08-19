@@ -470,3 +470,61 @@ it did not run; the first deployment with a key is where that gets closed.
 **Model.** `claude-opus-5`, in the browser and on the server, from one
 constant each kept deliberately identical. Somebody on their own key and
 somebody on the deployment should be reading the same product.
+
+---
+
+## 15. The aspects come from the ephemeris, and the rule that guards them grew teeth
+
+**Decision.** `scope.astro` now carries something. When both people have a
+complete birth place, the comparison function computes the synastry aspects
+through Astrologer's `/api/v5/chart-data/synastry` and gives the model that
+list. The model writes the reading of each aspect and nothing else about it.
+
+**The toggle was offering a crossing that never happened.** `Consent.tsx` has
+listed "La carta natal" since Phase 9 and `comparison-payload.ts` has had a
+`chart` field since then too, and `Result.tsx` passed `chart: null` for both
+people. Everything downstream was correct about a thing that never arrived.
+The first instinct was to delete the toggle; §11 had already decided the
+opposite, naming the endpoint to use, and deleting it would have been the
+smaller change made in the wrong direction.
+
+**Why rule 5 was passing while being broken.** The old check asked whether any
+aspect came back when no chart was present. The case it could never catch is
+the one the feature actually produced: a model handed two sets of signs and
+houses and asked for the aspects between them. Signs and houses do not contain
+the degrees an aspect is computed from, so every aspect that reading ever
+showed was invented — and the check passed each time, because charts *were*
+present. A rule that only fires in the case that cannot happen is decoration.
+
+Now the ephemeris supplies the list and the check asks whether the answer is a
+subset of it. `inventedAspect` lives in `src/lib` with tests for the failures
+that matter: a wholly invented pair, a real pair given the wrong aspect, and
+the same pair stated backwards — synastry is directional, and Sun-of-A to
+Moon-of-B is not the reading that Moon-of-A to Sun-of-B is.
+
+**Rejecting the whole answer, not the stray aspect.** `summary` is written
+against the list the model believed it had. Dropping one aspect and keeping
+the prose that described it is the same lie, quieter.
+
+**The score, again, one field lower.** §11 warned that `/compatibility-score`
+is the wrong endpoint and `/chart-data/synastry` the right one. The right one
+takes `include_relationship_score`, which returns the same Ciro Discepolo
+number §7 forbids. It is set to `false` explicitly rather than left to a
+default, in the one place that calls the endpoint.
+
+**What crosses, and what does not.** Birth dates and places now leave the
+browser, under `scope.astro` and no other. They go to the Edge Function and to
+the ephemeris; they never reach a prompt, and a test asserts the built payload
+holds no birth data under any other scope. The two people's legal names do not
+travel at all — Astrologer uses `name` as a chart label, so it receives "A"
+and "B".
+
+**All or nothing on the birth place.** Date, time, city and country together
+or the comparison runs on numbers and themes. A date without a time gives a
+Moon that could be anywhere in a twelve-degree band, and an aspect computed
+from it would be stated with exactly the confidence of a real one.
+
+**What is unverified.** The synastry call itself. `enrich` runs after the
+model gate, so a deployment without an `ANTHROPIC_API_KEY` never reaches the
+ephemeris — the call cannot be exercised until the model exists. It is in the
+same box as the model call, for the same reason.
