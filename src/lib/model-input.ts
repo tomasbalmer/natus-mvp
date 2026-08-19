@@ -30,8 +30,16 @@ import { modalityBySlug } from './catalog.ts';
 const MAX_TURNS = 8;
 const MAX_TURN_CHARS = 4_000;
 const MAX_PROSE = 8_000;
-/** Astrologer's XML context, capped where the natal-chart function caps it. */
-const MAX_CHART = 250_000;
+/**
+ * Astrologer's XML context.
+ *
+ * A real chart measures about 10,000 characters. The cap was 250,000, copied
+ * from the natal-chart function's own bound on what it will store — which is
+ * the wrong number to reuse here, because this one is not storage, it is
+ * prompt tokens. Twenty-five times the real size is 67,000 tokens of input
+ * somebody else pays for. Four times is headroom; twenty-five is a hole.
+ */
+const MAX_CHART = 40_000;
 
 const slug = z.string().trim().min(1).max(80);
 const slugs = z.array(slug).max(60);

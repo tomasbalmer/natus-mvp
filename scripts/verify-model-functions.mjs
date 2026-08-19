@@ -134,19 +134,35 @@ for (const fn of Object.keys(BODIES)) {
 }
 
 // ── a valid turn reaches the model gate ─────────────────────────────────────
+//
+// Three states, not two. A dummy key is the useful middle one: it makes every
+// gate behind the key check reachable — the spend ceilings below, and the
+// synastry enrichment — without spending anything at Anthropic, because the
+// call fails at authentication rather than at billing.
+//
+//   503 no_model     no key. Nothing behind the gate can be exercised.
+//   502 api_error    a key that Anthropic refused. Everything up to the call
+//                    ran; the answer itself is still unverified.
+//   200              a real key. The contract is checked.
 let keyed = false;
+let real = false;
 for (const fn of Object.keys(BODIES)) {
   const response = await call(fn, BODIES[fn]);
   const body = await response.json();
   if (response.status === 503) {
     check(`${fn}: a valid request reaches the model gate`, body.error === 'no_model', `error=${body.error}`);
+  } else if (response.status === 502 && body.kind === 'api_error') {
+    keyed = true;
+    check(`${fn}: a valid request reaches the model itself`, true, 'key refused upstream');
   } else {
     keyed = true;
+    real = true;
     check(`${fn}: answers`, response.status === 200, `status=${response.status} ${JSON.stringify(body).slice(0, 90)}`);
     check(`${fn}: and bills what it spent`, Number.isInteger(body.input_tokens), `in=${body.input_tokens}`);
   }
 }
 if (!keyed) console.log('note  the model path is UNVERIFIED — serve with ANTHROPIC_API_KEY to cover it');
+else if (!real) console.log('note  the key was refused upstream — the answer itself is still UNVERIFIED');
 
 // ── safety runs in front of the model, and in front of the key check ────────
 //
@@ -200,7 +216,9 @@ const withBirth = await call('comparison', {
 const withBirthBody = await withBirth.json();
 check(
   'comparison: birth data under the astro scope is accepted',
-  withBirth.status === 503 ? withBirthBody.error === 'no_model' : withBirth.status === 200,
+  // Accepted means parsed and carried past validation, whatever the model
+  // then did with it. 400 would be the failure this asserts against.
+  withBirth.status !== 400,
   `status=${withBirth.status} error=${withBirthBody.error}`,
 );
 
@@ -224,12 +242,60 @@ check(
   `status=${invented.status}`,
 );
 
+// ── the spend ceilings ──────────────────────────────────────────────────────
+//
+// Only reachable when the deployment has a key: the gate sits behind the model
+// check, so that a keyless deployment does not run two queries to say
+// `no_model`. Serve with a dummy ANTHROPIC_API_KEY to exercise it — the
+// refusal happens before anything is sent to Anthropic, so the key never has
+// to be real.
+if (keyed) {
+  const SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!SERVICE) {
+    console.log('note  spend ceilings UNVERIFIED — set SUPABASE_SERVICE_ROLE_KEY to cover them');
+  } else {
+    const elevated = createClient(API, SERVICE, { auth: { persistSession: false } });
+    // Written with the service role because that is who writes the ledger. A
+    // person cannot insert here, which is the point of counting from it.
+    const rows = Array.from({ length: 10 }, () => ({
+      user_id: userId,
+      purpose: 'soul_map',
+      prompt_version: 'v1',
+      model: 'claude-opus-5',
+      mode: 'server',
+      outcome: 'ok',
+      input_tokens: 3000,
+      output_tokens: 1200,
+    }));
+    const { error: seedError } = await elevated.from('claude_api_calls').insert(rows);
+    check('the ledger accepts the elevated write', !seedError, seedError?.message ?? '');
+
+    const capped = await call('soul-map', BODIES['soul-map']);
+    const cappedBody = await capped.json();
+    check(
+      'soul-map: a person at their ceiling is refused before the model is called',
+      capped.status === 429 && cappedBody.scope === 'person',
+      `status=${capped.status} scope=${cappedBody.scope}`,
+    );
+
+    // A different purpose is unaffected: the ceilings are per purpose, so one
+    // exhausted surface must not close the others.
+    const other = await call('meditation', BODIES.meditation);
+    check(
+      'meditation: another purpose is untouched by it',
+      other.status !== 429,
+      `status=${other.status}`,
+    );
+  }
+}
+
 // ── the ledger ──────────────────────────────────────────────────────────────
 const { data: logged } = await client
   .from('claude_api_calls')
   .select('purpose,outcome')
   .eq('user_id', userId);
 const refusals = (logged ?? []).filter((r) => r.outcome === 'refused_crisis').map((r) => r.purpose).sort();
+// Seeded rows are 'ok', so they do not appear here.
 check(
   'both crisis refusals are recorded, under their own purpose',
   refusals.join(',') === 'meditation,soul_map',

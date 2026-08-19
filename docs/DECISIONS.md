@@ -528,3 +528,54 @@ from it would be stated with exactly the confidence of a real one.
 model gate, so a deployment without an `ANTHROPIC_API_KEY` never reaches the
 ephemeris — the call cannot be exercised until the model exists. It is in the
 same box as the model call, for the same reason.
+
+---
+
+## 16. The spend has a ceiling in three places
+
+**Decision.** Three bounds, none of them on the prompts: `max_tokens` per
+purpose rather than one number for all five, a per-person call limit per
+purpose counted from `claude_api_calls`, and a rolling thirty-day budget for
+the whole deployment. Past any of them the call is refused and the
+application falls back to the fixtures it already falls back to.
+
+**What it was before.** One quota existed — the chat's three free questions,
+which is a product rule from the PDR. The other four surfaces had none, so
+regenerating a Soul Map five hundred times was five hundred model calls. Every
+purpose shared `max_tokens: 8000`, so a two-sentence chat reply carried the
+same ceiling as a document. And `MAX_CHART` bounded the natal chart at 250,000
+characters — a number copied from what the natal-chart function will *store*,
+which is the wrong bound for something that becomes *prompt tokens*. A real
+chart is about 10,000. The worst case for a single call was around a dollar,
+with nothing limiting how many.
+
+**These are abuse ceilings, not product rules, and the difference is visible
+at the boundary.** A spent chat quota shows a paywall, because being out of
+free questions is a state the product has an answer for. Hitting one of these
+returns 429, because it is not a state anybody was supposed to reach. The
+numbers are set an order of magnitude above ordinary use.
+
+**Counted from the ledger, not from a counter.** `claude_api_calls` already
+records the user, the purpose and the tokens of every server call, with an
+index built for exactly this. Nothing has to be kept in step, and nothing a
+client can write is involved — the same argument `quota.ts` makes about the
+chat.
+
+**They fail open, and the safety checks do not.** A database hiccup is not a
+runaway, and refusing every request because a count could not be read turns a
+monitoring failure into an outage. The ledger still records what was spent.
+Deliberately the opposite of the crisis scan, which fails closed.
+
+**The first draft mixed daily and monthly windows and the arithmetic caught
+it.** Twenty meditations a day reads as a modest number and is six hundred a
+month; at the output ceiling that came to $178 from one person against a $50
+budget. Every window is thirty days now, because the budget is the number
+these have to add up against and one unit of time is what makes that sum
+checkable. `budget.test.ts` checks it, and would fail again on the same
+mistake.
+
+**What was deliberately not touched.** The prompts. They are reconstructed
+from the PDR rather than written by the product's author, and shortening them
+to save tokens would be editing somebody else's voice to save a few cents on a
+bill that comes to a few dollars for fifty people. Cost is not a reason to
+change a prompt here; it was never the expensive part.

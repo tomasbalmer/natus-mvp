@@ -1117,6 +1117,55 @@ that could never carry anything.
 so a deployment without an `ANTHROPIC_API_KEY` never reaches the ephemeris.
 Same box as the model call, same key.
 
+### [UNPLANNED] Phase 8: Ceilings on what this can cost
+
+Asked for directly: keep the spend from running away, without touching the
+prompts, which were written from the PDR rather than by the product's author.
+
+- [x] Step 8.1: A price and a set of ceilings, in one place
+  - ADD `src/lib/budget.ts`, `src/lib/budget.test.ts` — the model's price,
+    `max_tokens` per purpose, per-person call limits, and the deployment's
+    monthly budget.
+- [x] Step 8.2: Counted from the ledger
+  - ADD `supabase/functions/_shared/spend.ts` — both counts read with the
+    elevated client from `claude_api_calls`, which already has the index.
+  - MODIFY `_shared/serve-model.ts`, `chat/index.ts` — the gate, after the
+    model check so a keyless deployment does not run two queries to say
+    `no_model`, and before `enrich` so a refusal does not spend an ephemeris
+    call either.
+- [x] Step 8.3: The input bound that was twenty-five times too loose
+  - MODIFY `src/lib/model-input.ts` — `MAX_CHART` 250,000 → 40,000.
+
+**Verification** — passed 2026-08-19
+
+- `pnpm verify:models` 18/18 with the gate reachable, including the two that
+  matter: a person at their ceiling is refused 429 before the model is called,
+  and another purpose is untouched by it. 15/15 in the keyless mode, and
+  `pnpm verify:chat` 13/13 in both.
+- `pnpm typecheck` clean, `pnpm test` 744 across 29 files (+25), `pnpm build`
+  succeeds.
+- The gate was exercised with a **dummy** `ANTHROPIC_API_KEY`, which is the
+  useful middle state: everything behind the key check becomes reachable and
+  nothing is spent, because the call fails at authentication rather than at
+  billing. `supabase/.env.local` carries it with a comment saying so, and the
+  verify script now distinguishes three states instead of two.
+
+- [FINDING] **The arithmetic caught a ceiling that was not one.** The first
+  draft gave meditation and comparison daily windows — twenty a day, which
+  reads modest and is six hundred a month. Priced at the output ceiling, one
+  person could cost $178 against a $50 budget. Every window is thirty days
+  now, and `budget.test.ts` asserts one person's worst case stays under a
+  third of the budget, so the same mistake fails rather than ships.
+- [FINDING] **`MAX_CHART` was the storage bound, reused as a prompt bound.**
+  250,000 characters is what the natal-chart function will keep; it is 67,000
+  tokens of input somebody else pays for, against a real chart of 10,000.
+
+- [DEVIATION] The ceilings are abuse guards rather than product rules, and the
+  PDR states none of them. They return 429 rather than the paywall a spent
+  chat quota returns, because hitting one is not a state the product has an
+  answer for. The chat's `FREE_QUESTIONS` is untouched and deliberately has no
+  second ceiling here.
+
 ## Success Criteria
 
 Checked 2026-08-19, against the deployed project where the criterion is about

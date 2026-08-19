@@ -4,6 +4,8 @@ import { authenticate, Unauthorized } from './auth.ts';
 import { logCall, type CallRecord } from './log.ts';
 import { MODEL, ModelError, generate, hasKey } from './anthropic.ts';
 import { scanText } from './lib/safety.ts';
+import { MAX_OUTPUT_TOKENS } from './lib/budget.ts';
+import { refuseForSpend } from './spend.ts';
 
 /**
  * The shape four of the five functions share.
@@ -111,12 +113,27 @@ export function serveModel<I, O>(route: ModelRoute<I, O>): (request: Request) =>
     // the curated fixtures, which is a supported way to run a deployment.
     if (!hasKey()) return json(request, { error: 'no_model' }, 503);
 
+    // Before `enrich`, so a refused turn does not spend an ephemeris call
+    // either. After the key check, so a deployment with no model is not asked
+    // to run two queries to say so.
+    const refusal = await refuseForSpend(elevated, userId, route.purpose);
+    if (refusal) {
+      await logCall(elevated, {
+        ...record,
+        outcome: 'refused_quota',
+        latencyMs: Date.now() - started,
+        errorKind: refusal.reason,
+      });
+      return json(request, { error: 'spend_limit', scope: refusal.reason }, 429);
+    }
+
     try {
       const input = route.enrich ? await route.enrich(parsed.data) : parsed.data;
       const generated = await generate({
         system: route.system,
         user: route.user(input),
         schema: route.output,
+        maxTokens: MAX_OUTPUT_TOKENS[route.purpose],
         ...(route.effort ? { effort: route.effort } : {}),
       });
 

@@ -97,8 +97,16 @@ The other two secrets the functions need:
 
 ```bash
 supabase secrets set ANTHROPIC_API_KEY=...   # the five model functions
-supabase secrets set RAPIDAPI_KEY=...        # natal-chart, via Astrologer
+supabase secrets set RAPIDAPI_KEY=...        # natal-chart and synastry
+supabase secrets set MONTHLY_BUDGET_USD=50   # optional; 50 is the default
 ```
+
+`MONTHLY_BUDGET_USD` is the ceiling on what the whole deployment may spend at
+Anthropic in a rolling thirty days, counted from `claude_api_calls`. Past it
+every model call is refused with 429 and the application falls back to its
+curated fixtures. It is the last line of defence, and the only one that holds
+when the failure is not one person looping but everybody costing more than
+expected. Per-person ceilings sit under it in `src/lib/budget.ts`.
 
 Without either, the functions that need them answer `no_model` or
 `astrologer_not_configured` and the application degrades to its curated

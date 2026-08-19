@@ -68,6 +68,12 @@ export async function generate<T>(call: {
    * them. Raise it for anything that produces a document.
    */
   effort?: 'low' | 'medium' | 'high' | 'xhigh' | 'max';
+  /**
+   * The ceiling for this contract, from `lib/budget.ts`. One number for every
+   * purpose meant a two-sentence chat reply shared a limit with a Soul Map
+   * document, and the limit had to fit the document.
+   */
+  maxTokens: number;
 }): Promise<Generation<T>> {
   const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
   if (!apiKey) throw new ModelError('No key is configured.', 'api_error');
@@ -75,7 +81,7 @@ export async function generate<T>(call: {
   let last: unknown;
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const response = await post(call.system, call.user, call.effort ?? 'medium', apiKey);
+      const response = await post(call.system, call.user, call.effort ?? 'medium', call.maxTokens, apiKey);
       const value = call.schema.parse(readJson(response.text));
       assertCleanCopy(value);
       return { value, inputTokens: response.inputTokens, outputTokens: response.outputTokens };
@@ -111,6 +117,7 @@ async function post(
   system: string,
   user: string,
   effort: string,
+  maxTokens: number,
   apiKey: string,
 ): Promise<{ text: string; inputTokens: number | null; outputTokens: number | null }> {
   const controller = new AbortController();
@@ -127,7 +134,7 @@ async function post(
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 8000,
+        max_tokens: maxTokens,
         // Adaptive is the default on this model; stating it keeps the next
         // reader from assuming the omission means thinking is off.
         thinking: { type: 'adaptive' },

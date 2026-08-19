@@ -1,6 +1,8 @@
 import { json, preflight } from '../_shared/cors.ts';
 import { authenticate, Unauthorized } from '../_shared/auth.ts';
 import { currentQuota } from '../_shared/quota.ts';
+import { overDeploymentBudget } from '../_shared/spend.ts';
+import { MAX_OUTPUT_TOKENS } from '../_shared/lib/budget.ts';
 import { logCall } from '../_shared/log.ts';
 import { scanText } from '../_shared/lib/safety.ts';
 import { resourcesForCountry } from '../_shared/lib/crisis-resources.ts';
@@ -129,6 +131,23 @@ Deno.serve(async (request) => {
     );
   }
 
+  // The person is within their three free questions; the deployment may still
+  // be over its own ceiling. A different refusal from a different cause, so it
+  // gets a different status: 402 asks for money, 429 says come back later.
+  if (await overDeploymentBudget(elevated)) {
+    await logCall(elevated, {
+      userId,
+      purpose: 'chat',
+      promptVersion: PROMPT_VERSION,
+      model: MODEL,
+      mode: 'server',
+      outcome: 'refused_quota',
+      latencyMs: Date.now() - started,
+      errorKind: 'deployment',
+    });
+    return json(request, { error: 'spend_limit', scope: 'deployment' }, 429);
+  }
+
   const context = chatContextSchema.safeParse(body);
   if (!context.success) return json(request, { error: 'invalid_context' }, 400);
 
@@ -148,6 +167,7 @@ Deno.serve(async (request) => {
         history: context.data.history,
       }),
       schema: chatResponseSchema,
+      maxTokens: MAX_OUTPUT_TOKENS.chat,
     });
 
     await logCall(elevated, {
