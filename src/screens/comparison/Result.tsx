@@ -154,7 +154,7 @@ export function Result() {
       <Screen backdrop="grass" scrim="heavy" opacity={PHOTO.content40}>
         <div className="flex min-h-dvh flex-col overflow-y-auto px-5 pt-[var(--top-inset)] pb-[var(--bottom-inset)] sm:min-h-0">
           <p className="eyebrow mb-3">El cruce</p>
-          <h1 className="mb-6 text-[length:var(--fs-title-26)] leading-[1.18] text-blanco">{result.headline}</h1>
+          <h1 className="mb-6 text-[length:var(--fs-title-26)] leading-[var(--lh-heading-1_18)] text-blanco">{result.headline}</h1>
 
           <section className="mb-6">
             <h2 className="eyebrow mb-2.5">Los números, en diálogo</h2>

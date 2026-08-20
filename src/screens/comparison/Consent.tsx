@@ -72,7 +72,7 @@ export function Consent() {
       <Screen backdrop="surf" scrim="heavy" opacity={PHOTO.content40}>
         <div className="flex min-h-dvh flex-col overflow-y-auto px-5 pt-[var(--top-inset)] pb-[var(--bottom-inset)] sm:min-h-0">
           <p className="eyebrow mb-3">Permisos de {profile.display_name}</p>
-          <h1 className="mb-3 text-[length:var(--fs-title-27)] leading-[1.15] text-blanco">
+          <h1 className="mb-3 text-[length:var(--fs-title-27)] leading-[var(--lh-heading-1_15)] text-blanco">
             Qué se puede
             <br />
             mirar, y hasta cuándo.

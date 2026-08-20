@@ -87,7 +87,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 />
                 <p className="eyebrow">Antes de seguir</p>
               </div>
-              <h1 className="mb-4 text-[length:var(--fs-title-26)] leading-[1.18] text-blanco">
+              <h1 className="mb-4 text-[length:var(--fs-title-26)] leading-[var(--lh-heading-1_18)] text-blanco">
                 Se rompió la pantalla, no lo que te está pasando.
               </h1>
               <p className="text-[length:var(--fs-body-13)] leading-relaxed text-crema/75">
@@ -99,7 +99,7 @@ export class ErrorBoundary extends Component<Props, State> {
         ) : (
           <div>
             <p className="eyebrow mb-4">Algo salió mal</p>
-            <h1 className="mb-4 text-[length:var(--fs-title-26)] leading-[1.18] text-blanco">
+            <h1 className="mb-4 text-[length:var(--fs-title-26)] leading-[var(--lh-heading-1_18)] text-blanco">
               Se rompió algo de este lado.
             </h1>
             <p className="text-[length:var(--fs-body-13)] leading-relaxed text-crema/70">

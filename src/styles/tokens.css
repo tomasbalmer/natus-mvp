@@ -147,6 +147,24 @@
   --fs-micro-9: 9px; /* ×2 */
   --fs-micro-8: 8px; /* ×2 */
 
+  /*
+   * Heading line-height. FOUR VALUES FOR ONE JOB.
+   *
+   * Every h1 and one h2 set their own, and they came from the mockup the same
+   * way the sizes did: measured per screen rather than chosen once. 1.15 does
+   * eleven of the seventeen; the other three exist because three screens were
+   * transcribed on different days.
+   *
+   * Only headings are here. Body and label line-height is genuinely varied —
+   * `--fs-body-13` alone ships with four different ones — and naming that
+   * would mean deciding which is right, which is the designer's call and not
+   * a transcription. The document records the whole matrix instead.
+   */
+  --lh-heading-1_12: 1.12; /* ×1 — Landing */
+  --lh-heading-1_14: 1.14; /* ×1 — Gate */
+  --lh-heading-1_15: 1.15; /* ×11 */
+  --lh-heading-1_18: 1.18; /* ×4 */
+
   --track-eyebrow: 0.22em;
   --track-cta: 0.12em;
 }

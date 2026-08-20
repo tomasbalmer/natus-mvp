@@ -93,7 +93,7 @@ export function SoulMap() {
       <div className="flex min-h-dvh flex-col overflow-y-auto px-6 pt-[var(--top-inset)] pb-[var(--bottom-inset)] sm:min-h-0">
         <p className="eyebrow mb-3">Tu mapa del alma</p>
 
-        <h1 className="mb-7 text-[length:var(--fs-title-30)] leading-[1.15] text-blanco">
+        <h1 className="mb-7 text-[length:var(--fs-title-30)] leading-[var(--lh-heading-1_15)] text-blanco">
           {firstName ? (
             <>
               <span className="font-serif text-crema italic">{firstName}</span>,

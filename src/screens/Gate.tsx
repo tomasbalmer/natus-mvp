@@ -41,7 +41,7 @@ export function Gate() {
 
         <p className="eyebrow mb-3">Natus</p>
 
-        <h1 className="mb-4 text-[length:var(--fs-display-sm)] leading-[1.14] text-blanco">
+        <h1 className="mb-4 text-[length:var(--fs-display-sm)] leading-[var(--lh-heading-1_14)] text-blanco">
           Esto todavía
           <br />
           <span className="font-serif text-crema italic">no está abierto.</span>

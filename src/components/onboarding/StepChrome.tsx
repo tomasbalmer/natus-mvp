@@ -50,7 +50,7 @@ export function StepBody({
 }) {
   return (
     <>
-      <h2 className="mb-2 text-[length:var(--fs-heading-28)] leading-[1.18] text-blanco">{title}</h2>
+      <h2 className="mb-2 text-[length:var(--fs-heading-28)] leading-[var(--lh-heading-1_18)] text-blanco">{title}</h2>
       {helper && <p className="mb-5 text-[length:var(--fs-body-12)] leading-relaxed text-crema/55">{helper}</p>}
       {!helper && <div className="mb-5" />}
 

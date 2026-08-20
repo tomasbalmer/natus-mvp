@@ -127,7 +127,7 @@ export function Signup() {
       <div className="flex min-h-dvh flex-col overflow-y-auto px-6 pt-[var(--top-inset)] pb-9 sm:min-h-0">
         <p className="eyebrow mb-3">Guardar tu mapa</p>
 
-        <h1 className="mb-3 text-[length:var(--fs-title-30)] leading-[1.15] text-blanco">
+        <h1 className="mb-3 text-[length:var(--fs-title-30)] leading-[var(--lh-heading-1_15)] text-blanco">
           Para volver
           <br />
           <span className="font-serif text-crema italic">cuando quieras.</span>

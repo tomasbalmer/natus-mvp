@@ -204,3 +204,62 @@ describe('src/lib stays portable', () => {
     expect(found).toEqual([]);
   });
 });
+
+/**
+ * The lesson is borrowed, and it was expensive for somebody else.
+ *
+ * `waterplan-frontend` is fifty times this size and does everything right on
+ * paper: a design-system package, a token library, a Storybook. Its newest
+ * type scale — two roles, sizes paired with line-heights — is the shape this
+ * one should grow into. It is used in three files. Fourteen use the scale it
+ * replaced, and **five hundred and fifty-three places write `font-size:`
+ * with a number in it**, because nothing anywhere fails when they do.
+ *
+ * Their colour tokens, by contrast, are used in five hundred and sixty-one
+ * files. Same team, same repository, same folder — the difference is that a
+ * hex code is hard to invent from memory and `13px` is not.
+ *
+ * This file is the part they are missing. The scale reached one hundred per
+ * cent adoption today; these two tests are what keep it there, and they cost
+ * nothing while nobody is trying to erode it.
+ */
+describe('the type scale cannot erode', () => {
+  const JSX = FILES.filter((f) => f.endsWith('.tsx'));
+
+  it('finds the components', () => {
+    expect(JSX.length).toBeGreaterThan(20);
+  });
+
+  it('has no font size written as a literal', () => {
+    const found: string[] = [];
+
+    for (const file of JSX) {
+      for (const [i, line] of readFileSync(file, 'utf8').split('\n').entries()) {
+        // Both spellings: an arbitrary value, and Tailwind's own scale, which
+        // is a second vocabulary for the same axis rather than an exception
+        // to the first.
+        const literal = /\btext-\[[0-9.]+px\]/.exec(line);
+        const preset = /\btext-(?:xs|sm|base|lg|xl|[2-9]xl)\b/.exec(line);
+        const hit = literal ?? preset;
+        if (hit) found.push(`${relative(SRC, file)}:${i + 1}  ${hit[0]}`);
+      }
+    }
+
+    expect(found).toEqual([]);
+  });
+
+  it('has no heading line-height written as a literal', () => {
+    const found: string[] = [];
+
+    for (const file of JSX) {
+      for (const [i, line] of readFileSync(file, 'utf8').split('\n').entries()) {
+        // `leading-[var(--lh-…)]` is the token form and passes; a bare number
+        // is a fifth value for a job that already has four too many.
+        const hit = /\bleading-\[[0-9.]+\]/.exec(line);
+        if (hit) found.push(`${relative(SRC, file)}:${i + 1}  ${hit[0]}`);
+      }
+    }
+
+    expect(found).toEqual([]);
+  });
+});

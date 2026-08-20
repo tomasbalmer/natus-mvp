@@ -18,7 +18,7 @@ export function Landing() {
 
         <p className="eyebrow mb-3">Bienvenido a tu camino</p>
 
-        <h1 className="mb-3.5 text-[length:var(--fs-display)] leading-[1.12] text-blanco">
+        <h1 className="mb-3.5 text-[length:var(--fs-display)] leading-[var(--lh-heading-1_12)] text-blanco">
           El Inicio
           <br />
           de Una

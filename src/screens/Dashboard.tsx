@@ -147,7 +147,7 @@ export function Dashboard() {
     <Screen backdrop="forest" scrim="heavy" opacity={PHOTO.content42}>
       <div className="flex min-h-dvh flex-col overflow-y-auto px-5 pt-[var(--top-inset)] pb-[var(--bottom-inset)] sm:min-h-0">
         <p className="eyebrow mb-3">Tu espacio</p>
-        <h1 className="mb-6 text-[length:var(--fs-title-30)] leading-[1.15] text-blanco">
+        <h1 className="mb-6 text-[length:var(--fs-title-30)] leading-[var(--lh-heading-1_15)] text-blanco">
           {name ? (
             <>
               Hola,{' '}

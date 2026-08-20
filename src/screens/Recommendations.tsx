@@ -142,7 +142,7 @@ export function Recommendations() {
 
         <Constellation modalities={cards.map((c) => c.modality)} />
 
-        <h1 className="mt-2 mb-2 text-center text-[length:var(--fs-title-27)] leading-[1.15] text-blanco">
+        <h1 className="mt-2 mb-2 text-center text-[length:var(--fs-title-27)] leading-[var(--lh-heading-1_15)] text-blanco">
           Caminos posibles
         </h1>
         <p className="mx-auto mb-6 max-w-[280px] text-center text-[length:var(--fs-body-12_5)] leading-relaxed text-crema/55">
