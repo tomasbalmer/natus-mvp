@@ -123,7 +123,7 @@ function userIsObject(phrase: readonly string[]): boolean {
 /**
  * Whether a suppressor sits in the tokens immediately before a match.
  *
- * Only the window *before* the match is examined, never the match itself.
+ * Only the tokens *before* the match are examined, never the match itself.
  * That matters because several ideation terms legitimately start with "no"
  * ("no quiero vivir"); reading that "no" as a negation would suppress exactly
  * the phrases the detector exists to catch.
@@ -133,12 +133,12 @@ function isSuppressed(
   matchIndex: number,
   phrase: readonly string[],
 ): boolean {
-  const window = tokens.slice(Math.max(0, matchIndex - WINDOW), matchIndex);
-  if (window.length === 0) return false;
+  const preceding = tokens.slice(Math.max(0, matchIndex - WINDOW), matchIndex);
+  if (preceding.length === 0) return false;
 
-  if (ALWAYS_SUPPRESS.some((s) => findPhrase(window, s) !== -1)) return true;
+  if (ALWAYS_SUPPRESS.some((s) => findPhrase(preceding, s) !== -1)) return true;
   if (userIsObject(phrase)) return false;
-  return OTHER_SUBJECT.some((s) => findPhrase(window, s) !== -1);
+  return OTHER_SUBJECT.some((s) => findPhrase(preceding, s) !== -1);
 }
 
 function excerptAround(normalized: string, token: Token | undefined): string {
