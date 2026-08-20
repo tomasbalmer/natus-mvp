@@ -31,10 +31,14 @@ export type ExportDocument = {
   data: Record<string, unknown>;
 };
 
+// Two claims here stopped being true and nobody noticed, because a notice
+// inside a downloaded file is read once by whoever asked for it. There is a
+// server now, and the key somebody used to paste has not existed since BYOK
+// was removed. The redaction below stays regardless: an export taken from a
+// browser that still holds an old bucket should not carry one out.
 const NOTICE =
-  'Todo lo que Natus guardó de vos, tal como está en este navegador. Es una demo: ' +
-  'nada de esto vive en un servidor. Si usaste tu propia clave de API, no está acá — ' +
-  'se reemplazó por una marca.';
+  'Todo lo que Natus guardó de vos, tal como está en este navegador. Si entraste con ' +
+  'tu cuenta, lo mismo está guardado ahí, y bajar este archivo no lo borra.';
 
 function redact(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(redact);

@@ -24,9 +24,10 @@ export type Namespace =
 
 /**
  * `ai_mode` used to live at the end of that union and held a pasted Anthropic
- * key. Removing the BYOK path took the namespace with it — and `purgeRetiredNamespaces` in `db.ts` clears the bucket from browsers
- * that already have one, because a credential nobody can reach any more is
- * still a credential sitting on somebody's disk.
+ * key. Removing the BYOK path took the namespace with it, and
+ * `purgeRetiredNamespaces` in `db.ts` clears the bucket from browsers that
+ * already have one — a credential nobody can reach any more is still a
+ * credential sitting on somebody's disk.
  */
 
 

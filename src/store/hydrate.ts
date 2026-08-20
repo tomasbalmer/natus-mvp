@@ -28,6 +28,46 @@ export type WriteFailure = { namespace: string; message: string };
 
 let onWriteFailure: ((failure: WriteFailure) => void) | null = null;
 
+/**
+ * The signed-in identity, kept so the delete path can reach Postgres.
+ *
+ * `clearAll` in `db.ts` clears the mirror and `localStorage` directly rather
+ * than going through `write`, which is what makes it fast and what makes it
+ * local. That was invisible for as long as nothing else existed; with a
+ * backend behind the mirror it meant "delete everything" emptied the browser
+ * and left every row in place, and the next hydration brought all of it back.
+ */
+let identity: { client: TypedClient; userId: string } | null = null;
+
+/** Whether there is a Postgres side to delete from at all. */
+export function hasRemoteIdentity(): boolean {
+  return identity !== null;
+}
+
+/**
+ * Delete this person's rows, everywhere.
+ *
+ * In reverse namespace order, because the schema cascades parent to child and
+ * the list is written parent first: `messages` before `conversations`,
+ * `chart_comparisons` before the consents and profiles it points at. Cascade
+ * would cover most of it, but relying on that means the delete is correct by
+ * accident of schema rather than by what this function does.
+ *
+ * Sequential, and it throws on the first failure. Fourteen parallel deletes
+ * that half succeed leave an account nobody can describe, and the caller has
+ * to be able to tell somebody the truth about what is gone.
+ */
+export async function purgeRemote(): Promise<void> {
+  if (!identity) return;
+  const { client, userId } = identity;
+
+  for (const ns of [...REMOTE_NAMESPACES].reverse()) {
+    await ADAPTERS[ns].save(client, userId, null);
+  }
+
+  identity = null;
+}
+
 export function setWriteFailureHandler(handler: (failure: WriteFailure) => void): void {
   onWriteFailure = handler;
 }
@@ -61,6 +101,7 @@ export async function hydrate(): Promise<HydrationResult> {
 
     seedMirror(loaded);
     setPersister(makePersister(client, userId));
+    identity = { client, userId };
     return { kind: 'remote', userId, namespaces: loaded.length };
   } catch {
     // Deliberately not partial. Seeding some namespaces from Postgres and

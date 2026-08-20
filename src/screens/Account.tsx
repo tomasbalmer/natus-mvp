@@ -4,6 +4,8 @@ import { PHOTO, Screen } from '@/components/Screen';
 import { buildExport, exportFileName } from '@/lib/export';
 import { clearAll, exportAll } from '@/store/db';
 import { clearStoredBlobs } from '@/store/blobs';
+import { hasRemoteIdentity, purgeRemote } from '@/store/hydrate.ts';
+import { signOut } from '@/supabase/session.ts';
 import { getClient } from '@/store/account';
 import { getPreferences, setLocale, type Locale } from '@/store/preferences';
 
@@ -14,6 +16,12 @@ import { getPreferences, setLocale, type Locale } from '@/store/preferences';
  * It also runs the IndexedDB sweep, because "delete my account" that leaves
  * blobs behind is the kind of promise that is only discovered to be false by
  * someone who trusted it.
+ *
+ * That sentence was written about blobs and was true about Postgres too, for
+ * a while. `clearAll` empties the mirror and `localStorage` without going
+ * through `write`, so it never reached the persister: the browser emptied,
+ * every row stayed, and the next hydration brought all of it back. The rows
+ * go first now, and nothing local is touched until they are gone.
  */
 
 const LOCALES: [Locale, string][] = [
@@ -27,6 +35,7 @@ export function Account() {
   const [locale, setStoredLocale] = useState<Locale>(() => getPreferences().locale);
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
   const [exported, setExported] = useState<string | null>(null);
 
   const download = () => {
@@ -48,11 +57,40 @@ export function Account() {
 
   const deleteEverything = async () => {
     setBusy(true);
+    setFailed(false);
+
+    // Postgres first, and nothing local until it answers. A browser emptied
+    // against rows that survived is the worst of the three outcomes: it looks
+    // done, it reads as done, and the next load contradicts it.
+    try {
+      await purgeRemote();
+    } catch {
+      setBusy(false);
+      setFailed(true);
+      return;
+    }
+
     await clearStoredBlobs();
     // localStorage last: if the blob sweep throws, the record of what exists
     // is still there to try again with.
     clearAll();
+
+    // The account is gone; the session that reaches it should not outlive it,
+    // least of all on a phone somebody is handing back.
+    await signOut().catch(() => {
+      // Already unreachable, or never configured. Nothing is left to protect.
+    });
+
     navigate('/', { replace: true });
+  };
+
+  const leave = async () => {
+    setBusy(true);
+    await signOut().catch(() => {});
+    // Not `clearAll`: signing out is not deleting. What it must not leave is
+    // one person's data on screen for whoever opens the app next, and the
+    // mirror is what would do that, so the reload is the point.
+    window.location.assign(import.meta.env.BASE_URL);
   };
 
   return (
@@ -119,7 +157,7 @@ export function Account() {
           <p className="eyebrow mb-1.5">Llevarte tus datos</p>
           <p className="mb-3 text-[length:var(--fs-body-11_5)] leading-relaxed text-crema/55">
             Un archivo JSON con todo: tus respuestas, tu mapa, tus caminos, tus marcas de
-            rutina. Si cargaste una clave de API, no viene incluida.
+            rutina. Bajarlo no borra nada.
           </p>
           <button
             type="button"
@@ -172,9 +210,34 @@ export function Account() {
               >
                 Mejor no
               </button>
+              {failed && (
+                <p
+                  role="alert"
+                  className="text-[length:var(--fs-body-11_5)] leading-relaxed text-alerta"
+                >
+                  No pudimos borrar lo que está guardado en tu cuenta, así que tampoco borramos
+                  nada de este navegador. Sigue todo como estaba y podés volver a intentar.
+                </p>
+              )}
             </div>
           )}
         </section>
+
+        {hasRemoteIdentity() && (
+          <section className="mt-6">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void leave()}
+              className="glass-chip w-full rounded-full px-3 py-2.5 text-[length:var(--fs-label-11)] tracking-wide text-crema/70 uppercase disabled:opacity-50"
+            >
+              Cerrar sesión
+            </button>
+            <p className="mt-2 text-[length:var(--fs-body-11)] leading-relaxed text-crema/55">
+              Tus datos quedan en tu cuenta. Volvés a entrar con el mismo Google y está todo.
+            </p>
+          </section>
+        )}
       </div>
     </Screen>
   );
