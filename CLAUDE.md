@@ -66,6 +66,15 @@ real generation, all walked on the deployed site.
   sign-in. Google rather than magic links because Supabase's built-in mail
   refuses anyone outside the project team, at two messages an hour.
 - The free-tier pause question is still open.
+- The type scale has 24 sizes across 9 roles, and several roles carry more
+  than one: `title` has four, `heading` seven for nine uses. Named at their
+  values so the drift is countable, and deliberately not collapsed — that is
+  a design decision, and a designer is reviewing it. Line-height is the same
+  story one axis over: `--fs-body-13` alone ships with four.
+- `supabase/functions/_shared` is 3,933 lines copied from `src/lib` and
+  `src/ai/prompts` by `pnpm sync:shared`, with a parity test to catch drift.
+  It works. It is still duplication held together by tooling, and the fix is
+  a pnpm workspace package — the shape `waterplan-frontend` already uses.
 - `crisis-keywords.json` is `"status": "preliminary"` and wants a clinician.
 
 **Two open questions with the data now being collected for them:** whether the
@@ -108,7 +117,14 @@ src/ai/      One runAi with two paths: an Edge Function when the backend is
              otherwise. Both parse the same zod schema and pass the same copy
              lint. Prompts also cross into _shared, under the same parity test.
 
-src/screens/ Route-level components.
+src/screens/ Route-level components. Wrapped per route by `ErrorBoundary`,
+             which consults the crisis store before deciding what a failed
+             screen shows.
+src/styles/  tokens.css is the visual source of truth: palette, glass,
+             geometry, and a type scale of 36 tokens over 9 roles. Sizes are
+             named by role and value — four `title-*` exist because four
+             sizes ship, not because four were designed. Nothing is written
+             as a literal, and `architecture.test.ts` fails if one appears.
 data/        Seed JSON: modalities, topics, crisis resources, bed tracks.
 
 supabase/functions/
@@ -131,7 +147,7 @@ pnpm verify:chat && pnpm verify:models
 
 ```
 pnpm typecheck      tsc --noEmit
-pnpm test           vitest, 752 tests
+pnpm test           vitest, 767 tests
 pnpm build          production build
 pnpm dev            development server
 pnpm sync:shared    re-copy src/lib and src/ai/prompts into _shared
@@ -147,6 +163,23 @@ All three must pass before a commit. CI runs the same and deploys on push to
 Verify UI work in a browser, not by reasoning about it. Every defect found
 during the build — a stopped wizard, an overlapping constellation, a stale
 match — was invisible to the type checker and the test suite.
+
+## The rules that run
+
+`src/architecture.test.ts` executes what this file used to only assert. Layer
+direction, `src/lib` importing nothing outside itself and touching no browser
+global, file extensions on its relative imports, and no font size or heading
+line-height written as a literal.
+
+They exist because the alternative is visible next door.
+`waterplan-frontend` is fifty times this size, has a design-system package, a
+token library and a Storybook, and writes `font-size:` with a number in it in
+five hundred and fifty-three places — nothing there fails when it does. Its
+colour tokens, in the same folder, are used in five hundred and sixty-one
+files. A hex code is hard to invent from memory and `13px` is not.
+
+Every rule was proven to fail before being trusted. If you add one, break it
+on purpose first; a guard nobody has seen fail is a guard nobody has checked.
 
 ## Non-negotiables
 
