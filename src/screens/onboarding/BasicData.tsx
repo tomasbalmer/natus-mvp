@@ -13,7 +13,7 @@ const COUNTRIES: [string, string][] = [
 
 
 const fieldClass =
-  'glass w-full rounded-[var(--radius-option)] px-4 py-3 text-sm text-blanco placeholder:text-crema/55 [color-scheme:dark]';
+  'glass w-full rounded-[var(--radius-option)] px-4 py-3 text-[length:var(--fs-body-14)] leading-5 text-blanco placeholder:text-crema/55 [color-scheme:dark]';
 
 const labelClass = 'mb-1.5 block text-[length:var(--fs-label-11)] tracking-wide text-crema/55 uppercase';
 

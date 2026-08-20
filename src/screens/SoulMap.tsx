@@ -44,7 +44,7 @@ function Numbers({ numerology }: { numerology: Numerology }) {
             className="glass flex items-center justify-between rounded-[var(--radius-option)] px-4 py-3"
           >
             <span className="text-[length:var(--fs-body-13)] text-blanco/85">{NUMBER_LABELS[key]}</span>
-            <span className="font-serif text-2xl font-light text-crema">{numerology[key]}</span>
+            <span className="font-serif text-[length:var(--fs-numeral-24)] leading-8 font-light text-crema">{numerology[key]}</span>
           </div>
         ))}
       </div>
@@ -75,7 +75,7 @@ export function SoulMap() {
     return (
       <Screen backdrop="palm" scrim="heavy" opacity={PHOTO.content45}>
         <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
-          <p className="text-sm leading-relaxed text-crema/65">
+          <p className="text-[length:var(--fs-body-14)] leading-relaxed text-crema/65">
             Todavía no generamos tu mapa. Empezá por el principio y volvemos acá.
           </p>
           <Link to="/onboarding" className="cta no-underline">

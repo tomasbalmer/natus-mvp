@@ -104,7 +104,7 @@ export function Recommendations() {
     return (
       <Screen backdrop="grass" scrim="heavy" opacity={PHOTO.content40}>
         <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
-          <p className="text-sm leading-relaxed text-crema/65">
+          <p className="text-[length:var(--fs-body-14)] leading-relaxed text-crema/65">
             Las terapias sugeridas salen de tu mapa. Generalo primero.
           </p>
           <Link to="/onboarding" className="cta no-underline">

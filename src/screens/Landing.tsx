@@ -33,7 +33,7 @@ export function Landing() {
          * "el terapeuta que te entiende" is a prediction of alliance the MVP
          * cannot make — it recommends modalities, not people.
          */}
-        <p className="mb-8 max-w-[268px] text-sm leading-relaxed text-crema/65">
+        <p className="mb-8 max-w-[268px] text-[length:var(--fs-body-14)] leading-relaxed text-crema/65">
           Un espejo para lo que estás atravesando. Sin cuenta, sin diagnóstico.
         </p>
 
@@ -45,7 +45,7 @@ export function Landing() {
           <span>{returning ? 'Volver a mi espacio' : 'Comenzar'}</span>
           <span
             aria-hidden="true"
-            className="flex size-7 items-center justify-center rounded-full bg-crema/15 text-sm"
+            className="flex size-7 items-center justify-center rounded-full bg-crema/15 text-[length:var(--fs-body-14)] leading-5"
           >
             →
           </span>

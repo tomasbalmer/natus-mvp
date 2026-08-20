@@ -30,7 +30,7 @@ function Verdict({ verdict }: { verdict: SafetyVerdict }) {
   if (!verdict.crisis) {
     return (
       <div className="glass rounded-[var(--radius-option)] px-4 py-3">
-        <p className="text-sm text-crema/70">Sin señal de crisis. El flujo sigue normal.</p>
+        <p className="text-[length:var(--fs-body-14)] leading-5 text-crema/70">Sin señal de crisis. El flujo sigue normal.</p>
       </div>
     );
   }
@@ -42,7 +42,7 @@ function Verdict({ verdict }: { verdict: SafetyVerdict }) {
           aria-hidden="true"
           className="size-2 rounded-full bg-alerta shadow-[0_0_8px_var(--natus-alerta)]"
         />
-        <p className="text-sm text-blanco">
+        <p className="text-[length:var(--fs-body-14)] leading-5 text-blanco">
           Severidad {verdict.severity} · {verdict.category}
         </p>
       </div>
@@ -92,7 +92,7 @@ export function SafetyLab() {
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={3}
-          className="glass w-full resize-none rounded-[var(--radius-option)] px-4 py-3 text-sm text-blanco placeholder:text-crema/55"
+          className="glass w-full resize-none rounded-[var(--radius-option)] px-4 py-3 text-[length:var(--fs-body-14)] leading-5 text-blanco placeholder:text-crema/55"
           placeholder="Escribí algo…"
         />
 

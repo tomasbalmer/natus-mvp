@@ -58,7 +58,7 @@ export function Dashboard() {
     return (
       <Screen backdrop="forest" scrim="heavy" opacity={PHOTO.content45}>
         <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
-          <p className="text-sm leading-relaxed text-crema/65">
+          <p className="text-[length:var(--fs-body-14)] leading-relaxed text-crema/65">
             Tu espacio se arma con tu mapa. Empecemos por ahí.
           </p>
           <Link to="/onboarding" className="cta no-underline">

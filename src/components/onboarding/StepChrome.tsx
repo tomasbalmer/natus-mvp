@@ -19,7 +19,7 @@ export function ProgressRow({
           type="button"
           onClick={onBack}
           aria-label="Volver"
-          className="glass-chip flex size-8 shrink-0 items-center justify-center rounded-full text-sm text-crema"
+          className="glass-chip flex size-8 shrink-0 items-center justify-center rounded-full text-[length:var(--fs-body-14)] leading-5 text-crema"
         >
           ←
         </button>

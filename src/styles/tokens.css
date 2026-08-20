@@ -76,6 +76,13 @@
    *
    * Nothing here has been normalised. Naming the drift and deciding what it
    * ought to be are different jobs, and the second belongs to a designer.
+   *
+   * Four of these arrived late, and from a second vocabulary. Thirty places
+   * used Tailwind's own `text-sm`, `text-xs`, `text-lg` and `text-2xl`
+   * alongside the tokens, so two systems described the same axis and 14, 18
+   * and 24px were in the design without appearing in any list of it. Those
+   * classes also carry a line-height; where one was relied on, the equivalent
+   * `leading-*` is now written out, because the tokens set size alone.
    */
 
   /* Display — the two entry screens, and the only place type gets loud. */
@@ -112,6 +119,7 @@
   /* Body copy.
      SEVEN VALUES over 101 uses, four of them within a pixel and a
      half of each other. */
+  --fs-body-14: 14px; /* ×27 — arrived as Tailwind's `text-sm`, see below */
   --fs-body-13_5: 13.5px; /* ×1 */
   --fs-body-13: 13px; /* ×13 */
   --fs-body-12_5: 12.5px; /* ×22 */
@@ -127,7 +135,14 @@
   --fs-label-10: 10px; /* ×15 */
   --fs-label-9: 9px; /* ×1 */
 
+  /* Numerals presented as display type: the five numerology numbers, and a
+     telephone number on the crisis screen. Serif, and the only place a figure
+     is the content rather than a label on one. */
+  --fs-numeral-24: 24px; /* ×1 */
+  --fs-numeral-18: 18px; /* ×1 */
+
   /* Marks and numerals inside chips, checkboxes and badges. */
+  --fs-micro-12: 12px; /* ×1 */
   --fs-micro-10: 10px; /* ×2 */
   --fs-micro-9: 9px; /* ×2 */
   --fs-micro-8: 8px; /* ×2 */

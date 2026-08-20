@@ -71,7 +71,7 @@ export function Chat() {
     return (
       <Screen backdrop="surf" scrim="heavy" opacity={PHOTO.content45}>
         <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
-          <p className="text-sm leading-relaxed text-crema/65">
+          <p className="text-[length:var(--fs-body-14)] leading-relaxed text-crema/65">
             La conversación se apoya en tu mapa. Generalo primero y volvemos acá.
           </p>
           <Link to="/onboarding" className="cta no-underline">

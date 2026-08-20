@@ -24,7 +24,7 @@ import { upgradeToEmail } from '@/supabase/session.ts';
  */
 
 const fieldClass =
-  'glass w-full rounded-[var(--radius-option)] px-4 py-3 text-sm text-blanco placeholder:text-crema/55';
+  'glass w-full rounded-[var(--radius-option)] px-4 py-3 text-[length:var(--fs-body-14)] leading-5 text-blanco placeholder:text-crema/55';
 
 export function Signup() {
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ export function Signup() {
     return (
       <Screen backdrop="surf" scrim="heavy" opacity={PHOTO.content50}>
         <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
-          <p className="text-sm leading-relaxed text-crema/65">Tu cuenta ya está creada.</p>
+          <p className="text-[length:var(--fs-body-14)] leading-relaxed text-crema/65">Tu cuenta ya está creada.</p>
           <Link to="/inicio" className="cta no-underline">
             Ir a mi espacio
           </Link>
@@ -50,7 +50,7 @@ export function Signup() {
     return (
       <Screen backdrop="surf" scrim="heavy" opacity={PHOTO.content50}>
         <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
-          <p className="text-sm leading-relaxed text-crema/65">
+          <p className="text-[length:var(--fs-body-14)] leading-relaxed text-crema/65">
             Primero generamos tu mapa. La cuenta viene después, cuando ya tengas algo que
             guardar.
           </p>
@@ -106,7 +106,7 @@ export function Signup() {
     return (
       <Screen backdrop="surf" scrim="heavy" opacity={PHOTO.content50}>
         <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
-          <p className="text-sm leading-relaxed text-crema/65">
+          <p className="text-[length:var(--fs-body-14)] leading-relaxed text-crema/65">
             Te mandamos un correo a <span className="text-blanco">{email}</span>. Abrilo para
             confirmar la dirección.
           </p>

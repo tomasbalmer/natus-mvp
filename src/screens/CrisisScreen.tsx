@@ -39,7 +39,7 @@ export function CrisisScreen({
           contando importa.
         </h1>
 
-        <p className="mb-8 text-sm leading-relaxed text-crema/75">
+        <p className="mb-8 text-[length:var(--fs-body-14)] leading-relaxed text-crema/75">
           {message ??
             'Por lo que escribiste, esto no es algo para atravesar solo y no es algo que un mapa simbólico pueda acompañar. Hay personas disponibles ahora mismo para hablar con vos.'}
         </p>

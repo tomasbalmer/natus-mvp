@@ -127,7 +127,7 @@ export function Result() {
           <div className="flex min-h-dvh flex-col items-center justify-center gap-4 px-8 text-center sm:min-h-0">
             {error ? (
               <>
-                <p className="text-sm leading-relaxed text-crema/75">{error}</p>
+                <p className="text-[length:var(--fs-body-14)] leading-relaxed text-crema/75">{error}</p>
                 <button type="button" className="cta" onClick={() => void generate()}>
                   Reintentar
                 </button>
@@ -285,7 +285,7 @@ function Missing({ message, to = '/comparacion', cta = 'Volver' }: { message: st
     <ComparisonGate>
       <Screen backdrop="grass" scrim="heavy" opacity={PHOTO.content45}>
         <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
-          <p className="text-sm leading-relaxed text-crema/65">{message}</p>
+          <p className="text-[length:var(--fs-body-14)] leading-relaxed text-crema/65">{message}</p>
           <Link to={to} className="cta no-underline">
             {cta}
           </Link>

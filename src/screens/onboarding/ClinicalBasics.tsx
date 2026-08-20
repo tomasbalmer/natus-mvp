@@ -152,7 +152,7 @@ export function ClinicalBasics({
           <textarea
             id="clinical-notes"
             rows={2}
-            className="glass w-full resize-none rounded-[var(--radius-option)] px-4 py-3 text-sm text-blanco placeholder:text-crema/55"
+            className="glass w-full resize-none rounded-[var(--radius-option)] px-4 py-3 text-[length:var(--fs-body-14)] leading-5 text-blanco placeholder:text-crema/55"
             placeholder="Opcional"
           />
         </div>
