@@ -3,6 +3,7 @@ import { Route, Routes, useLocation } from 'react-router-dom';
 import { PhoneFrame } from '@/components/PhoneFrame';
 import { DemoBanner } from '@/components/DemoBanner';
 import { SaveFailureNotice } from '@/components/SaveFailureNotice';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { BottomNav } from '@/components/BottomNav';
 import { Landing } from '@/screens/Landing';
 import { SoulMap } from '@/screens/SoulMap';
@@ -110,24 +111,35 @@ export function App() {
         <DemoBanner />
         <SaveFailureNotice />
       </div>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/mapa" element={<SoulMap />} />
-        <Route path="/recomendaciones" element={<Recommendations />} />
-        <Route path="/rutina" element={<Routine />} />
-        <Route path="/inicio" element={<Dashboard />} />
-        <Route path="/registro" element={<Signup />} />
-        <Route path="/cuenta" element={<Account />} />
-        <Route path="/chat" element={<Chat />} />
-        <Route path="/meditaciones" element={<Meditation />} />
-        <Route path="/biblioteca" element={<Library />} />
-        <Route path="/comparacion" element={<ExternalProfile />} />
-        <Route path="/comparacion/consentimiento/:id" element={<Consent />} />
-        <Route path="/comparacion/resultado/:id" element={<Result />} />
-        <Route path="/lab/safety" element={<SafetyLab />} />
-        <Route path="*" element={<Landing />} />
-      </Routes>
+      {/*
+        Keyed by pathname so navigating away clears a caught error. Without the
+        key the fallback outlives the screen that produced it and the whole
+        application reads as broken, which is a worse lie than the bug.
+
+        Inside the frame rather than around it: the banner and the navigation
+        are how somebody leaves a screen that failed, so they have to survive
+        it.
+      */}
+      <ErrorBoundary key={pathname}>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/mapa" element={<SoulMap />} />
+          <Route path="/recomendaciones" element={<Recommendations />} />
+          <Route path="/rutina" element={<Routine />} />
+          <Route path="/inicio" element={<Dashboard />} />
+          <Route path="/registro" element={<Signup />} />
+          <Route path="/cuenta" element={<Account />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/meditaciones" element={<Meditation />} />
+          <Route path="/biblioteca" element={<Library />} />
+          <Route path="/comparacion" element={<ExternalProfile />} />
+          <Route path="/comparacion/consentimiento/:id" element={<Consent />} />
+          <Route path="/comparacion/resultado/:id" element={<Result />} />
+          <Route path="/lab/safety" element={<SafetyLab />} />
+          <Route path="*" element={<Landing />} />
+        </Routes>
+      </ErrorBoundary>
       {/*
         A crisis takeover has to actually take the screen over. Leaving a glass
         bar offering "Caminos" and "Chat" across the bottom of it turns the
