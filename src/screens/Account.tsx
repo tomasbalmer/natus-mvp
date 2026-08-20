@@ -109,8 +109,18 @@ export function Account() {
             <>
               <p className="text-[length:var(--fs-body-13)] leading-snug text-blanco">{client.email}</p>
               <p className="mt-1 text-[length:var(--fs-body-11_5)] leading-relaxed text-crema/55">
-                Cuenta simulada. No se envió ningún correo y no hay ningún servidor donde
-                exista.
+                {/*
+                  Both halves were one sentence, and it was the demo's: "no hay
+                  ningún servidor donde exista". True while there was not one.
+                  Once somebody signs in, their account is a row in Postgres and
+                  their answers are thirteen more — and this screen was telling
+                  them the opposite, on the screen where they decide whether to
+                  delete it. `Signup` already conditions its own version of this
+                  claim; this one had been missed.
+                */}
+                {hasRemoteIdentity()
+                  ? 'Tu cuenta vive en el servidor de Natus, atada a este acceso de Google. Desde acá podés bajarte todo o borrarlo.'
+                  : 'Cuenta simulada. No se envió ningún correo y no hay ningún servidor donde exista.'}
               </p>
             </>
           ) : (

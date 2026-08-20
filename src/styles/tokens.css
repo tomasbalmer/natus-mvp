@@ -29,7 +29,20 @@
   --glass-blur-chip: 12px;
   --glass-blur-card: 20px;
 
-  /* Text on photography */
+  /*
+   * Text on photography.
+   *
+   * `--text-primary` sets the body colour and `--text-eyebrow` the label one.
+   * The middle three are a semantic emphasis ramp that the application never
+   * adopted: screens write the alpha inline instead, at 55, 60, 65, 70, 75, 80
+   * and 85, with `crema/55` alone appearing ninety-three times. So the ramp
+   * that ships has seven steps and no names, and the one with names has three
+   * steps and no users.
+   *
+   * Kept rather than deleted. Which of the seven is "muted" and which is
+   * "faint" is a design decision, and deleting the vocabulary would quietly
+   * settle it as "neither".
+   */
   --text-primary: var(--natus-blanco);
   --text-accent: var(--natus-crema);
   --text-muted: rgb(232 220 200 / 0.65);
@@ -45,7 +58,6 @@
   --h-cta: 54px;
   --h-option: 52px;
 
-  --pad-screen: 24px;
 
   /* Clearance for the demo banner, which floats over every screen. Screens
      start their content below this rather than each guessing a padding. */
