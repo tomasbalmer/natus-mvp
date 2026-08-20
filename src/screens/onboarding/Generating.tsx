@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/components/Screen';
 import { generateSoulMap } from '@/ai/soul-map';
 import {
   calculateNatalChart,
@@ -111,7 +111,7 @@ export function Generating({
   }, [draft, numerology, onDone, onFailed]);
 
   return (
-    <Screen backdrop="surf" scrim="diagonal" opacity={0.7}>
+    <Screen backdrop="surf" scrim="diagonal" opacity={PHOTO.veil70}>
       <div className="flex min-h-dvh flex-col items-center justify-center gap-9 px-8 text-center sm:min-h-0">
         <div className="relative flex size-30 items-center justify-center">
           <span className="orb-pulse" aria-hidden="true" />
@@ -130,10 +130,10 @@ export function Generating({
         </div>
 
         <div aria-live="polite" className="min-h-12">
-          <p className="font-serif text-[22px] leading-snug font-light text-blanco">
+          <p className="font-serif text-[length:var(--fs-voice-22)] leading-snug font-light text-blanco">
             {STAGES[stage]}
           </p>
-          <p className="mt-2 text-[11px] tracking-wide text-crema/55">
+          <p className="mt-2 text-[length:var(--fs-body-11)] tracking-wide text-crema/55">
             Esto puede tardar un momento
           </p>
         </div>

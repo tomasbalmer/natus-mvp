@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/components/Screen';
 import { currentSynthesis } from '@/store/soulMap';
 
 /** Screen 1 of PDR 6.1, built from mockup screen 01. */
@@ -9,16 +9,16 @@ export function Landing() {
   const returning = currentSynthesis() !== undefined;
 
   return (
-    <Screen backdrop="forest" scrim="bottom" opacity={0.9} focus="center 20%">
+    <Screen backdrop="forest" scrim="bottom" opacity={PHOTO.hero} focus="center 20%">
       <div className="mt-auto flex flex-col items-center px-7 pb-13 text-center">
         <div className="relative mb-5 flex size-16 items-center justify-center rounded-full border border-crema/35">
           <span aria-hidden="true" className="absolute inset-1.5 rounded-full border border-crema/15" />
-          <span className="font-serif text-[22px] font-light tracking-wide text-crema">◯</span>
+          <span className="font-serif text-[length:var(--fs-voice-22)] font-light tracking-wide text-crema">◯</span>
         </div>
 
         <p className="eyebrow mb-3">Bienvenido a tu camino</p>
 
-        <h1 className="mb-3.5 text-[40px] leading-[1.12] text-blanco">
+        <h1 className="mb-3.5 text-[length:var(--fs-display)] leading-[1.12] text-blanco">
           El Inicio
           <br />
           de Una
@@ -55,13 +55,13 @@ export function Landing() {
           <button
             type="button"
             onClick={() => navigate('/onboarding')}
-            className="mt-3 px-2 py-1 text-[11px] text-crema/55 underline underline-offset-4 hover:text-crema/70"
+            className="mt-3 px-2 py-1 text-[length:var(--fs-body-11)] text-crema/55 underline underline-offset-4 hover:text-crema/70"
           >
             Empezar de nuevo
           </button>
         )}
 
-        <div className="mt-4 flex items-center gap-4 text-[10px] tracking-wide uppercase">
+        <div className="mt-4 flex items-center gap-4 text-[length:var(--fs-label-10)] tracking-wide uppercase">
           <Link to="/lab/safety" className="text-crema/55 no-underline hover:text-crema/60">
             Safety
           </Link>

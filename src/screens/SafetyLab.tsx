@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/components/Screen';
 import { CrisisBanner } from '@/components/CrisisBanner';
 import { CrisisScreen } from './CrisisScreen';
 import { scanText, type SafetyVerdict } from '@/lib/safety';
@@ -46,10 +46,10 @@ function Verdict({ verdict }: { verdict: SafetyVerdict }) {
           Severidad {verdict.severity} · {verdict.category}
         </p>
       </div>
-      <p className="text-[11px] leading-relaxed text-crema/55">
+      <p className="text-[length:var(--fs-body-11)] leading-relaxed text-crema/55">
         Términos: {verdict.matched.join(' · ')}
       </p>
-      <p className="mt-2 text-[11px] leading-relaxed text-crema/55">
+      <p className="mt-2 text-[length:var(--fs-body-11)] leading-relaxed text-crema/55">
         {verdict.severity === 'high'
           ? 'Bloquea Mapa del Alma, recomendaciones y meditaciones.'
           : 'No bloquea. Excluye modalidades removedoras y prioriza la familia psicológica.'}
@@ -74,12 +74,12 @@ export function SafetyLab() {
   }
 
   return (
-    <Screen backdrop="grass" scrim="heavy" opacity={0.35}>
+    <Screen backdrop="grass" scrim="heavy" opacity={PHOTO.content35}>
       <div className="flex min-h-dvh flex-col gap-4 overflow-y-auto px-5 pt-[var(--top-inset)] pb-8 sm:min-h-0">
         <div>
           <p className="eyebrow mb-2">Laboratorio</p>
-          <h1 className="text-[26px] text-blanco">Capa 1 de safety</h1>
-          <p className="mt-2 text-[12px] leading-relaxed text-crema/55">
+          <h1 className="text-[length:var(--fs-title-26)] text-blanco">Capa 1 de safety</h1>
+          <p className="mt-2 text-[length:var(--fs-body-12)] leading-relaxed text-crema/55">
             Determinística, sin modelo. Corre antes de gastar un token.
           </p>
         </div>
@@ -102,7 +102,7 @@ export function SafetyLab() {
               key={label}
               type="button"
               onClick={() => setText(sample)}
-              className="glass-chip rounded-full px-3 py-1.5 text-[11px] text-crema/70"
+              className="glass-chip rounded-full px-3 py-1.5 text-[length:var(--fs-body-11)] text-crema/70"
             >
               {label}
             </button>

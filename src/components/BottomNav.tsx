@@ -41,10 +41,10 @@ export function BottomNav() {
             ].join(' ')
           }
         >
-          <span aria-hidden="true" className="text-[13px] leading-none">
+          <span aria-hidden="true" className="text-[length:var(--fs-body-13)] leading-none">
             {item.glyph}
           </span>
-          <span className="text-[9px] leading-none tracking-[0.14em] uppercase">{item.label}</span>
+          <span className="text-[length:var(--fs-label-9)] leading-none tracking-[0.14em] uppercase">{item.label}</span>
         </NavLink>
       ))}
     </nav>

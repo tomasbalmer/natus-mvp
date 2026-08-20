@@ -27,10 +27,10 @@ export function Paywall({
       className="glass rounded-[var(--radius-option)] px-4 py-4"
     >
       <p className="eyebrow mb-2">Hasta acá llega lo incluido</p>
-      <h2 className="mb-2 text-[17px] leading-snug text-blanco">
+      <h2 className="mb-2 text-[length:var(--fs-heading-17)] leading-snug text-blanco">
         Usaste tus {used} preguntas.
       </h2>
-      <p className="mb-3.5 text-[12px] leading-relaxed text-crema/55">
+      <p className="mb-3.5 text-[length:var(--fs-body-12)] leading-relaxed text-crema/55">
         Lo que escribiste sigue guardado en el cuadro de abajo. Tu mapa, tus caminos y tu
         rutina siguen disponibles sin pagar nada.
       </p>
@@ -39,14 +39,14 @@ export function Paywall({
         <button type="button" className="cta" onClick={onSimulate}>
           Simular acceso completo
         </button>
-        <p className="px-1 text-[10.5px] leading-relaxed text-crema/55">
+        <p className="px-1 text-[length:var(--fs-body-10_5)] leading-relaxed text-crema/55">
           Esto no cobra nada. No hay pasarela de pago en esta demo: el botón sólo cambia el
           estado para que puedas seguir viendo cómo funciona.
         </p>
         <button
           type="button"
           onClick={onDismiss}
-          className="glass-chip rounded-full px-3 py-2.5 text-[11px] tracking-wide text-crema/60 uppercase"
+          className="glass-chip rounded-full px-3 py-2.5 text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase"
         >
           Volver
         </button>

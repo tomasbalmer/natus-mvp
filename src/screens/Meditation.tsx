@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/components/Screen';
 import { CrisisScreen } from '@/screens/CrisisScreen';
 import { BED_TRACKS } from '@/lib/catalog';
 import { detectCrisis, riskLevel } from '@/lib/safety';
@@ -109,20 +109,20 @@ export function Meditation() {
   };
 
   return (
-    <Screen backdrop="palm" scrim="heavy" opacity={0.4}>
+    <Screen backdrop="palm" scrim="heavy" opacity={PHOTO.content40}>
       <div className="flex min-h-dvh flex-col overflow-y-auto px-5 pt-[var(--top-inset)] pb-[var(--bottom-inset)] sm:min-h-0">
         <p className="eyebrow mb-3">Meditaciones</p>
-        <h1 className="mb-3 text-[28px] leading-[1.15] text-blanco">
+        <h1 className="mb-3 text-[length:var(--fs-title-28)] leading-[1.15] text-blanco">
           Una práctica,
           <br />
           armada para hoy.
         </h1>
-        <p className="mb-6 text-[12.5px] leading-relaxed text-crema/55">
+        <p className="mb-6 text-[length:var(--fs-body-12_5)] leading-relaxed text-crema/55">
           Contá con qué llegás. No hace falta que sea una intención elevada: "estoy podrida" es
           una intención.
         </p>
 
-        <label className="mb-1.5 block text-[11px] tracking-wide text-crema/55 uppercase" htmlFor="intent">
+        <label className="mb-1.5 block text-[length:var(--fs-label-11)] tracking-wide text-crema/55 uppercase" htmlFor="intent">
           ¿Con qué llegás?
         </label>
         <textarea
@@ -131,10 +131,10 @@ export function Meditation() {
           value={intent}
           onChange={(e) => setIntent(e.target.value)}
           placeholder="Escribí lo que se te venga…"
-          className="glass w-full resize-none rounded-[var(--radius-option)] px-3.5 py-3 text-[13px] text-blanco placeholder:text-crema/55"
+          className="glass w-full resize-none rounded-[var(--radius-option)] px-3.5 py-3 text-[length:var(--fs-body-13)] text-blanco placeholder:text-crema/55"
         />
 
-        <p className="mt-5 mb-2 text-[11px] tracking-wide text-crema/55 uppercase">Cuánto tiempo</p>
+        <p className="mt-5 mb-2 text-[length:var(--fs-label-11)] tracking-wide text-crema/55 uppercase">Cuánto tiempo</p>
         <div className="flex gap-2">
           {LENGTHS.map((length) => (
             <button
@@ -143,7 +143,7 @@ export function Meditation() {
               aria-pressed={minutes === length}
               onClick={() => setMinutes(length)}
               className={[
-                'flex-1 rounded-full px-3 py-2.5 text-[11px] tracking-wide uppercase transition-colors',
+                'flex-1 rounded-full px-3 py-2.5 text-[length:var(--fs-label-11)] tracking-wide uppercase transition-colors',
                 minutes === length ? 'bg-verde text-crema' : 'glass-chip text-crema/60',
               ].join(' ')}
             >
@@ -153,14 +153,14 @@ export function Meditation() {
         </div>
 
         {!isPlaybackAvailable() && (
-          <p className="mt-4 rounded-[var(--radius-option)] border border-crema/10 px-3.5 py-2.5 text-[11px] leading-relaxed text-crema/55">
+          <p className="mt-4 rounded-[var(--radius-option)] border border-crema/10 px-3.5 py-2.5 text-[length:var(--fs-body-11)] leading-relaxed text-crema/55">
             Este navegador no tiene síntesis de voz, así que vas a poder leer el guion pero no
             escucharlo.
           </p>
         )}
 
         {error && (
-          <p role="alert" className="mt-4 text-[11.5px] leading-relaxed text-alerta">
+          <p role="alert" className="mt-4 text-[length:var(--fs-body-11_5)] leading-relaxed text-alerta">
             {error}
           </p>
         )}
@@ -176,7 +176,7 @@ export function Meditation() {
           </button>
           <Link
             to="/biblioteca"
-            className="glass-chip rounded-full px-3 py-2.5 text-center text-[11px] tracking-wide text-crema/60 uppercase no-underline"
+            className="glass-chip rounded-full px-3 py-2.5 text-center text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase no-underline"
           >
             Mis prácticas guardadas
           </Link>
@@ -227,11 +227,11 @@ function Player({ meditation, onLeave }: { meditation: StoredMeditation; onLeave
   };
 
   return (
-    <Screen backdrop="palm" scrim="heavy" opacity={0.35}>
+    <Screen backdrop="palm" scrim="heavy" opacity={PHOTO.content35}>
       <div className="flex min-h-dvh flex-col overflow-y-auto px-5 pt-[var(--top-inset)] pb-[var(--bottom-inset)] sm:min-h-0">
         <p className="eyebrow mb-3">{bedTrack?.name ?? 'Solo voz'}</p>
-        <h1 className="mb-1.5 text-[28px] leading-[1.15] text-blanco">{meditation.script.title}</h1>
-        <p className="mb-5 text-[11.5px] leading-relaxed text-crema/55">
+        <h1 className="mb-1.5 text-[length:var(--fs-title-28)] leading-[1.15] text-blanco">{meditation.script.title}</h1>
+        <p className="mb-5 text-[length:var(--fs-body-11_5)] leading-relaxed text-crema/55">
           {meditation.estimated_minutes} min aproximados · pediste {meditation.requested_minutes}
         </p>
 
@@ -280,7 +280,7 @@ function Player({ meditation, onLeave }: { meditation: StoredMeditation; onLeave
         </div>
 
         <h2 className="eyebrow mb-2">El guion</h2>
-        <p className="text-[12.5px] leading-relaxed whitespace-pre-line text-crema/65">
+        <p className="text-[length:var(--fs-body-12_5)] leading-relaxed whitespace-pre-line text-crema/65">
           {meditation.script.script_text}
         </p>
 
@@ -291,11 +291,11 @@ function Player({ meditation, onLeave }: { meditation: StoredMeditation; onLeave
               stop();
               onLeave();
             }}
-            className="glass-chip rounded-full px-3 py-2.5 text-[11px] tracking-wide text-crema/60 uppercase"
+            className="glass-chip rounded-full px-3 py-2.5 text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase"
           >
             Armar otra
           </button>
-          <p className="px-1 text-[10px] tracking-wide text-crema/55 uppercase">
+          <p className="px-1 text-[length:var(--fs-label-10)] tracking-wide text-crema/55 uppercase">
             {meditation.mode === 'fixture' ? 'Modo demo · guion curado' : 'Generado con Claude'} ·{' '}
             {meditation.prompt_version}
           </p>
@@ -318,7 +318,7 @@ function VolumeSlider({
 }) {
   return (
     <div className="flex items-center gap-3">
-      <label htmlFor={id} className="w-12 shrink-0 text-[10px] tracking-wide text-crema/55 uppercase">
+      <label htmlFor={id} className="w-12 shrink-0 text-[length:var(--fs-label-10)] tracking-wide text-crema/55 uppercase">
         {label}
       </label>
       <input

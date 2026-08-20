@@ -28,7 +28,7 @@ const IDEATION_OPTIONS: [IdeationAnswer, string][] = [
 function Question({ children, label }: { label: string; children: React.ReactNode }) {
   return (
     <fieldset className="border-0 p-0">
-      <legend className="mb-2.5 text-[13px] leading-snug text-blanco">{label}</legend>
+      <legend className="mb-2.5 text-[length:var(--fs-body-13)] leading-snug text-blanco">{label}</legend>
       <div className="flex flex-col gap-2">{children}</div>
     </fieldset>
   );
@@ -77,7 +77,7 @@ export function ClinicalBasics({
     >
       <div className="flex flex-col gap-6">
         {/* Containment before the first question. PDR US-1.3 CA1. */}
-        <p className="text-[12px] leading-relaxed text-crema/60">
+        <p className="text-[length:var(--fs-body-12)] leading-relaxed text-crema/60">
           Preguntamos esto para no recomendarte algo que en tu momento actual podría hacer
           más daño que bien. No es un diagnóstico y no hay respuestas mejores que otras.
           <br />
@@ -144,7 +144,7 @@ export function ClinicalBasics({
 
         <div>
           <label
-            className="mb-2.5 block text-[13px] leading-snug text-blanco"
+            className="mb-2.5 block text-[length:var(--fs-body-13)] leading-snug text-blanco"
             htmlFor="clinical-notes"
           >
             ¿Hay algo más que quieras que tengamos en cuenta?

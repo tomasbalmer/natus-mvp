@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/components/Screen';
 import { currentMatch, isCheckedToday, toggleCheckIn, totalCheckIns } from '@/store/matches';
 
 /**
@@ -35,7 +35,7 @@ export function Routine() {
 
   if (!match) {
     return (
-      <Screen backdrop="forest" scrim="heavy" opacity={0.45}>
+      <Screen backdrop="forest" scrim="heavy" opacity={PHOTO.content45}>
         <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
           <p className="text-sm leading-relaxed text-crema/65">
             Tu rutina sale de tus recomendaciones. Generalas primero.
@@ -49,15 +49,15 @@ export function Routine() {
   }
 
   return (
-    <Screen backdrop="forest" scrim="heavy" opacity={0.45}>
+    <Screen backdrop="forest" scrim="heavy" opacity={PHOTO.content45}>
       <div className="flex min-h-dvh flex-col overflow-y-auto px-5 pt-[var(--top-inset)] pb-[var(--bottom-inset)] sm:min-h-0">
         <p className="eyebrow mb-3">Mi rutina</p>
-        <h1 className="mb-2 text-[28px] leading-[1.15] text-blanco">
+        <h1 className="mb-2 text-[length:var(--fs-title-28)] leading-[1.15] text-blanco">
           Cosas concretas,
           <br />
           no consejos.
         </h1>
-        <p className="mb-6 text-[12.5px] leading-relaxed text-crema/55">
+        <p className="mb-6 text-[length:var(--fs-body-12_5)] leading-relaxed text-crema/55">
           Marcá lo que hiciste si te sirve tenerlo a la vista. Nadie te va a decir nada si
           dejás de marcar.
         </p>
@@ -70,15 +70,15 @@ export function Routine() {
             return (
               <article key={practice.title} className="glass rounded-[var(--radius-option)] px-4 py-4">
                 <div className="mb-2 flex items-baseline justify-between gap-3">
-                  <h2 className="text-[14px] leading-snug text-blanco">{practice.title}</h2>
-                  <span className="shrink-0 text-[10px] tracking-wide text-crema/55 uppercase">
+                  <h2 className="text-[length:var(--fs-heading-14)] leading-snug text-blanco">{practice.title}</h2>
+                  <span className="shrink-0 text-[length:var(--fs-label-10)] tracking-wide text-crema/55 uppercase">
                     {CADENCE_LABEL[practice.cadence]}
                   </span>
                 </div>
 
-                <p className="mb-3 text-[12.5px] leading-relaxed text-crema/65">{practice.body}</p>
+                <p className="mb-3 text-[length:var(--fs-body-12_5)] leading-relaxed text-crema/65">{practice.body}</p>
 
-                <p className="mb-3.5 font-serif text-[15px] leading-snug text-crema italic">
+                <p className="mb-3.5 font-serif text-[length:var(--fs-voice-15)] leading-snug text-crema italic">
                   {practice.invitation}
                 </p>
 
@@ -91,7 +91,7 @@ export function Routine() {
                     }}
                     aria-pressed={done}
                     className={[
-                      'flex-1 rounded-full px-3 py-2 text-[11px] tracking-wide uppercase transition-colors',
+                      'flex-1 rounded-full px-3 py-2 text-[length:var(--fs-label-11)] tracking-wide uppercase transition-colors',
                       done ? 'bg-verde text-crema' : 'glass-chip text-crema/70 hover:text-crema',
                     ].join(' ')}
                   >
@@ -100,7 +100,7 @@ export function Routine() {
 
                   {total > 0 && (
                     // A total, never a consecutive run. See the note above.
-                    <span className="shrink-0 text-[11px] text-crema/55">
+                    <span className="shrink-0 text-[length:var(--fs-body-11)] text-crema/55">
                       {total} {total === 1 ? 'día' : 'días'} en total
                     </span>
                   )}

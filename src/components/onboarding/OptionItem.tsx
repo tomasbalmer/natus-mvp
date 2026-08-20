@@ -35,14 +35,14 @@ export function OptionItem({
       style={{ backdropFilter: 'blur(var(--glass-blur-card))' }}
     >
       <span className="min-w-0 flex-1">
-        <span className="block text-[13px] leading-snug">{label}</span>
-        {hint && <span className="mt-0.5 block text-[11px] leading-snug text-crema/55">{hint}</span>}
+        <span className="block text-[length:var(--fs-body-13)] leading-snug">{label}</span>
+        {hint && <span className="mt-0.5 block text-[length:var(--fs-body-11)] leading-snug text-crema/55">{hint}</span>}
       </span>
 
       <span
         aria-hidden="true"
         className={[
-          'flex size-[18px] shrink-0 items-center justify-center rounded-full border text-[10px]',
+          'flex size-[18px] shrink-0 items-center justify-center rounded-full border text-[length:var(--fs-micro-10)]',
           selected ? 'border-tierra bg-tierra text-white' : 'border-crema/30',
         ].join(' ')}
       >

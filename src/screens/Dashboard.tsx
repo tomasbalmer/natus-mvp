@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/components/Screen';
 import { CrisisBanner } from '@/components/CrisisBanner';
 import { CrisisScreen } from '@/screens/CrisisScreen';
 import { activeProfile, isSignedIn } from '@/store/account';
@@ -56,7 +56,7 @@ export function Dashboard() {
 
   if (!profile || !synthesis) {
     return (
-      <Screen backdrop="forest" scrim="heavy" opacity={0.45}>
+      <Screen backdrop="forest" scrim="heavy" opacity={PHOTO.content45}>
         <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
           <p className="text-sm leading-relaxed text-crema/65">
             Tu espacio se arma con tu mapa. Empecemos por ahí.
@@ -144,10 +144,10 @@ export function Dashboard() {
   const name = firstNameOf(profile.draft.legal_birth_name);
 
   return (
-    <Screen backdrop="forest" scrim="heavy" opacity={0.42}>
+    <Screen backdrop="forest" scrim="heavy" opacity={PHOTO.content42}>
       <div className="flex min-h-dvh flex-col overflow-y-auto px-5 pt-[var(--top-inset)] pb-[var(--bottom-inset)] sm:min-h-0">
         <p className="eyebrow mb-3">Tu espacio</p>
-        <h1 className="mb-6 text-[30px] leading-[1.15] text-blanco">
+        <h1 className="mb-6 text-[length:var(--fs-title-30)] leading-[1.15] text-blanco">
           {name ? (
             <>
               Hola,{' '}
@@ -169,8 +169,8 @@ export function Dashboard() {
             to="/registro"
             className="glass mb-5 block rounded-[var(--radius-option)] px-4 py-3.5 no-underline"
           >
-            <p className="text-[13px] leading-snug text-blanco">Guardá tu mapa</p>
-            <p className="mt-1 text-[11.5px] leading-relaxed text-crema/55">
+            <p className="text-[length:var(--fs-body-13)] leading-snug text-blanco">Guardá tu mapa</p>
+            <p className="mt-1 text-[length:var(--fs-body-11_5)] leading-relaxed text-crema/55">
               Sin cuenta, esto vive siete días en este navegador y después se va.
             </p>
           </Link>
@@ -181,8 +181,8 @@ export function Dashboard() {
             const inner = (
               <>
                 <p className="eyebrow mb-1.5">{section.eyebrow}</p>
-                <h2 className="mb-1.5 text-[15px] leading-snug text-blanco">{section.title}</h2>
-                <p className="line-clamp-3 text-[12px] leading-relaxed text-crema/55">
+                <h2 className="mb-1.5 text-[length:var(--fs-heading-15)] leading-snug text-blanco">{section.title}</h2>
+                <p className="line-clamp-3 text-[length:var(--fs-body-12)] leading-relaxed text-crema/55">
                   {section.body}
                 </p>
               </>

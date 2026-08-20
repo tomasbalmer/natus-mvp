@@ -62,27 +62,27 @@ export function ModalityCard({
       ].join(' ')}
     >
       <div className="mb-2 flex items-baseline gap-2.5">
-        <span aria-hidden="true" className="font-serif text-[15px] text-crema/55 italic">
+        <span aria-hidden="true" className="font-serif text-[length:var(--fs-voice-15)] text-crema/55 italic">
           {rank}
         </span>
-        <h3 className="flex-1 font-serif text-[19px] leading-tight font-light text-blanco">
+        <h3 className="flex-1 font-serif text-[length:var(--fs-heading-19)] leading-tight font-light text-blanco">
           {modality.name_es}
         </h3>
       </div>
 
       <div className="mb-3 flex flex-wrap gap-1.5">
-        <span className="glass-chip rounded-full px-2.5 py-1 text-[10px] tracking-wide text-crema/70 uppercase">
+        <span className="glass-chip rounded-full px-2.5 py-1 text-[length:var(--fs-label-10)] tracking-wide text-crema/70 uppercase">
           {FAMILY_LABEL[modality.family]}
         </span>
-        <span className="glass-chip rounded-full px-2.5 py-1 text-[10px] tracking-wide text-crema/70 uppercase">
+        <span className="glass-chip rounded-full px-2.5 py-1 text-[length:var(--fs-label-10)] tracking-wide text-crema/70 uppercase">
           {modality.typical_format}
         </span>
-        <span className="glass-chip rounded-full px-2.5 py-1 text-[10px] tracking-wide text-crema/70 uppercase">
+        <span className="glass-chip rounded-full px-2.5 py-1 text-[length:var(--fs-label-10)] tracking-wide text-crema/70 uppercase">
           {HORIZON_LABEL[modality.typical_horizon]}
         </span>
         <span
           className={[
-            'rounded-full px-2.5 py-1 text-[10px] tracking-wide uppercase',
+            'rounded-full px-2.5 py-1 text-[length:var(--fs-label-10)] tracking-wide uppercase',
             modality.evidence_level === 'clinica'
               ? 'bg-verde/70 text-crema'
               : 'glass-chip text-crema/55',
@@ -92,13 +92,13 @@ export function ModalityCard({
         </span>
       </div>
 
-      <p className="mb-3 text-[13px] leading-relaxed text-blanco/85">{reasoning}</p>
+      <p className="mb-3 text-[length:var(--fs-body-13)] leading-relaxed text-blanco/85">{reasoning}</p>
 
       {/* US-6.1 CA1: what actually happens in a session. Without it the
           recommendation is useless — most people have no idea what EMDR or
           constelaciones involve. */}
       <details className="group mb-3">
-        <summary className="cursor-pointer list-none text-[11px] tracking-wide text-crema/55 uppercase hover:text-crema/80">
+        <summary className="cursor-pointer list-none text-[length:var(--fs-label-11)] tracking-wide text-crema/55 uppercase hover:text-crema/80">
           Qué pasa en una sesión
           <span aria-hidden="true" className="ml-1.5 group-open:hidden">
             +
@@ -107,7 +107,7 @@ export function ModalityCard({
             −
           </span>
         </summary>
-        <p className="mt-2 text-[12.5px] leading-relaxed text-crema/65">
+        <p className="mt-2 text-[length:var(--fs-body-12_5)] leading-relaxed text-crema/65">
           {modality.what_happens}
         </p>
       </details>
@@ -115,7 +115,7 @@ export function ModalityCard({
       {cautionNote && (
         <div className="mb-3 flex gap-2.5 rounded-[10px] border border-alerta/25 bg-alerta/8 px-3 py-2.5">
           <span aria-hidden="true" className="mt-[5px] size-1.5 shrink-0 rounded-full bg-alerta" />
-          <p className="text-[11.5px] leading-relaxed text-crema/75">{cautionNote}</p>
+          <p className="text-[length:var(--fs-body-11_5)] leading-relaxed text-crema/75">{cautionNote}</p>
         </div>
       )}
 
@@ -125,7 +125,7 @@ export function ModalityCard({
           onClick={() => onReact('saved')}
           aria-pressed={reaction === 'saved'}
           className={[
-            'flex-1 rounded-full px-3 py-2 text-[11px] tracking-wide uppercase transition-colors',
+            'flex-1 rounded-full px-3 py-2 text-[length:var(--fs-label-11)] tracking-wide uppercase transition-colors',
             reaction === 'saved'
               ? 'bg-verde text-crema'
               : 'glass-chip text-crema/70 hover:text-crema',
@@ -137,7 +137,7 @@ export function ModalityCard({
           type="button"
           onClick={() => onReact('dismissed')}
           aria-pressed={dismissed}
-          className="glass-chip flex-1 rounded-full px-3 py-2 text-[11px] tracking-wide text-crema/55 uppercase hover:text-crema"
+          className="glass-chip flex-1 rounded-full px-3 py-2 text-[length:var(--fs-label-11)] tracking-wide text-crema/55 uppercase hover:text-crema"
         >
           {dismissed ? 'Descartada' : 'No me hace sentido'}
         </button>

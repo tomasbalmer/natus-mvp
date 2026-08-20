@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/components/Screen';
 import { ComparisonGate } from './Gate';
 import {
   CONSENT_TTL_MS,
@@ -53,7 +53,7 @@ export function Consent() {
   if (!profile) {
     return (
       <ComparisonGate>
-        <Screen backdrop="surf" scrim="heavy" opacity={0.45}>
+        <Screen backdrop="surf" scrim="heavy" opacity={PHOTO.content45}>
           <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
             <p className="text-sm leading-relaxed text-crema/65">Esa persona ya no está cargada.</p>
             <Link to="/comparacion" className="cta no-underline">
@@ -69,15 +69,15 @@ export function Consent() {
 
   return (
     <ComparisonGate>
-      <Screen backdrop="surf" scrim="heavy" opacity={0.4}>
+      <Screen backdrop="surf" scrim="heavy" opacity={PHOTO.content40}>
         <div className="flex min-h-dvh flex-col overflow-y-auto px-5 pt-[var(--top-inset)] pb-[var(--bottom-inset)] sm:min-h-0">
           <p className="eyebrow mb-3">Permisos de {profile.display_name}</p>
-          <h1 className="mb-3 text-[27px] leading-[1.15] text-blanco">
+          <h1 className="mb-3 text-[length:var(--fs-title-27)] leading-[1.15] text-blanco">
             Qué se puede
             <br />
             mirar, y hasta cuándo.
           </h1>
-          <p className="mb-6 text-[12.5px] leading-relaxed text-crema/55">
+          <p className="mb-6 text-[length:var(--fs-body-12_5)] leading-relaxed text-crema/55">
             Elegís el alcance y {profile.display_name} lo acepta o no. El permiso vence a los{' '}
             {days(CONSENT_TTL_MS)} días y se puede retirar en cualquier momento.
           </p>
@@ -96,15 +96,15 @@ export function Consent() {
                 <span
                   aria-hidden="true"
                   className={[
-                    'mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-sm border text-[10px]',
+                    'mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-sm border text-[length:var(--fs-micro-10)]',
                     scope[key] ? 'border-crema bg-crema text-negro' : 'border-crema/30 text-transparent',
                   ].join(' ')}
                 >
                   ✓
                 </span>
                 <span>
-                  <span className="block text-[13px] text-blanco">{label}</span>
-                  <span className="mt-0.5 block text-[11.5px] leading-relaxed text-crema/55">
+                  <span className="block text-[length:var(--fs-body-13)] text-blanco">{label}</span>
+                  <span className="mt-0.5 block text-[length:var(--fs-body-11_5)] leading-relaxed text-crema/55">
                     {detail}
                   </span>
                 </span>
@@ -112,7 +112,7 @@ export function Consent() {
             ))}
           </div>
 
-          <p className="mb-6 rounded-[var(--radius-option)] border border-crema/10 px-3.5 py-2.5 text-[11px] leading-relaxed text-crema/55">
+          <p className="mb-6 rounded-[var(--radius-option)] border border-crema/10 px-3.5 py-2.5 text-[length:var(--fs-body-11)] leading-relaxed text-crema/55">
             Lo que ninguna de las dos partes puede compartir, aunque quiera: lo que escribió en
             el onboarding y sus respuestas clínicas. No hay una casilla para eso porque no
             existe el camino.
@@ -124,7 +124,7 @@ export function Consent() {
            */}
           <div className="rounded-[var(--radius-option)] border border-crema/15 px-4 py-4">
             <p className="eyebrow mb-2">Del lado de {profile.display_name}</p>
-            <p className="mb-3.5 text-[11.5px] leading-relaxed text-crema/55">
+            <p className="mb-3.5 text-[length:var(--fs-body-11_5)] leading-relaxed text-crema/55">
               En el producto real esto llega por correo y lo responde la otra persona. Acá no se
               envía ningún correo: respondés vos, desde este panel, para poder ver cómo sigue.
             </p>
@@ -158,7 +158,7 @@ export function Consent() {
                     respondToConsent(consent.id, 'denied');
                     setConsent(consentFor(id));
                   }}
-                  className="glass-chip rounded-full px-3 py-2.5 text-[11px] tracking-wide text-crema/60 uppercase"
+                  className="glass-chip rounded-full px-3 py-2.5 text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase"
                 >
                   {profile.display_name} no acepta
                 </button>
@@ -167,7 +167,7 @@ export function Consent() {
 
             {consent && consent.status !== 'pending' && (
               <div className="flex flex-col gap-2">
-                <p className="mb-1 text-[12px] leading-relaxed text-crema/75">
+                <p className="mb-1 text-[length:var(--fs-body-12)] leading-relaxed text-crema/75">
                   {active
                     ? `Con permiso, hasta dentro de ${days(consent.expires_at - Date.now())} días.`
                     : consent.status === 'granted'
@@ -192,7 +192,7 @@ export function Consent() {
                         revokeConsent(consent.id);
                         setConsent(consentFor(id));
                       }}
-                      className="rounded-full border border-alerta/40 px-3 py-2.5 text-[11px] tracking-wide text-alerta uppercase"
+                      className="rounded-full border border-alerta/40 px-3 py-2.5 text-[length:var(--fs-label-11)] tracking-wide text-alerta uppercase"
                     >
                       Retirar el permiso
                     </button>
@@ -203,7 +203,7 @@ export function Consent() {
                   <button
                     type="button"
                     onClick={() => setConsent(requestConsent({ externalProfileId: id, scope }))}
-                    className="glass-chip rounded-full px-3 py-2.5 text-[11px] tracking-wide text-crema/60 uppercase"
+                    className="glass-chip rounded-full px-3 py-2.5 text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase"
                   >
                     Volver a pedir
                   </button>
@@ -214,7 +214,7 @@ export function Consent() {
 
           <Link
             to="/comparacion"
-            className="glass-chip mt-4 rounded-full px-3 py-2.5 text-center text-[11px] tracking-wide text-crema/60 uppercase no-underline"
+            className="glass-chip mt-4 rounded-full px-3 py-2.5 text-center text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase no-underline"
           >
             Volver
           </Link>

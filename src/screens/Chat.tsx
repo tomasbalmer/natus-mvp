@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/components/Screen';
 import { Paywall } from '@/components/Paywall';
 import { CrisisResourceList } from '@/components/CrisisResourceList';
 import { modalityBySlug } from '@/lib/catalog';
@@ -69,7 +69,7 @@ export function Chat() {
 
   if (!synthesis || !profile || !conversation) {
     return (
-      <Screen backdrop="surf" scrim="heavy" opacity={0.45}>
+      <Screen backdrop="surf" scrim="heavy" opacity={PHOTO.content45}>
         <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
           <p className="text-sm leading-relaxed text-crema/65">
             La conversación se apoya en tu mapa. Generalo primero y volvemos acá.
@@ -150,18 +150,18 @@ export function Chat() {
   };
 
   return (
-    <Screen backdrop="surf" scrim="heavy" opacity={0.4}>
+    <Screen backdrop="surf" scrim="heavy" opacity={PHOTO.content40}>
       <div className="flex min-h-dvh flex-col px-5 pt-[var(--top-inset)] pb-[var(--bottom-inset)] sm:min-h-0 sm:h-full">
         <div className="mb-3 flex shrink-0 items-baseline justify-between gap-3">
           <p className="eyebrow">Conversación</p>
-          <span className="glass-chip shrink-0 rounded-full px-3 py-1 text-[10px] tracking-wide text-crema/70 uppercase">
+          <span className="glass-chip shrink-0 rounded-full px-3 py-1 text-[length:var(--fs-label-10)] tracking-wide text-crema/70 uppercase">
             {Number.isFinite(remaining) ? `${remaining} de ${FREE_QUESTIONS}` : 'Sin límite'}
           </span>
         </div>
 
         <div className="-mx-1 flex-1 overflow-y-auto px-1">
           {messages.length === 0 && (
-            <p className="mt-4 text-[12.5px] leading-relaxed text-crema/55">
+            <p className="mt-4 text-[length:var(--fs-body-12_5)] leading-relaxed text-crema/55">
               Preguntale algo a tu mapa. Funciona mejor con una situación concreta que con una
               pregunta grande.
             </p>
@@ -172,7 +172,7 @@ export function Chat() {
               message.role === 'user' ? (
                 <p
                   key={message.id}
-                  className="self-end rounded-[var(--radius-option)] rounded-br-sm bg-verde/70 px-3.5 py-2.5 text-[12.5px] leading-relaxed text-crema"
+                  className="self-end rounded-[var(--radius-option)] rounded-br-sm bg-verde/70 px-3.5 py-2.5 text-[length:var(--fs-body-12_5)] leading-relaxed text-crema"
                 >
                   {message.text}
                 </p>
@@ -187,7 +187,7 @@ export function Chat() {
                   ].join(' ')}
                 >
                   <p className="eyebrow mb-1.5">{TYPE_LABEL[message.type ?? 'reflection']}</p>
-                  <p className="text-[12.5px] leading-relaxed text-blanco/85">{message.text}</p>
+                  <p className="text-[length:var(--fs-body-12_5)] leading-relaxed text-blanco/85">{message.text}</p>
 
                   {message.linked_modality_slugs.length > 0 && (
                     <div className="mt-2.5 flex flex-wrap gap-1.5">
@@ -195,7 +195,7 @@ export function Chat() {
                         <Link
                           key={slug}
                           to="/recomendaciones"
-                          className="glass-chip rounded-full px-3 py-1 text-[10.5px] text-crema/75 no-underline"
+                          className="glass-chip rounded-full px-3 py-1 text-[length:var(--fs-body-10_5)] text-crema/75 no-underline"
                         >
                           {modalityBySlug(slug)?.name_es ?? slug}
                         </Link>
@@ -213,7 +213,7 @@ export function Chat() {
             )}
 
             {thinking && (
-              <p aria-live="polite" className="text-[12px] text-crema/55">
+              <p aria-live="polite" className="text-[length:var(--fs-body-12)] text-crema/55">
                 Pensando…
               </p>
             )}
@@ -222,7 +222,7 @@ export function Chat() {
         </div>
 
         {error && (
-          <p role="alert" className="shrink-0 pt-2 text-[11.5px] leading-relaxed text-alerta">
+          <p role="alert" className="shrink-0 pt-2 text-[length:var(--fs-body-11_5)] leading-relaxed text-alerta">
             {error}
           </p>
         )}
@@ -230,7 +230,7 @@ export function Chat() {
         <div className="shrink-0 pt-3">
           {containment ? (
             <div className="rounded-[var(--radius-option)] border border-alerta/30 px-4 py-3.5">
-              <p className="mb-2.5 text-[12px] leading-relaxed text-crema/75">
+              <p className="mb-2.5 text-[length:var(--fs-body-12)] leading-relaxed text-crema/75">
                 Dejamos la conversación acá por ahora. No es un castigo ni se borró nada: es
                 que esto se habla con alguien.
               </p>
@@ -240,7 +240,7 @@ export function Chat() {
                   markFalsePositive(containment);
                   setContainment(null);
                 }}
-                className="text-[11px] text-crema/55 underline underline-offset-4 hover:text-crema/70"
+                className="text-[length:var(--fs-body-11)] text-crema/55 underline underline-offset-4 hover:text-crema/70"
               >
                 Esto no aplica a mi caso
               </button>
@@ -271,7 +271,7 @@ export function Chat() {
                 }}
                 placeholder="Escribí lo que se te venga…"
                 aria-label="Tu mensaje"
-                className="glass max-h-28 min-h-[52px] flex-1 resize-none rounded-[var(--radius-option)] px-3.5 py-3 text-[12.5px] text-blanco placeholder:text-crema/55"
+                className="glass max-h-28 min-h-[52px] flex-1 resize-none rounded-[var(--radius-option)] px-3.5 py-3 text-[length:var(--fs-body-12_5)] text-blanco placeholder:text-crema/55"
               />
               <button
                 type="button"

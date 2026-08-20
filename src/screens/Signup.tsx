@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/components/Screen';
 import { SignupError, isSignedIn, signUp } from '@/store/account';
 import { currentSynthesis } from '@/store/soulMap';
 import { isBackendConfigured } from '@/supabase/client.ts';
@@ -35,7 +35,7 @@ export function Signup() {
 
   if (isSignedIn()) {
     return (
-      <Screen backdrop="surf" scrim="heavy" opacity={0.5}>
+      <Screen backdrop="surf" scrim="heavy" opacity={PHOTO.content50}>
         <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
           <p className="text-sm leading-relaxed text-crema/65">Tu cuenta ya está creada.</p>
           <Link to="/inicio" className="cta no-underline">
@@ -48,7 +48,7 @@ export function Signup() {
 
   if (!currentSynthesis()) {
     return (
-      <Screen backdrop="surf" scrim="heavy" opacity={0.5}>
+      <Screen backdrop="surf" scrim="heavy" opacity={PHOTO.content50}>
         <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
           <p className="text-sm leading-relaxed text-crema/65">
             Primero generamos tu mapa. La cuenta viene después, cuando ya tengas algo que
@@ -104,13 +104,13 @@ export function Signup() {
 
   if (sent) {
     return (
-      <Screen backdrop="surf" scrim="heavy" opacity={0.5}>
+      <Screen backdrop="surf" scrim="heavy" opacity={PHOTO.content50}>
         <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
           <p className="text-sm leading-relaxed text-crema/65">
             Te mandamos un correo a <span className="text-blanco">{email}</span>. Abrilo para
             confirmar la dirección.
           </p>
-          <p className="text-[11px] leading-relaxed text-crema/55">
+          <p className="text-[length:var(--fs-body-11)] leading-relaxed text-crema/55">
             Tu mapa ya está guardado. Confirmar sirve para que puedas volver desde otro
             dispositivo.
           </p>
@@ -123,23 +123,23 @@ export function Signup() {
   }
 
   return (
-    <Screen backdrop="surf" scrim="heavy" opacity={0.5}>
+    <Screen backdrop="surf" scrim="heavy" opacity={PHOTO.content50}>
       <div className="flex min-h-dvh flex-col overflow-y-auto px-6 pt-[var(--top-inset)] pb-9 sm:min-h-0">
         <p className="eyebrow mb-3">Guardar tu mapa</p>
 
-        <h1 className="mb-3 text-[30px] leading-[1.15] text-blanco">
+        <h1 className="mb-3 text-[length:var(--fs-title-30)] leading-[1.15] text-blanco">
           Para volver
           <br />
           <span className="font-serif text-crema italic">cuando quieras.</span>
         </h1>
 
-        <p className="mb-7 text-[12.5px] leading-relaxed text-crema/55">
+        <p className="mb-7 text-[length:var(--fs-body-12_5)] leading-relaxed text-crema/55">
           Tu mapa, tus caminos y tu rutina quedan asociados a esta dirección. Podés seguir sin
           cuenta: en ese caso todo se guarda igual, pero solo en este navegador y por siete
           días.
         </p>
 
-        <label className="mb-1.5 block text-[11px] tracking-wide text-crema/55 uppercase" htmlFor="email">
+        <label className="mb-1.5 block text-[length:var(--fs-label-11)] tracking-wide text-crema/55 uppercase" htmlFor="email">
           Tu correo
         </label>
         <input
@@ -162,12 +162,12 @@ export function Signup() {
         />
 
         {error && (
-          <p role="alert" className="mt-2 text-[12px] leading-relaxed text-alerta">
+          <p role="alert" className="mt-2 text-[length:var(--fs-body-12)] leading-relaxed text-alerta">
             {error}
           </p>
         )}
 
-        <p id="email-note" className="mt-2.5 text-[11px] leading-relaxed text-crema/55">
+        <p id="email-note" className="mt-2.5 text-[length:var(--fs-body-11)] leading-relaxed text-crema/55">
           {isBackendConfigured
             ? 'Te vamos a mandar un correo con un link para confirmar la dirección. No hay contraseña. Podés borrar todo en un clic desde Mi cuenta.'
             : 'En esta demo no se envía ningún correo ni se crea ninguna cuenta en ningún servidor. La dirección queda escrita en este navegador y nada más. Podés borrar todo en un clic desde Mi cuenta.'}
@@ -185,7 +185,7 @@ export function Signup() {
 
           <Link
             to="/inicio"
-            className="glass-chip rounded-full px-3 py-2.5 text-center text-[11px] tracking-wide text-crema/60 uppercase no-underline"
+            className="glass-chip rounded-full px-3 py-2.5 text-center text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase no-underline"
           >
             Ahora no
           </Link>

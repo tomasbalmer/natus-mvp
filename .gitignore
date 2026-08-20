@@ -15,3 +15,6 @@ pnpm-debug.log*
 
 coverage/
 .vite/
+
+# Playwright MCP scratch output
+.playwright-mcp/

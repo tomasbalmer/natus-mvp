@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/components/Screen';
 import { ComparisonGate } from './Gate';
 import { BIRTH_COUNTRIES } from '@/components/birth-countries';
 import {
@@ -26,7 +26,7 @@ import {
 
 const fieldClass =
   'glass w-full rounded-[var(--radius-option)] px-4 py-3 text-sm text-blanco placeholder:text-crema/55 [color-scheme:dark]';
-const labelClass = 'mb-1.5 block text-[11px] tracking-wide text-crema/55 uppercase';
+const labelClass = 'mb-1.5 block text-[length:var(--fs-label-11)] tracking-wide text-crema/55 uppercase';
 
 const STATUS_LABEL = {
   pending: 'Esperando respuesta',
@@ -64,15 +64,15 @@ export function ExternalProfile() {
 
   return (
     <ComparisonGate>
-      <Screen backdrop="surf" scrim="heavy" opacity={0.4}>
+      <Screen backdrop="surf" scrim="heavy" opacity={PHOTO.content40}>
         <div className="flex min-h-dvh flex-col overflow-y-auto px-5 pt-[var(--top-inset)] pb-[var(--bottom-inset)] sm:min-h-0">
           <p className="eyebrow mb-3">Comparar cartas</p>
-          <h1 className="mb-3 text-[28px] leading-[1.15] text-blanco">
+          <h1 className="mb-3 text-[length:var(--fs-title-28)] leading-[1.15] text-blanco">
             Un vínculo,
             <br />
             desde los dos lados.
           </h1>
-          <p className="mb-6 text-[12.5px] leading-relaxed text-crema/55">
+          <p className="mb-6 text-[length:var(--fs-body-12_5)] leading-relaxed text-crema/55">
             Se puede leer el cruce entre tu mapa y el de otra persona. Nunca sale un veredicto
             sobre la relación: sale material para conversar entre ustedes.
           </p>
@@ -85,12 +85,12 @@ export function ExternalProfile() {
                 return (
                   <article key={profile.id} className="glass rounded-[var(--radius-option)] px-4 py-3.5">
                     <div className="mb-1 flex items-baseline justify-between gap-3">
-                      <h2 className="text-[14px] text-blanco">{profile.display_name}</h2>
-                      <span className="shrink-0 text-[10px] tracking-wide text-crema/55 uppercase">
+                      <h2 className="text-[length:var(--fs-heading-14)] text-blanco">{profile.display_name}</h2>
+                      <span className="shrink-0 text-[length:var(--fs-label-10)] tracking-wide text-crema/55 uppercase">
                         {consent ? STATUS_LABEL[consent.status] : 'Sin pedir'}
                       </span>
                     </div>
-                    <p className="mb-3 text-[11.5px] text-crema/55">{profile.birth_date}</p>
+                    <p className="mb-3 text-[length:var(--fs-body-11_5)] text-crema/55">{profile.birth_date}</p>
 
                     {confirming === profile.id ? (
                       <div className="flex gap-2">
@@ -101,14 +101,14 @@ export function ExternalProfile() {
                             setProfiles(listExternalProfiles());
                             setConfirming(null);
                           }}
-                          className="flex-1 rounded-full border border-alerta/40 px-3 py-2 text-[11px] tracking-wide text-alerta uppercase"
+                          className="flex-1 rounded-full border border-alerta/40 px-3 py-2 text-[length:var(--fs-label-11)] tracking-wide text-alerta uppercase"
                         >
                           Borrar sus datos
                         </button>
                         <button
                           type="button"
                           onClick={() => setConfirming(null)}
-                          className="glass-chip flex-1 rounded-full px-3 py-2 text-[11px] tracking-wide text-crema/60 uppercase"
+                          className="glass-chip flex-1 rounded-full px-3 py-2 text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase"
                         >
                           Mejor no
                         </button>
@@ -121,14 +121,14 @@ export function ExternalProfile() {
                               ? `/comparacion/resultado/${profile.id}`
                               : `/comparacion/consentimiento/${profile.id}`
                           }
-                          className="glass-chip flex-1 rounded-full px-3 py-2 text-center text-[11px] tracking-wide text-crema/75 uppercase no-underline"
+                          className="glass-chip flex-1 rounded-full px-3 py-2 text-center text-[length:var(--fs-label-11)] tracking-wide text-crema/75 uppercase no-underline"
                         >
                           {active ? 'Ver el cruce' : 'Permisos'}
                         </Link>
                         <button
                           type="button"
                           onClick={() => setConfirming(profile.id)}
-                          className="glass-chip rounded-full px-3.5 py-2 text-[11px] tracking-wide text-crema/55 uppercase"
+                          className="glass-chip rounded-full px-3.5 py-2 text-[length:var(--fs-label-11)] tracking-wide text-crema/55 uppercase"
                         >
                           Borrar
                         </button>
@@ -234,7 +234,7 @@ export function ExternalProfile() {
                     </option>
                   ))}
                 </select>
-                <p className="mt-1.5 text-[11px] leading-relaxed text-crema/55">
+                <p className="mt-1.5 text-[length:var(--fs-body-11)] leading-relaxed text-crema/55">
                   Hora, ciudad y país sólo hacen falta si querés que el cruce mire las dos
                   cartas. Sin los tres, se lee con los números y los temas.
                 </p>
@@ -247,7 +247,7 @@ export function ExternalProfile() {
                */}
               <div className="rounded-[var(--radius-option)] border border-alerta/25 px-4 py-3.5">
                 <p className="eyebrow mb-1.5">Antes de guardar</p>
-                <p className="text-[12px] leading-relaxed text-crema/75">
+                <p className="text-[length:var(--fs-body-12)] leading-relaxed text-crema/75">
                   Estos son datos de otra persona. Cargalos solo si esa persona sabe que lo
                   estás haciendo. El paso siguiente es pedirle permiso, y sin ese permiso no se
                   lee nada.
@@ -260,7 +260,7 @@ export function ExternalProfile() {
               <button
                 type="button"
                 onClick={() => setAdding(false)}
-                className="glass-chip rounded-full px-3 py-2.5 text-[11px] tracking-wide text-crema/60 uppercase"
+                className="glass-chip rounded-full px-3 py-2.5 text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase"
               >
                 Cancelar
               </button>

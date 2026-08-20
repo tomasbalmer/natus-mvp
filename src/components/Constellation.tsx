@@ -11,11 +11,11 @@ import type { Modality } from '@/lib/schemas';
  */
 
 const POSITIONS = [
-  { className: 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2', size: 'size-[92px]', text: 'text-[11px]' },
-  { className: 'top-[16%] left-[4%]', size: 'size-[68px]', text: 'text-[9px]' },
-  { className: 'top-[18%] right-[4%]', size: 'size-[64px]', text: 'text-[9px]' },
-  { className: 'bottom-[8%] left-[10%]', size: 'size-[56px]', text: 'text-[8px]' },
-  { className: 'bottom-[10%] right-[8%]', size: 'size-[52px]', text: 'text-[8px]' },
+  { className: 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2', size: 'size-[92px]', text: 'text-[length:var(--fs-body-11)]' },
+  { className: 'top-[16%] left-[4%]', size: 'size-[68px]', text: 'text-[length:var(--fs-micro-9)]' },
+  { className: 'top-[18%] right-[4%]', size: 'size-[64px]', text: 'text-[length:var(--fs-micro-9)]' },
+  { className: 'bottom-[8%] left-[10%]', size: 'size-[56px]', text: 'text-[length:var(--fs-micro-8)]' },
+  { className: 'bottom-[10%] right-[8%]', size: 'size-[52px]', text: 'text-[length:var(--fs-micro-8)]' },
 ] as const;
 
 export function Constellation({ modalities }: { modalities: Modality[] }) {

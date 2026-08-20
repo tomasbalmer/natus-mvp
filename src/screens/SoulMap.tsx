@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/components/Screen';
 import { NUMBER_LABELS } from '@/lib/numerology';
 import { activeProfile, isSignedIn } from '@/store/account';
 import { currentSynthesis } from '@/store/soulMap';
@@ -43,14 +43,14 @@ function Numbers({ numerology }: { numerology: Numerology }) {
             key={key}
             className="glass flex items-center justify-between rounded-[var(--radius-option)] px-4 py-3"
           >
-            <span className="text-[13px] text-blanco/85">{NUMBER_LABELS[key]}</span>
+            <span className="text-[length:var(--fs-body-13)] text-blanco/85">{NUMBER_LABELS[key]}</span>
             <span className="font-serif text-2xl font-light text-crema">{numerology[key]}</span>
           </div>
         ))}
       </div>
 
       {numerology.master_numbers_present.length > 0 && (
-        <p className="mt-4 px-1 text-[12px] leading-relaxed text-crema/55">
+        <p className="mt-4 px-1 text-[length:var(--fs-body-12)] leading-relaxed text-crema/55">
           Aparecen números maestros en tu mapa:{' '}
           <span className="text-crema">{numerology.master_numbers_present.join(', ')}</span>. En
           la tradición pitagórica no se reducen, y se leen como una intensidad que pide más de
@@ -58,7 +58,7 @@ function Numbers({ numerology }: { numerology: Numerology }) {
         </p>
       )}
 
-      <p className="mt-3 px-1 text-[11px] leading-relaxed text-crema/55">
+      <p className="mt-3 px-1 text-[length:var(--fs-body-11)] leading-relaxed text-crema/55">
         Calculados en tu navegador a partir de tu nombre de nacimiento y tu fecha. Son un
         lenguaje simbólico para pensarte, no una medición.
       </p>
@@ -73,7 +73,7 @@ export function SoulMap() {
 
   if (!stored) {
     return (
-      <Screen backdrop="palm" scrim="heavy" opacity={0.45}>
+      <Screen backdrop="palm" scrim="heavy" opacity={PHOTO.content45}>
         <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
           <p className="text-sm leading-relaxed text-crema/65">
             Todavía no generamos tu mapa. Empezá por el principio y volvemos acá.
@@ -89,11 +89,11 @@ export function SoulMap() {
   const { synthesis, numerology } = stored;
 
   return (
-    <Screen backdrop="palm" scrim="heavy" opacity={0.45}>
+    <Screen backdrop="palm" scrim="heavy" opacity={PHOTO.content45}>
       <div className="flex min-h-dvh flex-col overflow-y-auto px-6 pt-[var(--top-inset)] pb-[var(--bottom-inset)] sm:min-h-0">
         <p className="eyebrow mb-3">Tu mapa del alma</p>
 
-        <h1 className="mb-7 text-[30px] leading-[1.15] text-blanco">
+        <h1 className="mb-7 text-[length:var(--fs-title-30)] leading-[1.15] text-blanco">
           {firstName ? (
             <>
               <span className="font-serif text-crema italic">{firstName}</span>,
@@ -111,7 +111,7 @@ export function SoulMap() {
           {(Object.keys(SECTION_TITLES) as (keyof typeof SECTION_TITLES)[]).map((key) => (
             <section key={key}>
               <h2 className="eyebrow mb-2.5">{SECTION_TITLES[key]}</h2>
-              <p className="text-[13.5px] leading-relaxed text-blanco/85">
+              <p className="text-[length:var(--fs-body-13_5)] leading-relaxed text-blanco/85">
                 {synthesis.soul_map_synthesis[key]}
               </p>
             </section>
@@ -125,15 +125,15 @@ export function SoulMap() {
           {synthesis.tips.map((tip) => (
             <article key={tip.title} className="glass rounded-[var(--radius-option)] px-4 py-3.5">
               <div className="mb-1.5 flex items-baseline justify-between gap-3">
-                <h3 className="text-[13px] text-blanco">{tip.title}</h3>
-                <span className="shrink-0 text-[10px] tracking-wide text-crema/55 uppercase">
+                <h3 className="text-[length:var(--fs-heading-13)] text-blanco">{tip.title}</h3>
+                <span className="shrink-0 text-[length:var(--fs-label-10)] tracking-wide text-crema/55 uppercase">
                   {CADENCE_LABEL[tip.cadence]}
                 </span>
               </div>
-              <p className="text-[12.5px] leading-relaxed text-crema/65">{tip.body}</p>
+              <p className="text-[length:var(--fs-body-12_5)] leading-relaxed text-crema/65">{tip.body}</p>
               {/* PDR 1.5: every tip closes on a micro-invitation. It is set in
                   the serif italic so it reads as a question, not a step. */}
-              <p className="mt-2.5 font-serif text-[15px] leading-snug text-crema italic">
+              <p className="mt-2.5 font-serif text-[length:var(--fs-voice-15)] leading-snug text-crema italic">
                 {tip.invitation}
               </p>
             </article>
@@ -146,12 +146,12 @@ export function SoulMap() {
         {numerology ? (
           <Numbers numerology={numerology} />
         ) : (
-          <p className="text-[12px] leading-relaxed text-crema/55">
+          <p className="text-[length:var(--fs-body-12)] leading-relaxed text-crema/55">
             No pudimos calcular los números con el nombre que ingresaste.
           </p>
         )}
 
-        <p className="mt-8 mb-3 px-1 font-serif text-[17px] leading-snug text-crema/80 italic">
+        <p className="mt-8 mb-3 px-1 font-serif text-[length:var(--fs-voice-17)] leading-snug text-crema/80 italic">
           {synthesis.follow_up_invitation}
         </p>
 
@@ -167,13 +167,13 @@ export function SoulMap() {
           {!isSignedIn() && (
             <Link
               to="/registro"
-              className="glass-chip rounded-full px-3 py-2.5 text-center text-[11px] tracking-wide text-crema/60 uppercase no-underline"
+              className="glass-chip rounded-full px-3 py-2.5 text-center text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase no-underline"
             >
               Guardar mi mapa
             </Link>
           )}
 
-          <p className="px-1 text-[10px] tracking-wide text-crema/55 uppercase">
+          <p className="px-1 text-[length:var(--fs-label-10)] tracking-wide text-crema/55 uppercase">
             {stored.mode === 'fixture' ? 'Modo demo · guion curado' : 'Generado con Claude'} ·{' '}
             {stored.prompt_version}
           </p>

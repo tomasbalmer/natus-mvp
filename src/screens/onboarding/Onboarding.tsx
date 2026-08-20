@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/components/Screen';
 import { CrisisBanner } from '@/components/CrisisBanner';
 import { ProgressRow } from '@/components/onboarding/StepChrome';
 import { CrisisScreen } from '@/screens/CrisisScreen';
@@ -132,7 +132,7 @@ export function Onboarding() {
   if (step === 'generando') {
     if (failure) {
       return (
-        <Screen backdrop="surf" scrim="diagonal" opacity={0.6}>
+        <Screen backdrop="surf" scrim="diagonal" opacity={PHOTO.veil60}>
           <div className="flex min-h-dvh flex-col items-center justify-center gap-6 px-8 text-center sm:min-h-0">
             <p className="text-sm leading-relaxed text-crema/75">{failure}</p>
             <button
@@ -164,7 +164,7 @@ export function Onboarding() {
   const total = STEPS.length - 1;
 
   return (
-    <Screen backdrop={BACKDROPS[step]} scrim="even" opacity={0.55}>
+    <Screen backdrop={BACKDROPS[step]} scrim="even" opacity={PHOTO.veil55}>
       <div className="flex min-h-dvh flex-col px-[22px] pt-[var(--top-inset)] pb-8 sm:min-h-0 sm:h-full">
         <ProgressRow
           label={LABELS[step]}

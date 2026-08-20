@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/components/Screen';
 import { Constellation } from '@/components/Constellation';
 import { ModalityCard } from '@/components/ModalityCard';
 import { modalityBySlug } from '@/lib/catalog';
@@ -102,7 +102,7 @@ export function Recommendations() {
 
   if (!currentSynthesis()) {
     return (
-      <Screen backdrop="grass" scrim="heavy" opacity={0.4}>
+      <Screen backdrop="grass" scrim="heavy" opacity={PHOTO.content40}>
         <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
           <p className="text-sm leading-relaxed text-crema/65">
             Las terapias sugeridas salen de tu mapa. Generalo primero.
@@ -117,13 +117,13 @@ export function Recommendations() {
 
   if (loading || !match) {
     return (
-      <Screen backdrop="grass" scrim="heavy" opacity={0.4}>
+      <Screen backdrop="grass" scrim="heavy" opacity={PHOTO.content40}>
         <div className="flex min-h-dvh flex-col items-center justify-center gap-4 px-8 text-center sm:min-h-0">
           <div className="relative flex size-24 items-center justify-center">
             <span className="orb-pulse" aria-hidden="true" />
             <span className="glass relative z-10 size-14 rounded-full" />
           </div>
-          <p className="font-serif text-[19px] font-light text-blanco">Buscando caminos</p>
+          <p className="font-serif text-[length:var(--fs-voice-19)] font-light text-blanco">Buscando caminos</p>
         </div>
       </Screen>
     );
@@ -136,27 +136,27 @@ export function Recommendations() {
     );
 
   return (
-    <Screen backdrop="grass" scrim="heavy" opacity={0.4}>
+    <Screen backdrop="grass" scrim="heavy" opacity={PHOTO.content40}>
       <div className="flex min-h-dvh flex-col overflow-y-auto px-5 pt-[var(--top-inset)] pb-[var(--bottom-inset)] sm:min-h-0">
         <p className="eyebrow mb-3 text-center">Tu constelación</p>
 
         <Constellation modalities={cards.map((c) => c.modality)} />
 
-        <h1 className="mt-2 mb-2 text-center text-[27px] leading-[1.15] text-blanco">
+        <h1 className="mt-2 mb-2 text-center text-[length:var(--fs-title-27)] leading-[1.15] text-blanco">
           Caminos posibles
         </h1>
-        <p className="mx-auto mb-6 max-w-[280px] text-center text-[12.5px] leading-relaxed text-crema/55">
+        <p className="mx-auto mb-6 max-w-[280px] text-center text-[length:var(--fs-body-12_5)] leading-relaxed text-crema/55">
           {framing}
         </p>
 
         {notice && (
-          <p className="mb-4 rounded-[var(--radius-option)] border border-crema/10 px-3.5 py-2.5 text-[11px] leading-relaxed text-crema/55">
+          <p className="mb-4 rounded-[var(--radius-option)] border border-crema/10 px-3.5 py-2.5 text-[length:var(--fs-body-11)] leading-relaxed text-crema/55">
             {notice}
           </p>
         )}
 
         {match.used_fallback && (
-          <p className="mb-4 rounded-[var(--radius-option)] border border-crema/10 px-3.5 py-2.5 text-[11px] leading-relaxed text-crema/55">
+          <p className="mb-4 rounded-[var(--radius-option)] border border-crema/10 px-3.5 py-2.5 text-[length:var(--fs-body-11)] leading-relaxed text-crema/55">
             No pudimos generar las explicaciones personalizadas, así que estas descripciones
             vienen del catálogo. El orden sigue basándose en lo que contaste.
           </p>
@@ -185,12 +185,12 @@ export function Recommendations() {
           <button
             type="button"
             onClick={() => void run()}
-            className="glass-chip rounded-full px-3 py-2.5 text-[11px] tracking-wide text-crema/60 uppercase"
+            className="glass-chip rounded-full px-3 py-2.5 text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase"
           >
             Volver a buscar
           </button>
 
-          <p className="px-1 text-[10px] tracking-wide text-crema/55 uppercase">
+          <p className="px-1 text-[length:var(--fs-label-10)] tracking-wide text-crema/55 uppercase">
             {match.result.prompt_version} · pool {match.strategy}
           </p>
         </div>

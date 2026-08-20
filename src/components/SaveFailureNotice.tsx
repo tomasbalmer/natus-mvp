@@ -27,7 +27,7 @@ export function SaveFailureNotice() {
   return (
     <div
       role="alert"
-      className="glass rounded-[var(--radius-option)] px-3.5 py-2.5 text-[11.5px] leading-relaxed text-crema"
+      className="glass rounded-[var(--radius-option)] px-3.5 py-2.5 text-[length:var(--fs-body-11_5)] leading-relaxed text-crema"
     >
       <p>
         No pudimos guardar lo último en tu cuenta. Sigue acá en este navegador, pero si lo cerrás
@@ -35,7 +35,7 @@ export function SaveFailureNotice() {
       </p>
       <button
         type="button"
-        className="mt-1.5 text-[10.5px] tracking-wide text-crema/60 uppercase underline"
+        className="mt-1.5 text-[length:var(--fs-label-10_5)] tracking-wide text-crema/60 uppercase underline"
         onClick={() => setFailure(null)}
       >
         Entendido

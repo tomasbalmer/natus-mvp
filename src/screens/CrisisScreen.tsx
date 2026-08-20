@@ -1,4 +1,4 @@
-import { Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/components/Screen';
 import { CrisisResourceList } from '@/components/CrisisResourceList';
 
 /**
@@ -26,14 +26,14 @@ export function CrisisScreen({
   onBack?: () => void;
 }) {
   return (
-    <Screen backdrop="palm" scrim="diagonal" opacity={0.5}>
+    <Screen backdrop="palm" scrim="diagonal" opacity={PHOTO.content50}>
       <div className="flex min-h-dvh flex-col overflow-y-auto px-6 pt-[var(--top-inset)] pb-9 sm:min-h-0">
         <div className="mb-6 flex items-center gap-2.5">
           <span aria-hidden="true" className="size-2 rounded-full bg-alerta shadow-[0_0_8px_var(--natus-alerta)]" />
           <p className="eyebrow">Antes de seguir</p>
         </div>
 
-        <h1 className="mb-5 text-[30px] text-blanco">
+        <h1 className="mb-5 text-[length:var(--fs-title-30)] text-blanco">
           Lo que estás
           <br />
           contando importa.
@@ -63,7 +63,7 @@ export function CrisisScreen({
             <button
               type="button"
               onClick={onNotMyCase}
-              className="self-center px-2 py-1 text-[11px] text-crema/55 underline underline-offset-4 hover:text-crema/70"
+              className="self-center px-2 py-1 text-[length:var(--fs-body-11)] text-crema/55 underline underline-offset-4 hover:text-crema/70"
             >
               Esto no aplica a mi caso
             </button>

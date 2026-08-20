@@ -27,6 +27,31 @@ const SCRIMS = {
 
 export type Scrim = keyof typeof SCRIMS;
 
+/**
+ * How much of the photograph shows through, per screen.
+ *
+ * Nine values for what are really three situations. `hero` is the two entry
+ * screens, where the photograph is the screen. `veil` is the onboarding
+ * sequence, where it recedes behind a question. `content` is everything
+ * else — and that one carries five numbers across twenty-seven screens,
+ * including a 0.42 sitting next to a 0.45 in two states of the same screen.
+ *
+ * Named at their transcribed values rather than normalised, for the same
+ * reason as the type scale in `tokens.css`: naming the drift and deciding
+ * what it should be are different jobs.
+ */
+export const PHOTO = {
+  hero: 0.9,
+  veil70: 0.7,
+  veil60: 0.6,
+  veil55: 0.55,
+  content50: 0.5,
+  content45: 0.45,
+  content42: 0.42,
+  content40: 0.4,
+  content35: 0.35,
+} as const;
+
 type ScreenProps = {
   backdrop?: Backdrop;
   scrim?: Scrim;

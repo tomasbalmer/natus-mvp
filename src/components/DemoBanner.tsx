@@ -35,17 +35,17 @@ export function DemoBanner() {
         className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left"
       >
         <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-tierra" />
-        <span className="flex-1 truncate text-[11px] text-crema/75">
+        <span className="flex-1 truncate text-[length:var(--fs-body-11)] text-crema/75">
           <span className="font-medium tracking-wide uppercase">Demo</span> — prototipo, no es
           un servicio de salud
         </span>
-        <span aria-hidden="true" className="shrink-0 text-[11px] text-crema/55">
+        <span aria-hidden="true" className="shrink-0 text-[length:var(--fs-body-11)] text-crema/55">
           {open ? '−' : '+'}
         </span>
       </button>
 
       {open && (
-        <p className="px-3.5 pb-2.5 text-[11px] leading-relaxed text-crema/60">
+        <p className="px-3.5 pb-2.5 text-[length:var(--fs-body-11)] leading-relaxed text-crema/60">
           {isBackendConfigured
             ? 'Si iniciaste sesión, lo que escribas se envía a los servidores de Natus y desde ahí a la API de Anthropic. Sin sesión, las respuestas vienen de guiones escritos a mano y nada sale de este navegador.'
             : 'Las respuestas vienen de guiones escritos a mano. Lo que escribas queda en este navegador y no se envía a ningún servidor.'}{' '}

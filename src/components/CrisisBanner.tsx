@@ -26,7 +26,7 @@ export function CrisisBanner({ country }: { country: string | undefined }) {
           aria-hidden="true"
           className="size-2 shrink-0 rounded-full bg-alerta shadow-[0_0_8px_var(--natus-alerta)]"
         />
-        <span className="flex-1 text-[12px] leading-snug text-crema/80">
+        <span className="flex-1 text-[length:var(--fs-body-12)] leading-snug text-crema/80">
           Si en algún momento se pone difícil, hay a quién llamar.
         </span>
         <span aria-hidden="true" className="shrink-0 text-xs text-crema/55">

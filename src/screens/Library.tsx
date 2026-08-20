@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/components/Screen';
 import { BED_TRACKS } from '@/lib/catalog';
 import { deleteMeditation, listMeditations } from '@/store/meditations';
 
@@ -31,10 +31,10 @@ export function Library() {
   const [confirming, setConfirming] = useState<string | null>(null);
 
   return (
-    <Screen backdrop="grass" scrim="heavy" opacity={0.4}>
+    <Screen backdrop="grass" scrim="heavy" opacity={PHOTO.content40}>
       <div className="flex min-h-dvh flex-col overflow-y-auto px-5 pt-[var(--top-inset)] pb-[var(--bottom-inset)] sm:min-h-0">
         <p className="eyebrow mb-3">Mis prácticas</p>
-        <h1 className="mb-6 text-[28px] leading-[1.15] text-blanco">
+        <h1 className="mb-6 text-[length:var(--fs-title-28)] leading-[1.15] text-blanco">
           Lo que fuiste
           <br />
           armando.
@@ -42,7 +42,7 @@ export function Library() {
 
         {meditations.length === 0 ? (
           <>
-            <p className="mb-6 text-[12.5px] leading-relaxed text-crema/55">
+            <p className="mb-6 text-[length:var(--fs-body-12_5)] leading-relaxed text-crema/55">
               Todavía no armaste ninguna. Cada práctica sale de una intención concreta, así que
               no hay un catálogo para elegir: se arma cuando la pedís.
             </p>
@@ -58,18 +58,18 @@ export function Library() {
                 className="glass rounded-[var(--radius-option)] px-4 py-3.5"
               >
                 <div className="mb-1.5 flex items-baseline justify-between gap-3">
-                  <h2 className="text-[14px] leading-snug text-blanco">
+                  <h2 className="text-[length:var(--fs-heading-14)] leading-snug text-blanco">
                     {meditation.script.title}
                   </h2>
-                  <span className="shrink-0 text-[10px] tracking-wide text-crema/55 uppercase">
+                  <span className="shrink-0 text-[length:var(--fs-label-10)] tracking-wide text-crema/55 uppercase">
                     {meditation.estimated_minutes} min
                   </span>
                 </div>
 
-                <p className="mb-1 text-[12px] leading-relaxed text-crema/55">
+                <p className="mb-1 text-[length:var(--fs-body-12)] leading-relaxed text-crema/55">
                   “{meditation.intent}”
                 </p>
-                <p className="mb-3 text-[10.5px] tracking-wide text-crema/55 uppercase">
+                <p className="mb-3 text-[length:var(--fs-label-10_5)] tracking-wide text-crema/55 uppercase">
                   {dayOf(meditation.created_at)} · {bedName(meditation.script.bed_track_id)}
                 </p>
 
@@ -82,14 +82,14 @@ export function Library() {
                         setMeditations(listMeditations());
                         setConfirming(null);
                       }}
-                      className="flex-1 rounded-full border border-alerta/40 px-3 py-2 text-[11px] tracking-wide text-alerta uppercase"
+                      className="flex-1 rounded-full border border-alerta/40 px-3 py-2 text-[length:var(--fs-label-11)] tracking-wide text-alerta uppercase"
                     >
                       Borrar
                     </button>
                     <button
                       type="button"
                       onClick={() => setConfirming(null)}
-                      className="glass-chip flex-1 rounded-full px-3 py-2 text-[11px] tracking-wide text-crema/60 uppercase"
+                      className="glass-chip flex-1 rounded-full px-3 py-2 text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase"
                     >
                       Mejor no
                     </button>
@@ -98,14 +98,14 @@ export function Library() {
                   <div className="flex gap-2">
                     <Link
                       to={`/meditaciones?id=${meditation.id}`}
-                      className="glass-chip flex-1 rounded-full px-3 py-2 text-center text-[11px] tracking-wide text-crema/75 uppercase no-underline"
+                      className="glass-chip flex-1 rounded-full px-3 py-2 text-center text-[length:var(--fs-label-11)] tracking-wide text-crema/75 uppercase no-underline"
                     >
                       Escuchar
                     </Link>
                     <button
                       type="button"
                       onClick={() => setConfirming(meditation.id)}
-                      className="glass-chip rounded-full px-3.5 py-2 text-[11px] tracking-wide text-crema/55 uppercase"
+                      className="glass-chip rounded-full px-3.5 py-2 text-[length:var(--fs-label-11)] tracking-wide text-crema/55 uppercase"
                     >
                       Borrar
                     </button>

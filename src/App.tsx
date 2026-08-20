@@ -83,7 +83,7 @@ export function App() {
           aria-live="polite"
           className="flex min-h-dvh items-center justify-center px-6 text-center"
         >
-          <p className="text-[12.5px] leading-relaxed text-crema/55">Abriendo tu espacio…</p>
+          <p className="text-[length:var(--fs-body-12_5)] leading-relaxed text-crema/55">Abriendo tu espacio…</p>
         </div>
       </PhoneFrame>
     );

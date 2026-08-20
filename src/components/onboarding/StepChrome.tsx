@@ -29,7 +29,7 @@ export function ProgressRow({
 
       <p className="eyebrow min-w-0 flex-1 truncate text-center">{label}</p>
 
-      <span className="glass-chip shrink-0 rounded-full px-3 py-1 text-[11px] text-crema">
+      <span className="glass-chip shrink-0 rounded-full px-3 py-1 text-[length:var(--fs-body-11)] text-crema">
         {step} de {total}
       </span>
     </div>
@@ -50,8 +50,8 @@ export function StepBody({
 }) {
   return (
     <>
-      <h2 className="mb-2 text-[28px] leading-[1.18] text-blanco">{title}</h2>
-      {helper && <p className="mb-5 text-[12px] leading-relaxed text-crema/55">{helper}</p>}
+      <h2 className="mb-2 text-[length:var(--fs-heading-28)] leading-[1.18] text-blanco">{title}</h2>
+      {helper && <p className="mb-5 text-[length:var(--fs-body-12)] leading-relaxed text-crema/55">{helper}</p>}
       {!helper && <div className="mb-5" />}
 
       <div className="-mx-1 flex-1 overflow-y-auto px-1 pb-2">{children}</div>

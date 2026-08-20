@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/components/Screen';
 import { ComparisonGate } from './Gate';
 import { computeNumerology, NumerologyInputError } from '@/lib/numerology';
 import { buildComparisonPayload, toComparisonBirth } from '@/lib/comparison-payload';
@@ -123,7 +123,7 @@ export function Result() {
   if (generating || !stored) {
     return (
       <ComparisonGate>
-        <Screen backdrop="grass" scrim="heavy" opacity={0.4}>
+        <Screen backdrop="grass" scrim="heavy" opacity={PHOTO.content40}>
           <div className="flex min-h-dvh flex-col items-center justify-center gap-4 px-8 text-center sm:min-h-0">
             {error ? (
               <>
@@ -138,7 +138,7 @@ export function Result() {
                   <span className="orb-pulse" aria-hidden="true" />
                   <span className="glass relative z-10 size-14 rounded-full" />
                 </div>
-                <p className="font-serif text-[19px] font-light text-blanco">Cruzando los mapas</p>
+                <p className="font-serif text-[length:var(--fs-voice-19)] font-light text-blanco">Cruzando los mapas</p>
               </>
             )}
           </div>
@@ -151,14 +151,14 @@ export function Result() {
 
   return (
     <ComparisonGate>
-      <Screen backdrop="grass" scrim="heavy" opacity={0.4}>
+      <Screen backdrop="grass" scrim="heavy" opacity={PHOTO.content40}>
         <div className="flex min-h-dvh flex-col overflow-y-auto px-5 pt-[var(--top-inset)] pb-[var(--bottom-inset)] sm:min-h-0">
           <p className="eyebrow mb-3">El cruce</p>
-          <h1 className="mb-6 text-[26px] leading-[1.18] text-blanco">{result.headline}</h1>
+          <h1 className="mb-6 text-[length:var(--fs-title-26)] leading-[1.18] text-blanco">{result.headline}</h1>
 
           <section className="mb-6">
             <h2 className="eyebrow mb-2.5">Los números, en diálogo</h2>
-            <p className="mb-3 text-[13px] leading-relaxed text-blanco/85">
+            <p className="mb-3 text-[length:var(--fs-body-13)] leading-relaxed text-blanco/85">
               {result.numerology_dialogue.summary}
             </p>
             <div className="flex flex-col gap-2.5">
@@ -168,14 +168,14 @@ export function Result() {
                   className="glass rounded-[var(--radius-option)] px-4 py-3.5"
                 >
                   <div className="mb-1.5 flex items-baseline justify-between gap-3">
-                    <h3 className="text-[12px] tracking-wide text-crema/60 uppercase">
+                    <h3 className="text-[length:var(--fs-heading-12)] tracking-wide text-crema/60 uppercase">
                       {KIND_LABEL[pair.kind] ?? pair.kind}
                     </h3>
-                    <span className="shrink-0 font-serif text-[17px] text-crema">
+                    <span className="shrink-0 font-serif text-[length:var(--fs-voice-17)] text-crema">
                       {pair.a_number} · {pair.b_number}
                     </span>
                   </div>
-                  <p className="text-[12.5px] leading-relaxed text-crema/70">{pair.reading}</p>
+                  <p className="text-[length:var(--fs-body-12_5)] leading-relaxed text-crema/70">{pair.reading}</p>
                 </article>
               ))}
             </div>
@@ -183,7 +183,7 @@ export function Result() {
 
           <section className="mb-6">
             <h2 className="eyebrow mb-2.5">La carta</h2>
-            <p className="text-[12.5px] leading-relaxed text-crema/60">
+            <p className="text-[length:var(--fs-body-12_5)] leading-relaxed text-crema/60">
               {result.astro_dialogue.summary}
             </p>
 
@@ -201,10 +201,10 @@ export function Result() {
                     key={`${aspect.a_body}-${aspect.type}-${aspect.b_body}`}
                     className="glass rounded-[var(--radius-option)] px-4 py-3"
                   >
-                    <p className="mb-1 text-[11px] tracking-wide text-crema/55 uppercase">
+                    <p className="mb-1 text-[length:var(--fs-label-11)] tracking-wide text-crema/55 uppercase">
                       {aspect.a_body} · {aspect.type} · {aspect.b_body}
                     </p>
-                    <p className="text-[12.5px] leading-relaxed text-crema/70">{aspect.reading}</p>
+                    <p className="text-[length:var(--fs-body-12_5)] leading-relaxed text-crema/70">{aspect.reading}</p>
                   </article>
                 ))}
               </div>
@@ -215,7 +215,7 @@ export function Result() {
             <h2 className="eyebrow mb-2.5">Donde fluye</h2>
             <ul className="flex list-none flex-col gap-2 p-0">
               {result.where_you_flow.map((line) => (
-                <li key={line} className="text-[12.5px] leading-relaxed text-blanco/85">
+                <li key={line} className="text-[length:var(--fs-body-12_5)] leading-relaxed text-blanco/85">
                   {line}
                 </li>
               ))}
@@ -226,7 +226,7 @@ export function Result() {
             <h2 className="eyebrow mb-2.5">Donde roza</h2>
             <ul className="flex list-none flex-col gap-2 p-0">
               {result.where_you_friction.map((line) => (
-                <li key={line} className="text-[12.5px] leading-relaxed text-blanco/85">
+                <li key={line} className="text-[length:var(--fs-body-12_5)] leading-relaxed text-blanco/85">
                   {line}
                 </li>
               ))}
@@ -240,25 +240,25 @@ export function Result() {
             <h2 className="eyebrow mb-3">Para conversar</h2>
             <div className="flex flex-col gap-3">
               {result.questions_to_explore.map((question) => (
-                <p key={question} className="font-serif text-[16px] leading-snug text-crema italic">
+                <p key={question} className="font-serif text-[length:var(--fs-voice-16)] leading-snug text-crema italic">
                   {question}
                 </p>
               ))}
             </div>
           </section>
 
-          <p className="mb-6 rounded-[var(--radius-option)] border border-crema/10 px-3.5 py-3 text-[11px] leading-relaxed text-crema/55">
+          <p className="mb-6 rounded-[var(--radius-option)] border border-crema/10 px-3.5 py-3 text-[length:var(--fs-body-11)] leading-relaxed text-crema/55">
             {result.disclaimer}
           </p>
 
           <div className="flex flex-col gap-2.5">
             <Link
               to={`/comparacion/consentimiento/${id}`}
-              className="glass-chip rounded-full px-3 py-2.5 text-center text-[11px] tracking-wide text-crema/60 uppercase no-underline"
+              className="glass-chip rounded-full px-3 py-2.5 text-center text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase no-underline"
             >
               Permisos y alcance
             </Link>
-            <p className="px-1 text-[10px] tracking-wide text-crema/55 uppercase">
+            <p className="px-1 text-[length:var(--fs-label-10)] tracking-wide text-crema/55 uppercase">
               {stored.mode === 'fixture' ? 'Modo demo · guion curado' : 'Generado con Claude'} ·{' '}
               {stored.prompt_version}
             </p>
@@ -283,7 +283,7 @@ function numerologyOf(legalName: string, birthDate: string) {
 function Missing({ message, to = '/comparacion', cta = 'Volver' }: { message: string; to?: string; cta?: string }) {
   return (
     <ComparisonGate>
-      <Screen backdrop="grass" scrim="heavy" opacity={0.45}>
+      <Screen backdrop="grass" scrim="heavy" opacity={PHOTO.content45}>
         <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
           <p className="text-sm leading-relaxed text-crema/65">{message}</p>
           <Link to={to} className="cta no-underline">

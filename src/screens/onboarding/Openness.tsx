@@ -87,7 +87,7 @@ export function Openness({
         </label>
         <input
           id="openness-other"
-          className="glass mt-1 w-full rounded-[var(--radius-option)] px-4 py-3 text-[13px] text-blanco placeholder:text-crema/55"
+          className="glass mt-1 w-full rounded-[var(--radius-option)] px-4 py-3 text-[length:var(--fs-body-13)] text-blanco placeholder:text-crema/55"
           placeholder="Otro: contanos cuál"
           value={other}
           onChange={(e) => {

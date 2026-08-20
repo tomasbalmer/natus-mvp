@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/components/Screen';
 import { AuthError, signInWithGoogle } from '@/supabase/session.ts';
 
 /**
@@ -32,22 +32,22 @@ export function Gate() {
   };
 
   return (
-    <Screen backdrop="forest" scrim="bottom" opacity={0.9} focus="center 20%">
+    <Screen backdrop="forest" scrim="bottom" opacity={PHOTO.hero} focus="center 20%">
       <div className="mt-auto flex flex-col items-center px-7 pb-13 text-center">
         <div className="relative mb-5 flex size-16 items-center justify-center rounded-full border border-crema/35">
           <span aria-hidden="true" className="absolute inset-1.5 rounded-full border border-crema/15" />
-          <span className="font-serif text-[22px] font-light tracking-wide text-crema">◯</span>
+          <span className="font-serif text-[length:var(--fs-voice-22)] font-light tracking-wide text-crema">◯</span>
         </div>
 
         <p className="eyebrow mb-3">Natus</p>
 
-        <h1 className="mb-4 text-[32px] leading-[1.14] text-blanco">
+        <h1 className="mb-4 text-[length:var(--fs-display-sm)] leading-[1.14] text-blanco">
           Esto todavía
           <br />
           <span className="font-serif text-crema italic">no está abierto.</span>
         </h1>
 
-        <p className="mb-8 text-[12.5px] leading-relaxed text-crema/60">
+        <p className="mb-8 text-[length:var(--fs-body-12_5)] leading-relaxed text-crema/60">
           Es una versión temprana, con un grupo chico de personas invitadas. Entrá con la
           dirección con la que te invitamos.
         </p>
@@ -57,7 +57,7 @@ export function Gate() {
         </button>
 
         {error && (
-          <p role="alert" className="mt-3 text-[12px] leading-relaxed text-alerta">
+          <p role="alert" className="mt-3 text-[length:var(--fs-body-12)] leading-relaxed text-alerta">
             {error}
           </p>
         )}
@@ -67,12 +67,12 @@ export function Gate() {
           "unverified app" warning to anybody on the test-user list, and
           somebody who was not expecting it reasonably reads it as a scam.
         */}
-        <p className="mt-5 text-[11px] leading-relaxed text-crema/55">
+        <p className="mt-5 text-[length:var(--fs-body-11)] leading-relaxed text-crema/55">
           Google va a avisarte que la aplicación no está verificada. Es esperable en esta
           etapa: podés continuar.
         </p>
 
-        <p className="mt-3 text-[11px] leading-relaxed text-crema/55">
+        <p className="mt-3 text-[length:var(--fs-body-11)] leading-relaxed text-crema/55">
           Si te invitamos y no podés entrar, escribinos: hay que agregar tu dirección a la
           lista.
         </p>

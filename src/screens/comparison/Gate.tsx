@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/components/Screen';
 import { CrisisScreen } from '@/screens/CrisisScreen';
 import { activeHighSeverityEvent } from '@/store/crisis';
 import { activeProfile } from '@/store/account';
@@ -24,7 +24,7 @@ export function ComparisonGate({ children }: { children: ReactNode }) {
 
   if (!profile || !currentSynthesis()) {
     return (
-      <Screen backdrop="surf" scrim="heavy" opacity={0.45}>
+      <Screen backdrop="surf" scrim="heavy" opacity={PHOTO.content45}>
         <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
           <p className="text-sm leading-relaxed text-crema/65">
             Para comparar hace falta tu mapa primero. El de la otra persona lo cargás después.
