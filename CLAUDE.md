@@ -21,6 +21,14 @@ Live at https://tomasbalmer.github.io/natus-mvp/
 asks about suicidal ideation because the product it demonstrates does. Nobody
 is monitoring it and the hotline numbers are unverified.
 
+## Work in progress
+
+`docs/DESIGN-LAYER.md` is a live plan, not a record: isolating the design layer
+so a designer can work in one place. It carries the measurements, the four
+steps, and the verification protocol this repository expects. Read it before
+touching `src/styles`, `src/components` or anything visual. Delete it when the
+steps are done and fold what is still true into this file.
+
 ## Where the reasoning lives
 
 **This file is it.** The design record — two implementation plans, a decision
@@ -39,7 +47,7 @@ The source documents are `PDR — MVP Natus_ Producto del Usuario.txt` and
 mockups are the **visual** truth (palette, typography, glass, photography) and
 the PDR is the **functional** truth (flow, scope, copy rules, safety).
 `README.md` carries the deployment configuration; `docs/ASSETS.md` the image
-licensing.
+licensing; `docs/DESIGN-LAYER.md` the plan currently in flight.
 
 ## Resuming work
 
