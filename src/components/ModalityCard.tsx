@@ -57,7 +57,7 @@ export function ModalityCard({
   return (
     <article
       className={[
-        'glass rounded-[var(--radius-option)] px-4 py-4 transition-opacity',
+        'surface surface-p16 transition-opacity',
         dismissed ? 'opacity-40' : '',
       ].join(' ')}
     >
@@ -71,21 +71,20 @@ export function ModalityCard({
       </div>
 
       <div className="mb-3 flex flex-wrap gap-1.5">
-        <span className="glass-chip rounded-full px-2.5 py-1 text-[length:var(--fs-label-10)] tracking-wide text-crema/70 uppercase">
+        <span className="badge text-crema/70">
           {FAMILY_LABEL[modality.family]}
         </span>
-        <span className="glass-chip rounded-full px-2.5 py-1 text-[length:var(--fs-label-10)] tracking-wide text-crema/70 uppercase">
+        <span className="badge text-crema/70">
           {modality.typical_format}
         </span>
-        <span className="glass-chip rounded-full px-2.5 py-1 text-[length:var(--fs-label-10)] tracking-wide text-crema/70 uppercase">
+        <span className="badge text-crema/70">
           {HORIZON_LABEL[modality.typical_horizon]}
         </span>
         <span
           className={[
-            'rounded-full px-2.5 py-1 text-[length:var(--fs-label-10)] tracking-wide uppercase',
             modality.evidence_level === 'clinica'
-              ? 'bg-verde/70 text-crema'
-              : 'glass-chip text-crema/55',
+              ? 'badge-bare bg-verde/70 text-crema'
+              : 'badge text-crema/55',
           ].join(' ')}
         >
           {EVIDENCE_LABEL[modality.evidence_level]}
@@ -125,10 +124,10 @@ export function ModalityCard({
           onClick={() => onReact('saved')}
           aria-pressed={reaction === 'saved'}
           className={[
-            'flex-1 rounded-full px-3 py-2 text-[length:var(--fs-label-11)] tracking-wide uppercase transition-colors',
+            'chip-p8 flex-1 transition-colors',
             reaction === 'saved'
-              ? 'bg-verde text-crema'
-              : 'glass-chip text-crema/70 hover:text-crema',
+              ? 'chip-bare bg-verde text-crema'
+              : 'chip text-crema/70 hover:text-crema',
           ].join(' ')}
         >
           {reaction === 'saved' ? 'Guardada' : 'Guardar'}
@@ -137,7 +136,7 @@ export function ModalityCard({
           type="button"
           onClick={() => onReact('dismissed')}
           aria-pressed={dismissed}
-          className="glass-chip flex-1 rounded-full px-3 py-2 text-[length:var(--fs-label-11)] tracking-wide text-crema/55 uppercase hover:text-crema"
+          className="chip chip-p8 flex-1 text-crema/55 hover:text-crema"
         >
           {dismissed ? 'Descartada' : 'No me hace sentido'}
         </button>

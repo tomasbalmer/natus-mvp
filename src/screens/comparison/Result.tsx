@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { PHOTO, Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/design/Screen';
 import { ComparisonGate } from './Gate';
 import { computeNumerology, NumerologyInputError } from '@/lib/numerology';
 import { buildComparisonPayload, toComparisonBirth } from '@/lib/comparison-payload';
@@ -136,7 +136,7 @@ export function Result() {
               <>
                 <div className="relative flex size-24 items-center justify-center">
                   <span className="orb-pulse" aria-hidden="true" />
-                  <span className="glass relative z-10 size-14 rounded-full" />
+                  <span className="circle relative z-10 size-14" />
                 </div>
                 <p className="font-serif text-[length:var(--fs-voice-19)] font-light text-blanco">Cruzando los mapas</p>
               </>
@@ -165,7 +165,7 @@ export function Result() {
               {result.numerology_dialogue.pairs.map((pair) => (
                 <article
                   key={pair.kind}
-                  className="glass rounded-[var(--radius-option)] px-4 py-3.5"
+                  className="surface surface-p14"
                 >
                   <div className="mb-1.5 flex items-baseline justify-between gap-3">
                     <h3 className="text-[length:var(--fs-heading-12)] tracking-wide text-crema/60 uppercase">
@@ -199,7 +199,7 @@ export function Result() {
                 {result.astro_dialogue.aspects.map((aspect) => (
                   <article
                     key={`${aspect.a_body}-${aspect.type}-${aspect.b_body}`}
-                    className="glass rounded-[var(--radius-option)] px-4 py-3"
+                    className="surface surface-p12"
                   >
                     <p className="mb-1 text-[length:var(--fs-label-11)] tracking-wide text-crema/55 uppercase">
                       {aspect.a_body} · {aspect.type} · {aspect.b_body}
@@ -254,7 +254,7 @@ export function Result() {
           <div className="flex flex-col gap-2.5">
             <Link
               to={`/comparacion/consentimiento/${id}`}
-              className="glass-chip rounded-full px-3 py-2.5 text-center text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase no-underline"
+              className="chip chip-p10 text-center text-crema/60 no-underline"
             >
               Permisos y alcance
             </Link>

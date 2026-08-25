@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { PHOTO, Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/design/Screen';
 import { NUMBER_LABELS } from '@/lib/numerology';
 import { activeProfile, isSignedIn } from '@/store/account';
 import { currentSynthesis } from '@/store/soulMap';
@@ -41,7 +41,7 @@ function Numbers({ numerology }: { numerology: Numerology }) {
         {NUMBER_ORDER.map((key) => (
           <div
             key={key}
-            className="glass flex items-center justify-between rounded-[var(--radius-option)] px-4 py-3"
+            className="surface surface-p12 flex items-center justify-between"
           >
             <span className="text-[length:var(--fs-body-13)] text-blanco/85">{NUMBER_LABELS[key]}</span>
             <span className="font-serif text-[length:var(--fs-numeral-24)] leading-8 font-light text-crema">{numerology[key]}</span>
@@ -123,7 +123,7 @@ export function SoulMap() {
         <h2 className="eyebrow mb-3">Para probar</h2>
         <div className="flex flex-col gap-2.5">
           {synthesis.tips.map((tip) => (
-            <article key={tip.title} className="glass rounded-[var(--radius-option)] px-4 py-3.5">
+            <article key={tip.title} className="surface surface-p14">
               <div className="mb-1.5 flex items-baseline justify-between gap-3">
                 <h3 className="text-[length:var(--fs-heading-13)] text-blanco">{tip.title}</h3>
                 <span className="shrink-0 text-[length:var(--fs-label-10)] tracking-wide text-crema/55 uppercase">
@@ -167,7 +167,7 @@ export function SoulMap() {
           {!isSignedIn() && (
             <Link
               to="/registro"
-              className="glass-chip rounded-full px-3 py-2.5 text-center text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase no-underline"
+              className="chip chip-p10 text-center text-crema/60 no-underline"
             >
               Guardar mi mapa
             </Link>

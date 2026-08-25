@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { PHOTO, Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/design/Screen';
 import { ComparisonGate } from './Gate';
 import { BIRTH_COUNTRIES } from '@/components/birth-countries';
 import {
@@ -25,7 +25,7 @@ import {
  */
 
 const fieldClass =
-  'glass w-full rounded-[var(--radius-option)] px-4 py-3 text-[length:var(--fs-body-14)] leading-5 text-blanco placeholder:text-crema/55 [color-scheme:dark]';
+  'field w-full text-[length:var(--fs-body-14)] leading-5 placeholder:text-crema/55 [color-scheme:dark]';
 const labelClass = 'mb-1.5 block text-[length:var(--fs-label-11)] tracking-wide text-crema/55 uppercase';
 
 const STATUS_LABEL = {
@@ -83,7 +83,7 @@ export function ExternalProfile() {
                 const consent = consentFor(profile.id);
                 const active = isConsentActive(consent);
                 return (
-                  <article key={profile.id} className="glass rounded-[var(--radius-option)] px-4 py-3.5">
+                  <article key={profile.id} className="surface surface-p14">
                     <div className="mb-1 flex items-baseline justify-between gap-3">
                       <h2 className="text-[length:var(--fs-heading-14)] text-blanco">{profile.display_name}</h2>
                       <span className="shrink-0 text-[length:var(--fs-label-10)] tracking-wide text-crema/55 uppercase">
@@ -108,7 +108,7 @@ export function ExternalProfile() {
                         <button
                           type="button"
                           onClick={() => setConfirming(null)}
-                          className="glass-chip flex-1 rounded-full px-3 py-2 text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase"
+                          className="chip chip-p8 flex-1 text-crema/60"
                         >
                           Mejor no
                         </button>
@@ -121,14 +121,14 @@ export function ExternalProfile() {
                               ? `/comparacion/resultado/${profile.id}`
                               : `/comparacion/consentimiento/${profile.id}`
                           }
-                          className="glass-chip flex-1 rounded-full px-3 py-2 text-center text-[length:var(--fs-label-11)] tracking-wide text-crema/75 uppercase no-underline"
+                          className="chip chip-p8 flex-1 text-center text-crema/75 no-underline"
                         >
                           {active ? 'Ver el cruce' : 'Permisos'}
                         </Link>
                         <button
                           type="button"
                           onClick={() => setConfirming(profile.id)}
-                          className="glass-chip rounded-full px-3.5 py-2 text-[length:var(--fs-label-11)] tracking-wide text-crema/55 uppercase"
+                          className="chip chip-p8 px-3.5 text-crema/55"
                         >
                           Borrar
                         </button>
@@ -260,7 +260,7 @@ export function ExternalProfile() {
               <button
                 type="button"
                 onClick={() => setAdding(false)}
-                className="glass-chip rounded-full px-3 py-2.5 text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase"
+                className="chip chip-p10 text-crema/60"
               >
                 Cancelar
               </button>

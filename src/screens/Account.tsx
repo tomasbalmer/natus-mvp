@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { PHOTO, Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/design/Screen';
 import { buildExport, exportFileName } from '@/lib/export';
 import { clearAll, exportAll } from '@/store/db';
 import { clearStoredBlobs } from '@/store/blobs';
@@ -103,7 +103,7 @@ export function Account() {
           son tuyos.
         </h1>
 
-        <section className="glass mb-3 rounded-[var(--radius-option)] px-4 py-3.5">
+        <section className="surface surface-p14 mb-3">
           <p className="eyebrow mb-1.5">Estado</p>
           {client ? (
             <>
@@ -131,7 +131,7 @@ export function Account() {
               </p>
               <Link
                 to="/registro"
-                className="glass-chip inline-block rounded-full px-3 py-1.5 text-[length:var(--fs-label-11)] tracking-wide text-crema/75 uppercase no-underline"
+                className="chip chip-p6 inline-block text-crema/75 no-underline"
               >
                 Guardar mi mapa
               </Link>
@@ -139,7 +139,7 @@ export function Account() {
           )}
         </section>
 
-        <section className="glass mb-3 rounded-[var(--radius-option)] px-4 py-3.5">
+        <section className="surface surface-p14 mb-3">
           <p className="eyebrow mb-1.5">Idioma</p>
           <div className="mb-2 flex gap-2">
             {LOCALES.map(([code, label]) => (
@@ -149,8 +149,8 @@ export function Account() {
                 aria-pressed={locale === code}
                 onClick={() => setStoredLocale(setLocale(code).locale)}
                 className={[
-                  'rounded-full px-3.5 py-1.5 text-[length:var(--fs-label-11)] tracking-wide uppercase transition-colors',
-                  locale === code ? 'bg-verde text-crema' : 'glass-chip text-crema/60',
+                  'chip-p6 px-3.5 transition-colors',
+                  locale === code ? 'chip-bare bg-verde text-crema' : 'chip text-crema/60',
                 ].join(' ')}
               >
                 {label}
@@ -163,7 +163,7 @@ export function Account() {
           </p>
         </section>
 
-        <section className="glass mb-3 rounded-[var(--radius-option)] px-4 py-3.5">
+        <section className="surface surface-p14 mb-3">
           <p className="eyebrow mb-1.5">Llevarte tus datos</p>
           <p className="mb-3 text-[length:var(--fs-body-11_5)] leading-relaxed text-crema/55">
             Un archivo JSON con todo: tus respuestas, tu mapa, tus caminos, tus marcas de
@@ -172,7 +172,7 @@ export function Account() {
           <button
             type="button"
             onClick={download}
-            className="glass-chip w-full rounded-full px-3 py-2.5 text-[length:var(--fs-label-11)] tracking-wide text-crema/75 uppercase"
+            className="chip chip-p10 w-full text-crema/75"
           >
             Descargar mis datos
           </button>
@@ -216,7 +216,7 @@ export function Account() {
               <button
                 type="button"
                 onClick={() => setConfirming(false)}
-                className="glass-chip w-full rounded-full px-3 py-2.5 text-[length:var(--fs-label-11)] tracking-wide text-crema/70 uppercase"
+                className="chip chip-p10 w-full text-crema/70"
               >
                 Mejor no
               </button>
@@ -239,7 +239,7 @@ export function Account() {
               type="button"
               disabled={busy}
               onClick={() => void leave()}
-              className="glass-chip w-full rounded-full px-3 py-2.5 text-[length:var(--fs-label-11)] tracking-wide text-crema/70 uppercase disabled:opacity-50"
+              className="chip chip-p10 w-full text-crema/70 disabled:opacity-50"
             >
               Cerrar sesión
             </button>

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { PHOTO, Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/design/Screen';
 import { Constellation } from '@/components/Constellation';
 import { ModalityCard } from '@/components/ModalityCard';
 import { modalityBySlug } from '@/lib/catalog';
@@ -121,7 +121,7 @@ export function Recommendations() {
         <div className="flex min-h-dvh flex-col items-center justify-center gap-4 px-8 text-center sm:min-h-0">
           <div className="relative flex size-24 items-center justify-center">
             <span className="orb-pulse" aria-hidden="true" />
-            <span className="glass relative z-10 size-14 rounded-full" />
+            <span className="circle relative z-10 size-14" />
           </div>
           <p className="font-serif text-[length:var(--fs-voice-19)] font-light text-blanco">Buscando caminos</p>
         </div>
@@ -185,7 +185,7 @@ export function Recommendations() {
           <button
             type="button"
             onClick={() => void run()}
-            className="glass-chip rounded-full px-3 py-2.5 text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase"
+            className="chip chip-p10 text-crema/60"
           >
             Volver a buscar
           </button>

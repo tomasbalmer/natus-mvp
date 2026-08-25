@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { PHOTO, Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/design/Screen';
 import { currentSynthesis } from '@/store/soulMap';
 
 /** Screen 1 of PDR 6.1, built from mockup screen 01. */

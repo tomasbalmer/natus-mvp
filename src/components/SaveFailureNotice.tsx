@@ -27,7 +27,7 @@ export function SaveFailureNotice() {
   return (
     <div
       role="alert"
-      className="glass rounded-[var(--radius-option)] px-3.5 py-2.5 text-[length:var(--fs-body-11_5)] leading-relaxed text-crema"
+      className="surface surface-p10 px-3.5 text-[length:var(--fs-body-11_5)] leading-relaxed text-crema"
     >
       <p>
         No pudimos guardar lo último en tu cuenta. Sigue acá en este navegador, pero si lo cerrás

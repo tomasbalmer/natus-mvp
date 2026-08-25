@@ -19,7 +19,7 @@ export function CrisisResourceList({
         <a
           key={`${r.country}-${r.name}`}
           href={telHref(r.contact)}
-          className="glass flex items-center gap-3 rounded-[var(--radius-option)] px-4 py-3 no-underline"
+          className="surface surface-p12 flex items-center gap-3 no-underline"
         >
           <div className="min-w-0 flex-1">
             <p className="truncate text-[length:var(--fs-body-14)] leading-5 text-blanco">{r.name}</p>
@@ -35,7 +35,7 @@ export function CrisisResourceList({
         href={set.fallback.url}
         target="_blank"
         rel="noreferrer noopener"
-        className="glass flex items-center gap-3 rounded-[var(--radius-option)] px-4 py-3 no-underline"
+        className="surface surface-p12 flex items-center gap-3 no-underline"
       >
         <div className="min-w-0 flex-1">
           <p className="truncate text-[length:var(--fs-body-14)] leading-5 text-blanco">{set.fallback.name}</p>

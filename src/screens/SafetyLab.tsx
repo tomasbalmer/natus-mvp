@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { PHOTO, Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/design/Screen';
 import { CrisisBanner } from '@/components/CrisisBanner';
 import { CrisisScreen } from './CrisisScreen';
 import { scanText, type SafetyVerdict } from '@/lib/safety';
@@ -29,14 +29,14 @@ const SAMPLES: [string, string][] = [
 function Verdict({ verdict }: { verdict: SafetyVerdict }) {
   if (!verdict.crisis) {
     return (
-      <div className="glass rounded-[var(--radius-option)] px-4 py-3">
+      <div className="surface surface-p12">
         <p className="text-[length:var(--fs-body-14)] leading-5 text-crema/70">Sin señal de crisis. El flujo sigue normal.</p>
       </div>
     );
   }
 
   return (
-    <div className="glass rounded-[var(--radius-option)] px-4 py-3">
+    <div className="surface surface-p12">
       <div className="mb-2 flex items-center gap-2">
         <span
           aria-hidden="true"
@@ -92,7 +92,7 @@ export function SafetyLab() {
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={3}
-          className="glass w-full resize-none rounded-[var(--radius-option)] px-4 py-3 text-[length:var(--fs-body-14)] leading-5 text-blanco placeholder:text-crema/55"
+          className="field w-full resize-none text-[length:var(--fs-body-14)] leading-5 placeholder:text-crema/55"
           placeholder="Escribí algo…"
         />
 
@@ -102,7 +102,7 @@ export function SafetyLab() {
               key={label}
               type="button"
               onClick={() => setText(sample)}
-              className="glass-chip rounded-full px-3 py-1.5 text-[length:var(--fs-body-11)] text-crema/70"
+              className="pill py-1.5 text-[length:var(--fs-body-11)] text-crema/70"
             >
               {label}
             </button>

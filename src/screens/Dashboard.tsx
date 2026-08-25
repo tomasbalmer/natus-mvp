@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { PHOTO, Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/design/Screen';
 import { CrisisBanner } from '@/components/CrisisBanner';
 import { CrisisScreen } from '@/screens/CrisisScreen';
 import { activeProfile, isSignedIn } from '@/store/account';
@@ -167,7 +167,7 @@ export function Dashboard() {
         {!isSignedIn() && (
           <Link
             to="/registro"
-            className="glass mb-5 block rounded-[var(--radius-option)] px-4 py-3.5 no-underline"
+            className="surface surface-p14 mb-5 block no-underline"
           >
             <p className="text-[length:var(--fs-body-13)] leading-snug text-blanco">Guardá tu mapa</p>
             <p className="mt-1 text-[length:var(--fs-body-11_5)] leading-relaxed text-crema/55">
@@ -192,7 +192,7 @@ export function Dashboard() {
               <Link
                 key={section.key}
                 to={section.to}
-                className="glass rounded-[var(--radius-option)] px-4 py-3.5 no-underline"
+                className="surface surface-p14 no-underline"
               >
                 {inner}
               </Link>

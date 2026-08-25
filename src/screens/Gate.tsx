@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PHOTO, Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/design/Screen';
 import { AuthError, signInWithGoogle } from '@/supabase/session.ts';
 
 /**

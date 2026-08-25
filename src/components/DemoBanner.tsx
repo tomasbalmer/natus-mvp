@@ -22,7 +22,7 @@ export function DemoBanner() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div role="note" className="glass-chip relative z-50 rounded-[var(--radius-option)]">
+    <div role="note" className="banner relative z-50">
       {/*
        * One line by default. The first draft ran to three and sat on top of
        * every screen's heading — a disclosure nobody can read past is worse

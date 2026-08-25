@@ -23,11 +23,11 @@ is monitoring it and the hotline numbers are unverified.
 
 ## Work in progress
 
-`docs/DESIGN-LAYER.md` is a live plan, not a record: isolating the design layer
-so a designer can work in one place. It carries the measurements, the four
-steps, and the verification protocol this repository expects. Read it before
-touching `src/styles`, `src/components` or anything visual. Delete it when the
-steps are done and fold what is still true into this file.
+`docs/DESIGN-LAYER.md` is a live plan, not a record. The design layer is now
+isolated in `src/design/` and fenced by a test; one step is left, and the file
+carries the verification protocol this repository expects of visual work. Read
+it before touching `src/design`, `src/styles` or anything visual. Delete it
+when that step is done and fold what is still true into this file.
 
 ## Where the reasoning lives
 
@@ -128,11 +128,18 @@ src/ai/      One runAi with two paths: an Edge Function when the backend is
 src/screens/ Route-level components. Wrapped per route by `ErrorBoundary`,
              which consults the crisis store before deciding what a failed
              screen shows.
-src/styles/  tokens.css is the visual source of truth: palette, glass,
-             geometry, and a type scale of 36 tokens over 9 roles. Sizes are
-             named by role and value — four `title-*` exist because four
-             sizes ship, not because four were designed. Nothing is written
-             as a literal, and `architecture.test.ts` fails if one appears.
+
+src/design/  The visual source of truth, and the only place a surface may be
+             written. tokens.css holds palette, glass, geometry and a type
+             scale of 36 tokens over 9 roles; primitives.css holds the nine
+             named parts every screen composes from; Screen.tsx holds the
+             backdrop, the scrim and the photo opacity.
+             Named by role and value — four `title-*` and four `surface-p*`
+             exist because four of each ship, not because four were designed.
+             `architecture.test.ts` fails on a font size written as a literal,
+             and on any screen that writes its own glass.
+src/styles/  Wiring, not design: the Tailwind import, the `@theme` mapping,
+             the base layer, and the contrast test.
 data/        Seed JSON: modalities, topics, crisis resources, bed tracks.
 
 supabase/functions/

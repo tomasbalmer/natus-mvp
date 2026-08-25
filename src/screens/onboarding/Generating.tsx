@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { PHOTO, Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/design/Screen';
 import { generateSoulMap } from '@/ai/soul-map';
 import {
   calculateNatalChart,
@@ -116,7 +116,7 @@ export function Generating({
         <div className="relative flex size-30 items-center justify-center">
           <span className="orb-pulse" aria-hidden="true" />
           <span className="orb-pulse orb-pulse-2" aria-hidden="true" />
-          <span className="glass relative z-10 flex size-18 items-center justify-center rounded-full shadow-[0_0_40px_rgb(28_56_41/0.4)]">
+          <span className="circle relative z-10 flex size-18 items-center justify-center shadow-[0_0_40px_rgb(28_56_41/0.4)]">
             <span className="flex items-center gap-[3px]" aria-hidden="true">
               {[10, 18, 24, 18, 10].map((h, i) => (
                 <span

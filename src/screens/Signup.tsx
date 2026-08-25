@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { PHOTO, Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/design/Screen';
 import { SignupError, isSignedIn, signUp } from '@/store/account';
 import { currentSynthesis } from '@/store/soulMap';
 import { isBackendConfigured } from '@/supabase/client.ts';
@@ -24,7 +24,7 @@ import { upgradeToEmail } from '@/supabase/session.ts';
  */
 
 const fieldClass =
-  'glass w-full rounded-[var(--radius-option)] px-4 py-3 text-[length:var(--fs-body-14)] leading-5 text-blanco placeholder:text-crema/55';
+  'field w-full text-[length:var(--fs-body-14)] leading-5 placeholder:text-crema/55';
 
 export function Signup() {
   const navigate = useNavigate();
@@ -185,7 +185,7 @@ export function Signup() {
 
           <Link
             to="/inicio"
-            className="glass-chip rounded-full px-3 py-2.5 text-center text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase no-underline"
+            className="chip chip-p10 text-center text-crema/60 no-underline"
           >
             Ahora no
           </Link>

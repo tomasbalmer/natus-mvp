@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { PHOTO, Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/design/Screen';
 import { BED_TRACKS } from '@/lib/catalog';
 import { deleteMeditation, listMeditations } from '@/store/meditations';
 
@@ -55,7 +55,7 @@ export function Library() {
             {meditations.map((meditation) => (
               <article
                 key={meditation.id}
-                className="glass rounded-[var(--radius-option)] px-4 py-3.5"
+                className="surface surface-p14"
               >
                 <div className="mb-1.5 flex items-baseline justify-between gap-3">
                   <h2 className="text-[length:var(--fs-heading-14)] leading-snug text-blanco">
@@ -89,7 +89,7 @@ export function Library() {
                     <button
                       type="button"
                       onClick={() => setConfirming(null)}
-                      className="glass-chip flex-1 rounded-full px-3 py-2 text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase"
+                      className="chip chip-p8 flex-1 text-crema/60"
                     >
                       Mejor no
                     </button>
@@ -98,14 +98,14 @@ export function Library() {
                   <div className="flex gap-2">
                     <Link
                       to={`/meditaciones?id=${meditation.id}`}
-                      className="glass-chip flex-1 rounded-full px-3 py-2 text-center text-[length:var(--fs-label-11)] tracking-wide text-crema/75 uppercase no-underline"
+                      className="chip chip-p8 flex-1 text-center text-crema/75 no-underline"
                     >
                       Escuchar
                     </Link>
                     <button
                       type="button"
                       onClick={() => setConfirming(meditation.id)}
-                      className="glass-chip rounded-full px-3.5 py-2 text-[length:var(--fs-label-11)] tracking-wide text-crema/55 uppercase"
+                      className="chip chip-p8 px-3.5 text-crema/55"
                     >
                       Borrar
                     </button>

@@ -19,7 +19,7 @@ export function ProgressRow({
           type="button"
           onClick={onBack}
           aria-label="Volver"
-          className="glass-chip flex size-8 shrink-0 items-center justify-center rounded-full text-[length:var(--fs-body-14)] leading-5 text-crema"
+          className="circle-chip flex size-8 shrink-0 items-center justify-center text-[length:var(--fs-body-14)] leading-5 text-crema"
         >
           ←
         </button>
@@ -29,7 +29,7 @@ export function ProgressRow({
 
       <p className="eyebrow min-w-0 flex-1 truncate text-center">{label}</p>
 
-      <span className="glass-chip shrink-0 rounded-full px-3 py-1 text-[length:var(--fs-body-11)] text-crema">
+      <span className="pill shrink-0 text-[length:var(--fs-body-11)] text-crema">
         {step} de {total}
       </span>
     </div>

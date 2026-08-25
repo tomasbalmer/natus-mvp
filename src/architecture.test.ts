@@ -29,6 +29,11 @@ const SRC = resolve(__dirname);
 const LAYERS: Record<string, number> = {
   styles: 0,
   lib: 0,
+  /**
+   * The design layer. Below the components that consume it and above nothing,
+   * so a surface can never reach back into the store to decide how it looks.
+   */
+  design: 1,
   supabase: 1,
   astrology: 1,
   store: 2,
@@ -256,6 +261,63 @@ describe('the type scale cannot erode', () => {
         // `leading-[var(--lh-…)]` is the token form and passes; a bare number
         // is a fifth value for a job that already has four too many.
         const hit = /\bleading-\[[0-9.]+\]/.exec(line);
+        if (hit) found.push(`${relative(SRC, file)}:${i + 1}  ${hit[0]}`);
+      }
+    }
+
+    expect(found).toEqual([]);
+  });
+});
+
+/**
+ * The design layer is the only place a surface is written.
+ *
+ * Before this rule, ninety-nine elements wore a glass surface in thirty-nine
+ * different strings, and the one part that carried a name — `.cta` — was the
+ * only one that had not drifted. The card shipped at four vertical paddings
+ * and the secondary button at three, and nobody chose either: there was no
+ * name to compare a new one against, so every new instance was written from
+ * whatever the nearest screen happened to say.
+ *
+ * Three spellings all had to be closed, because the drift used all three:
+ * the `glass` and `glass-chip` classes, the `--glass-*` tokens written raw
+ * into an arbitrary Tailwind value, and `backdropFilter` set inline as a
+ * style prop. The third is how the onboarding row and the constellation nodes
+ * ended up outside the inventory entirely — and how a third blur, `16px`,
+ * shipped for months without a token or a name.
+ *
+ * What a screen may still write is layout: `flex`, `w-full`, `mb-3`,
+ * `size-14`. That belongs to whoever builds the screen. What it may not write
+ * is what the thing is made of.
+ */
+describe('a screen cannot write its own surface', () => {
+  const OUTSIDE = FILES.filter((f) => !relative(SRC, f).startsWith('design/'));
+
+  /** The three spellings, and what to say when one turns up. */
+  const FORBIDDEN: readonly (readonly [string, RegExp])[] = [
+    // `option-glass` and `node-glass` are design-layer names and must pass;
+    // the lookarounds are what separates them from a raw `glass`.
+    ['the glass classes', /(?<![\w-])glass(?:-chip)?(?![\w-])/],
+    ['a raw --glass-* token', /--glass-/],
+    ['backdrop-filter set inline', /backdropFilter/],
+  ];
+
+  it('finds files outside the design layer', () => {
+    expect(OUTSIDE.length).toBeGreaterThan(50);
+  });
+
+  it.each(FORBIDDEN)('never writes %s', (_what, pattern) => {
+    const found: string[] = [];
+
+    for (const file of OUTSIDE) {
+      // Strip comments first. `App.tsx` explains why the crisis takeover is
+      // not a glass panel, and prose about a rule is not a breach of it.
+      const text = readFileSync(file, 'utf8')
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/^\s*\/\/.*$/gm, '');
+
+      for (const [i, line] of text.split('\n').entries()) {
+        const hit = pattern.exec(line);
         if (hit) found.push(`${relative(SRC, file)}:${i + 1}  ${hit[0]}`);
       }
     }

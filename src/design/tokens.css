@@ -28,6 +28,11 @@
   --glass-hover: rgb(255 255 255 / 0.13);
   --glass-blur-chip: 12px;
   --glass-blur-card: 20px;
+  /* Third blur, and until the design layer was isolated it had no name: the
+     constellation nodes carried `blur(16px)` inline. Named at its value like
+     the rest of the drift, not resolved into one of the other two — which of
+     the three is right is a design decision. */
+  --glass-blur-node: 16px;
 
   /*
    * Text on photography.
@@ -179,101 +184,4 @@
 
   --track-eyebrow: 0.22em;
   --track-cta: 0.12em;
-}
-
-/*
- * Reusable surfaces. Kept as plain CSS classes rather than Tailwind
- * components because they carry backdrop-filter, which is easy to get
- * subtly wrong when composed from utilities.
- */
-
-.glass {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(var(--glass-blur-card));
-  -webkit-backdrop-filter: blur(var(--glass-blur-card));
-}
-
-.glass-chip {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(var(--glass-blur-chip));
-  -webkit-backdrop-filter: blur(var(--glass-blur-chip));
-}
-
-.glass:hover {
-  background: var(--glass-hover);
-}
-
-/* The photographic backdrop and its legibility gradient. Every screen in the
-   mockup uses this pairing; the gradient stops differ per screen. */
-.photo-layer {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-}
-
-.photo-scrim {
-  position: absolute;
-  inset: 0;
-}
-
-/* The pulsing orb of mockup screen 03, used on the generating screen. */
-.orb-pulse {
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: rgb(28 56 41 / 0.2);
-  border: 1px solid rgb(28 56 41 / 0.4);
-  animation: pulse-ring 2.5s ease-out infinite;
-}
-
-.orb-pulse-2 {
-  width: 96px;
-  height: 96px;
-  background: rgb(28 56 41 / 0.25);
-  animation-delay: 0.8s;
-}
-
-@keyframes pulse-ring {
-  0% {
-    transform: scale(0.8);
-    opacity: 0.8;
-  }
-  70%,
-  100% {
-    transform: scale(1.15);
-    opacity: 0;
-  }
-}
-
-.wave-bar {
-  animation: wave 1.2s ease-in-out infinite;
-}
-
-@keyframes wave {
-  0%,
-  100% {
-    transform: scaleY(0.6);
-    opacity: 0.5;
-  }
-  50% {
-    transform: scaleY(1);
-    opacity: 1;
-  }
-}
-
-/* Respect the user's motion preference. The pulse and generating animations
-   are decorative; nothing depends on them to convey state. */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
 }

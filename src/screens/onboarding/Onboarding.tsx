@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PHOTO, Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/design/Screen';
 import { CrisisBanner } from '@/components/CrisisBanner';
 import { ProgressRow } from '@/components/onboarding/StepChrome';
 import { CrisisScreen } from '@/screens/CrisisScreen';

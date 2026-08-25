@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { PHOTO, Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/design/Screen';
 import { Paywall } from '@/components/Paywall';
 import { CrisisResourceList } from '@/components/CrisisResourceList';
 import { modalityBySlug } from '@/lib/catalog';
@@ -154,7 +154,7 @@ export function Chat() {
       <div className="flex min-h-dvh flex-col px-5 pt-[var(--top-inset)] pb-[var(--bottom-inset)] sm:min-h-0 sm:h-full">
         <div className="mb-3 flex shrink-0 items-baseline justify-between gap-3">
           <p className="eyebrow">Conversación</p>
-          <span className="glass-chip shrink-0 rounded-full px-3 py-1 text-[length:var(--fs-label-10)] tracking-wide text-crema/70 uppercase">
+          <span className="badge shrink-0 px-3 text-crema/70">
             {Number.isFinite(remaining) ? `${remaining} de ${FREE_QUESTIONS}` : 'Sin límite'}
           </span>
         </div>
@@ -180,10 +180,9 @@ export function Chat() {
                 <article
                   key={message.id}
                   className={[
-                    'rounded-[var(--radius-option)] px-3.5 py-3',
                     message.type === 'crisis'
-                      ? 'border border-alerta/30'
-                      : 'glass rounded-bl-sm',
+                      ? 'bubble-bare border border-alerta/30'
+                      : 'bubble rounded-bl-sm',
                   ].join(' ')}
                 >
                   <p className="eyebrow mb-1.5">{TYPE_LABEL[message.type ?? 'reflection']}</p>
@@ -195,7 +194,7 @@ export function Chat() {
                         <Link
                           key={slug}
                           to="/recomendaciones"
-                          className="glass-chip rounded-full px-3 py-1 text-[length:var(--fs-body-10_5)] text-crema/75 no-underline"
+                          className="pill text-[length:var(--fs-body-10_5)] text-crema/75 no-underline"
                         >
                           {modalityBySlug(slug)?.name_es ?? slug}
                         </Link>
@@ -271,14 +270,14 @@ export function Chat() {
                 }}
                 placeholder="Escribí lo que se te venga…"
                 aria-label="Tu mensaje"
-                className="glass max-h-28 min-h-[52px] flex-1 resize-none rounded-[var(--radius-option)] px-3.5 py-3 text-[length:var(--fs-body-12_5)] text-blanco placeholder:text-crema/55"
+                className="field max-h-28 min-h-[52px] flex-1 resize-none px-3.5 text-[length:var(--fs-body-12_5)] placeholder:text-crema/55"
               />
               <button
                 type="button"
                 onClick={() => void send()}
                 disabled={draft.trim() === '' || thinking}
                 aria-label="Enviar"
-                className="glass-chip flex size-11 shrink-0 items-center justify-center rounded-full text-crema disabled:opacity-40"
+                className="circle-chip flex size-11 shrink-0 items-center justify-center text-crema disabled:opacity-40"
               >
                 <span aria-hidden="true">→</span>
               </button>

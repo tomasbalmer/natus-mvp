@@ -1,4 +1,4 @@
-import { PHOTO, Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/design/Screen';
 import { CrisisResourceList } from '@/components/CrisisResourceList';
 
 /**

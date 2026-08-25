@@ -1,5 +1,13 @@
 @import 'tailwindcss';
-@import './tokens.css';
+
+/*
+ * The design layer. Everything visual lives behind these two files; what is
+ * left in here is wiring — the Tailwind import, the theme mapping and the
+ * base layer — and `src/architecture.test.ts` fails if a screen reaches past
+ * them and writes a raw surface of its own.
+ */
+@import '../design/tokens.css';
+@import '../design/primitives.css';
 
 /*
  * Map the mockup tokens onto Tailwind's theme so utilities read in the
@@ -59,39 +67,5 @@
     font: inherit;
     color: inherit;
     cursor: pointer;
-  }
-}
-
-@layer components {
-  /* Small uppercase label above a heading. Mockup calls it "eyebrow". */
-  .eyebrow {
-    font-family: var(--font-sans);
-    font-size: 10px;
-    font-weight: 400;
-    letter-spacing: var(--track-eyebrow);
-    text-transform: uppercase;
-    color: var(--text-eyebrow);
-  }
-
-  .cta {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-    height: var(--h-cta);
-    border-radius: var(--radius-cta);
-    background: var(--natus-verde);
-    border: 1px solid rgb(232 220 200 / 0.2);
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: var(--track-cta);
-    text-transform: uppercase;
-    color: var(--natus-crema);
-  }
-
-  .cta:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
   }
 }

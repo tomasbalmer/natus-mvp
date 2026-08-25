@@ -26,13 +26,12 @@ export function OptionItem({
       aria-checked={selected}
       onClick={onToggle}
       className={[
-        'flex w-full items-center gap-3 rounded-[var(--radius-option)] border px-4 text-left transition-colors',
+        'option flex w-full items-center gap-3 text-left transition-colors',
         hint ? 'min-h-[var(--h-option)] py-2.5' : 'h-[var(--h-option)]',
         selected
           ? 'border-tierra/50 bg-verde/60 text-crema'
-          : 'border-[var(--glass-border)] bg-[var(--glass-bg)] text-blanco/85',
+          : 'option-glass text-blanco/85',
       ].join(' ')}
-      style={{ backdropFilter: 'blur(var(--glass-blur-card))' }}
     >
       <span className="min-w-0 flex-1">
         <span className="block text-[length:var(--fs-body-13)] leading-snug">{label}</span>

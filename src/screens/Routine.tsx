@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { PHOTO, Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/design/Screen';
 import { currentMatch, isCheckedToday, toggleCheckIn, totalCheckIns } from '@/store/matches';
 
 /**
@@ -68,7 +68,7 @@ export function Routine() {
             const total = totalCheckIns(practice.title);
 
             return (
-              <article key={practice.title} className="glass rounded-[var(--radius-option)] px-4 py-4">
+              <article key={practice.title} className="surface surface-p16">
                 <div className="mb-2 flex items-baseline justify-between gap-3">
                   <h2 className="text-[length:var(--fs-heading-14)] leading-snug text-blanco">{practice.title}</h2>
                   <span className="shrink-0 text-[length:var(--fs-label-10)] tracking-wide text-crema/55 uppercase">
@@ -91,8 +91,8 @@ export function Routine() {
                     }}
                     aria-pressed={done}
                     className={[
-                      'flex-1 rounded-full px-3 py-2 text-[length:var(--fs-label-11)] tracking-wide uppercase transition-colors',
-                      done ? 'bg-verde text-crema' : 'glass-chip text-crema/70 hover:text-crema',
+                      'chip-p8 flex-1 transition-colors',
+                      done ? 'chip-bare bg-verde text-crema' : 'chip text-crema/70 hover:text-crema',
                     ].join(' ')}
                   >
                     {done ? 'Hecho hoy' : 'Marcar hoy'}

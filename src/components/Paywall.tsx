@@ -24,7 +24,7 @@ export function Paywall({
     <div
       role="dialog"
       aria-label="Se terminaron tus preguntas incluidas"
-      className="glass rounded-[var(--radius-option)] px-4 py-4"
+      className="surface surface-p16"
     >
       <p className="eyebrow mb-2">Hasta acá llega lo incluido</p>
       <h2 className="mb-2 text-[length:var(--fs-heading-17)] leading-snug text-blanco">
@@ -46,7 +46,7 @@ export function Paywall({
         <button
           type="button"
           onClick={onDismiss}
-          className="glass-chip rounded-full px-3 py-2.5 text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase"
+          className="chip chip-p10 text-crema/60"
         >
           Volver
         </button>

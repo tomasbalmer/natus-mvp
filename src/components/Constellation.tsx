@@ -49,14 +49,13 @@ export function Constellation({ modalities }: { modalities: Modality[] }) {
           <div key={modality.slug} className={`absolute ${position.className}`}>
             <div
               className={[
-                'flex items-center justify-center rounded-full border p-2 text-center leading-tight',
+                'node flex items-center justify-center border p-2 text-center leading-tight',
                 position.size,
                 position.text,
                 isCentre
                   ? 'border-crema/35 bg-verde/45 text-crema shadow-[0_0_40px_rgb(28_56_41/0.35)]'
-                  : 'border-crema/20 bg-[var(--glass-bg)] text-crema/70',
+                  : 'node-glass border-crema/20 text-crema/70',
               ].join(' ')}
-              style={{ backdropFilter: 'blur(16px)' }}
             >
               {modality.name_es}
             </div>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { PHOTO, Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/design/Screen';
 import { ComparisonGate } from './Gate';
 import {
   CONSENT_TTL_MS,
@@ -91,7 +91,7 @@ export function Consent() {
                 aria-checked={scope[key]}
                 disabled={consent?.status === 'granted'}
                 onClick={() => setScope((current) => ({ ...current, [key]: !current[key] }))}
-                className="glass flex items-start gap-3 rounded-[var(--radius-option)] px-4 py-3 text-left disabled:opacity-60"
+                className="surface surface-p12 flex items-start gap-3 text-left disabled:opacity-60"
               >
                 <span
                   aria-hidden="true"
@@ -158,7 +158,7 @@ export function Consent() {
                     respondToConsent(consent.id, 'denied');
                     setConsent(consentFor(id));
                   }}
-                  className="glass-chip rounded-full px-3 py-2.5 text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase"
+                  className="chip chip-p10 text-crema/60"
                 >
                   {profile.display_name} no acepta
                 </button>
@@ -203,7 +203,7 @@ export function Consent() {
                   <button
                     type="button"
                     onClick={() => setConsent(requestConsent({ externalProfileId: id, scope }))}
-                    className="glass-chip rounded-full px-3 py-2.5 text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase"
+                    className="chip chip-p10 text-crema/60"
                   >
                     Volver a pedir
                   </button>
@@ -214,7 +214,7 @@ export function Consent() {
 
           <Link
             to="/comparacion"
-            className="glass-chip mt-4 rounded-full px-3 py-2.5 text-center text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase no-underline"
+            className="chip chip-p10 mt-4 text-center text-crema/60 no-underline"
           >
             Volver
           </Link>

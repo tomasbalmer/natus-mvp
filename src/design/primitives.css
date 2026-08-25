@@ -1,0 +1,289 @@
+/*
+ * The named parts.
+ *
+ * Every surface in this product wears one of two blurs and lives in this file.
+ * Before it existed, ninety-nine elements carried a glass surface written as
+ * thirty-nine different strings of Tailwind utilities, and the one part that
+ * had a name — `.cta` — was the only one that had not drifted. That is the
+ * whole argument: the card was at three vertical paddings and the secondary
+ * button at four, and nobody decided either, because there was no name to
+ * compare a new one against.
+ *
+ * NAMED AT THEIR VALUES, NOT AT THEIR INTENT. `.surface-p14` rather than
+ * `.surface-base`, for the same reason `--fs-title-28` is not `--fs-title-lg`:
+ * the duplication has to be impossible to miss, and collapsing a family later
+ * has to be a deletion rather than a hunt. Four surface paddings ship because
+ * four were transcribed, not because four were designed.
+ *
+ * WHAT IS NOT HERE, ON PURPOSE. Text colour stays in the screens as
+ * `text-crema/60` and friends: `src/styles/contrast.test.ts` reads `.tsx` and
+ * fails on any alpha below 0.55, and folding the ramp in here would blind it.
+ * Layout — `flex`, `w-full`, `mb-3`, `size-14` — also stays in the screens.
+ * It belongs to whoever builds the screen, not to whoever designs it.
+ *
+ * These live in `@layer components` so a utility still wins. Two chips carry
+ * `px-3.5` and one carries `py-1.5`; those overrides are the drift made
+ * visible, and they must keep working until somebody decides they should not.
+ */
+
+@layer components {
+  /*
+   * BLUR. Three values ship. Two were tokens; the third was `blur(16px)`
+   * written inline on the constellation nodes and is a token now.
+   */
+  .surface,
+  .field,
+  .circle,
+  .bubble,
+  .option {
+    backdrop-filter: blur(var(--glass-blur-card));
+    -webkit-backdrop-filter: blur(var(--glass-blur-card));
+  }
+
+  .chip,
+  .badge,
+  .pill,
+  .circle-chip,
+  .nav-bar,
+  .banner {
+    backdrop-filter: blur(var(--glass-blur-chip));
+    -webkit-backdrop-filter: blur(var(--glass-blur-chip));
+  }
+
+  .node {
+    backdrop-filter: blur(var(--glass-blur-node));
+    -webkit-backdrop-filter: blur(var(--glass-blur-node));
+  }
+
+  /*
+   * FILL. Background and border, together, because they always travel
+   * together. Not every blurred part carries it: a selected toggle keeps its
+   * blur and takes a solid green instead, which is why the shapes below come
+   * in pairs — one that brings the fill, one that leaves room for another.
+   */
+  .surface,
+  .field,
+  .circle,
+  .bubble,
+  .chip,
+  .badge,
+  .pill,
+  .circle-chip,
+  .nav-bar,
+  .banner {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+  }
+
+  /* HOVER. Only the card blur ever lifted; the chip never had one. */
+  .surface:hover,
+  .field:hover,
+  .circle:hover,
+  .bubble:hover {
+    background: var(--glass-hover);
+  }
+
+  /* ── Surface — the card. FOUR VERTICAL PADDINGS FOR ONE PART. ────────── */
+  .surface {
+    border-radius: var(--radius-option);
+    padding-inline: 1rem;
+  }
+
+  .surface-p10 { padding-block: 0.625rem; } /* ×1 */
+  .surface-p12 { padding-block: 0.75rem; } /* ×7 */
+  .surface-p14 { padding-block: 0.875rem; } /* ×9 */
+  .surface-p16 { padding-block: 1rem; } /* ×4 */
+
+  /* ── Field — textarea and input. One shape, four type sizes above it. ── */
+  .field {
+    border-radius: var(--radius-option);
+    padding: 0.75rem 1rem;
+    color: var(--natus-blanco);
+  }
+
+  /* ── Chip — the secondary button. THREE PADDINGS, FOUR TEXT ALPHAS.
+     `-bare` is the same shape with no fill, for the four toggles whose
+     selected state is solid green. ─────────────────────────────────────── */
+  .chip,
+  .chip-bare {
+    border-radius: calc(infinity * 1px);
+    padding-inline: 0.75rem;
+    font-size: var(--fs-label-11);
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+  }
+
+  .chip-p6 { padding-block: 0.375rem; } /* ×2 */
+  .chip-p8 { padding-block: 0.5rem; } /* ×9 */
+  .chip-p10 { padding-block: 0.625rem; } /* ×15 */
+
+  /* ── Badge — the uppercase mark inside a card. ───────────────────────── */
+  .badge,
+  .badge-bare {
+    border-radius: calc(infinity * 1px);
+    padding: 0.25rem 0.625rem;
+    font-size: var(--fs-label-10);
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+  }
+
+  /* ── Pill — a badge that reads as prose: no versals, no tracking. ────── */
+  .pill {
+    border-radius: calc(infinity * 1px);
+    padding: 0.25rem 0.75rem;
+  }
+
+  /* ── Bubble — one turn of the chat. The crisis reply is bare on purpose:
+     it must not read as the product speaking calmly. ───────────────────── */
+  .bubble,
+  .bubble-bare {
+    border-radius: var(--radius-option);
+    padding: 0.75rem 0.875rem;
+  }
+
+  /* ── Option — the onboarding row. Blurred in both states; only the
+     unselected one is glass. ───────────────────────────────────────────── */
+  .option {
+    border-radius: var(--radius-option);
+    border: 1px solid transparent;
+    padding-inline: 1rem;
+  }
+
+  /* After `.option`, not before: same specificity, so the later rule is the
+     one that wins. Declared above it, the transparent border took the glass
+     one's place and the unselected row lost its edge. */
+  .option-glass {
+    background: var(--glass-bg);
+    border-color: var(--glass-border);
+  }
+
+  /* ── Circle — a round frame. The size is layout and stays in the screen. */
+  .circle,
+  .circle-chip {
+    border-radius: calc(infinity * 1px);
+  }
+
+  /* ── Node — a constellation node. Border and fill are set per state. ─── */
+  .node {
+    border-radius: calc(infinity * 1px);
+  }
+
+  .node-glass {
+    background: var(--glass-bg);
+  }
+
+  /* ── Chrome — one of each, and each the only one of its kind. ────────── */
+  .nav-bar {
+    border-radius: var(--radius-pill);
+    padding: 0.375rem;
+  }
+
+  .banner {
+    border-radius: var(--radius-option);
+  }
+
+  /* Small uppercase label above a heading. The mockup calls it "eyebrow". */
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-eyebrow);
+  }
+
+  .cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    height: var(--h-cta);
+    border-radius: var(--radius-cta);
+    background: var(--natus-verde);
+    border: 1px solid rgb(232 220 200 / 0.2);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: var(--track-cta);
+    text-transform: uppercase;
+    color: var(--natus-crema);
+  }
+
+  .cta:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+/* The photographic backdrop and its legibility gradient. Every screen in the
+   mockup uses this pairing; the gradient stops differ per screen. */
+.photo-layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.photo-scrim {
+  position: absolute;
+  inset: 0;
+}
+
+/* The pulsing orb of mockup screen 03, used on the generating screen. */
+.orb-pulse {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgb(28 56 41 / 0.2);
+  border: 1px solid rgb(28 56 41 / 0.4);
+  animation: pulse-ring 2.5s ease-out infinite;
+}
+
+.orb-pulse-2 {
+  width: 96px;
+  height: 96px;
+  background: rgb(28 56 41 / 0.25);
+  animation-delay: 0.8s;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  70%,
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+.wave-bar {
+  animation: wave 1.2s ease-in-out infinite;
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: scaleY(0.6);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+/* Respect the user's motion preference. The pulse and generating animations
+   are decorative; nothing depends on them to convey state. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

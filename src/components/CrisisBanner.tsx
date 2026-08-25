@@ -15,7 +15,7 @@ export function CrisisBanner({ country }: { country: string | undefined }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="glass-chip mx-2 rounded-[var(--radius-option)] px-3.5 py-2.5">
+    <div className="banner mx-2 px-3.5 py-2.5">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}

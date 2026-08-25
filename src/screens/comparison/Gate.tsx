@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { PHOTO, Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/design/Screen';
 import { CrisisScreen } from '@/screens/CrisisScreen';
 import { activeHighSeverityEvent } from '@/store/crisis';
 import { activeProfile } from '@/store/account';

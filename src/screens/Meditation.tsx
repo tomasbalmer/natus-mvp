@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { PHOTO, Screen } from '@/components/Screen';
+import { PHOTO, Screen } from '@/design/Screen';
 import { CrisisScreen } from '@/screens/CrisisScreen';
 import { BED_TRACKS } from '@/lib/catalog';
 import { detectCrisis, riskLevel } from '@/lib/safety';
@@ -131,7 +131,7 @@ export function Meditation() {
           value={intent}
           onChange={(e) => setIntent(e.target.value)}
           placeholder="Escribí lo que se te venga…"
-          className="glass w-full resize-none rounded-[var(--radius-option)] px-3.5 py-3 text-[length:var(--fs-body-13)] text-blanco placeholder:text-crema/55"
+          className="field w-full resize-none px-3.5 text-[length:var(--fs-body-13)] placeholder:text-crema/55"
         />
 
         <p className="mt-5 mb-2 text-[length:var(--fs-label-11)] tracking-wide text-crema/55 uppercase">Cuánto tiempo</p>
@@ -143,8 +143,8 @@ export function Meditation() {
               aria-pressed={minutes === length}
               onClick={() => setMinutes(length)}
               className={[
-                'flex-1 rounded-full px-3 py-2.5 text-[length:var(--fs-label-11)] tracking-wide uppercase transition-colors',
-                minutes === length ? 'bg-verde text-crema' : 'glass-chip text-crema/60',
+                'chip-p10 flex-1 transition-colors',
+                minutes === length ? 'chip-bare bg-verde text-crema' : 'chip text-crema/60',
               ].join(' ')}
             >
               {length} min
@@ -176,7 +176,7 @@ export function Meditation() {
           </button>
           <Link
             to="/biblioteca"
-            className="glass-chip rounded-full px-3 py-2.5 text-center text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase no-underline"
+            className="chip chip-p10 text-center text-crema/60 no-underline"
           >
             Mis prácticas guardadas
           </Link>
@@ -235,7 +235,7 @@ function Player({ meditation, onLeave }: { meditation: StoredMeditation; onLeave
           {meditation.estimated_minutes} min aproximados · pediste {meditation.requested_minutes}
         </p>
 
-        <div className="glass mb-4 rounded-[var(--radius-option)] px-4 py-4">
+        <div className="surface surface-p16 mb-4">
           <div
             role="progressbar"
             aria-valuenow={Math.round(progress * 100)}
@@ -291,7 +291,7 @@ function Player({ meditation, onLeave }: { meditation: StoredMeditation; onLeave
               stop();
               onLeave();
             }}
-            className="glass-chip rounded-full px-3 py-2.5 text-[length:var(--fs-label-11)] tracking-wide text-crema/60 uppercase"
+            className="chip chip-p10 text-crema/60"
           >
             Armar otra
           </button>

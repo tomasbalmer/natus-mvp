@@ -28,7 +28,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Secciones"
-      className="glass-chip pointer-events-auto flex items-stretch justify-between gap-1 rounded-[var(--radius-pill)] px-1.5 py-1.5"
+      className="nav-bar pointer-events-auto flex items-stretch justify-between gap-1"
     >
       {ITEMS.map((item) => (
         <NavLink
