@@ -29,6 +29,13 @@ carries the verification protocol this repository expects of visual work. Read
 it before touching `src/design`, `src/styles` or anything visual. Delete it
 when that step is done and fold what is still true into this file.
 
+`docs/HANDOVER.md` is the other live plan: moving the product to its owner's
+accounts and to `app.natus.world`. It says who does each step and in what
+order, and the order is load-bearing in two places — the domain after the
+repository transfer, and the `handover/custom-domain` branch merged only once
+the domain answers. Read it before touching deployment, DNS, secrets or auth
+URLs.
+
 ## Where the reasoning lives
 
 **This file is it.** The design record — two implementation plans, a decision
@@ -54,15 +61,6 @@ licensing; `docs/DESIGN-LAYER.md` the plan currently in flight.
 The product runs end to end in production: onboarding, natal chart by
 ephemeris, Soul Map, recommendations, chat, meditations and synastry, all with
 real generation, all walked on the deployed site.
-
-**Before the next deploy: five migrations are not in production yet.**
-`20260925120000` through `20260925160000` — the chat quota moved to the
-ledger, reference-data parity, the deployment spend summed in SQL, the
-claimed-session pointer made soft, and foreign-key indexes. CI deploys
-functions, never migrations, so run `supabase db push` **before** merging.
-The order matters: the chat function writes `claude_api_calls.charged`, and
-`logCall` never throws, so a function deployed ahead of its column logs
-nothing and the free questions become unlimited.
 
 **What is left is not code.** In rough order of weight:
 
@@ -191,9 +189,12 @@ pnpm dev            development server
 pnpm sync:shared    re-copy src/lib and src/ai/prompts into _shared
 ```
 
-Functions deploy on push, from the `functions` job that the site job waits on.
-`pnpm deploy:functions` pushes them without a commit, which is what to use
-while iterating on one.
+Migrations and functions deploy on push, in that order, from the `functions`
+job that the site job waits on. A migration that fails stops the functions
+and the site behind it — the order matters, because a function deployed ahead
+of a column it writes can fail silently. `pnpm deploy:functions` pushes
+functions without a commit, which is what to use while iterating on one; it
+does not apply migrations, so push those first with `supabase db push`.
 
 All three must pass before a commit. CI runs the same and deploys on push to
 `main`.
