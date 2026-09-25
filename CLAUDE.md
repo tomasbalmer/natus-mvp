@@ -84,6 +84,16 @@ real generation, all walked on the deployed site.
   It works. It is still duplication held together by tooling, and the fix is
   a pnpm workspace package — the shape `waterplan-frontend` already uses.
 - `crisis-keywords.json` is `"status": "preliminary"` and wants a clinician.
+  One thing for that review: a negated indirect term suppresses the next one
+  in its window, so "no doy más y nada tiene sentido" does not fire.
+- There is no privacy policy or terms page. Google's OAuth consent screen
+  requires one before the door can close, and the app stores birth data and
+  clinical answers. The text is the owner's.
+
+**A product call for the owner, found in the onboarding:** the clinical step
+had a free-text "¿Hay algo más…?" bound to nothing, and it was removed.
+Bringing it back means storing clinical free text, scanning it and keeping it
+out of every model payload.
 
 **A product call for the owner, found in the data layer:**
 
@@ -174,7 +184,7 @@ pnpm verify:chat && pnpm verify:models
 
 ```
 pnpm typecheck      tsc --noEmit
-pnpm test           vitest, 774 tests
+pnpm test           vitest, 784 tests
 pnpm test:db        pgTAP policies + the adapters and functions against a
                     real Postgres; needs `supabase start`
 pnpm build          production build
