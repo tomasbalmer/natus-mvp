@@ -5,13 +5,6 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import type { Plugin } from 'vite';
 
-/**
- * Link previews. WhatsApp, Slack and iMessage need an absolute image URL, and
- * the rest of index.html is deliberately relative so the site can move between
- * a subpath and a domain root. The absolute part comes from `VITE_SITE_URL`,
- * set beside `VITE_BASE` in the deploy workflow; without it (local builds) the
- * tags are simply not emitted.
- */
 function linkPreview(): Plugin {
   const site = process.env['VITE_SITE_URL']?.replace(/\/?$/, '/');
   const title = 'Natus';

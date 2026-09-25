@@ -347,7 +347,7 @@ describe.skipIf(!configured)('the clinical exclusion, server-side', () => {
     withoutClinicalExclusions: (slugs: string[], vulnerable: boolean) => { kept: string[]; excluded: string[] };
   };
   const clinical = (): Promise<Clinical> =>
-    import(/* @vite-ignore */ `${'../../supabase/functions/match'}/clinical.ts`) as Promise<Clinical>;
+    import(/* @vite-ignore */ `${'../../supabase/functions/_shared'}/clinical.ts`) as Promise<Clinical>;
 
   async function withAnswers(
     ideation: string | null,

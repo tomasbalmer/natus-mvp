@@ -189,9 +189,6 @@ check(
   `status=${crisisMeditation.status}`,
 );
 
-// A low-severity verdict — two indirect markers — is not refused. The screens
-// let the person continue with a banner, and a server that refused here failed
-// every generation for them with a generic error.
 const lowSeverity = await call('meditation', {
   ...BODIES.meditation,
   intent: 'estoy cansada de todo y no veo salida',

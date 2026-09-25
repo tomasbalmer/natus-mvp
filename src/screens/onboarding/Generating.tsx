@@ -151,13 +151,10 @@ function messageFor(error: unknown): string {
     case 'timeout':
       return 'Esto está tardando más de lo normal. Nada se perdió: podemos reintentar.';
     case 'api_error':
-      // It used to say "revisá tu clave", from when the viewer pasted one.
       return 'No pudimos completar la generación. Nada se perdió: podemos reintentar.';
     case 'spend_limit':
       return 'Por hoy llegamos al límite de generaciones. Nada se perdió: probá de nuevo más tarde.';
     case 'crisis':
-      // Reached only after "esto no aplica a mi caso": the server's check
-      // fails closed and does not generate over a high-severity signal.
       return 'Por lo que contaste, preferimos no armar tu mapa de forma automática. Si necesitás hablar con alguien, la ayuda sigue disponible desde el inicio.';
     case 'copy_violation':
       // Worth being specific: this one means the model broke a product rule

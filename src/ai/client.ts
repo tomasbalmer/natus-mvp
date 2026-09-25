@@ -51,12 +51,6 @@ export type AiResult<T> = {
   outputTokens: number | null;
 };
 
-/**
- * `quota`, `spend_limit` and `crisis` are refusals the server declares, and
- * each has a screen of its own — the paywall, an honest "not today", and
- * containment. Folding them into `api_error` put a generic failure where the
- * paywall and the hotlines belonged.
- */
 export type AiErrorKind =
   | 'invalid_json'
   | 'api_error'
@@ -70,18 +64,12 @@ export class AiError extends Error {
   constructor(
     message: string,
     readonly kind: AiErrorKind,
-    /** Set on `crisis`: the server's Layer 1 verdict. */
     readonly crisis?: { severity: CrisisSeverity; category: CrisisCategory },
   ) {
     super(message);
   }
 }
 
-/**
- * Past the longest generation seen, which is the Soul Map at about thirty
- * seconds. Without a ceiling a hung function held "Pensando…" until the
- * platform's own wall clock gave up, minutes later.
- */
 const EDGE_TIMEOUT_MS = 90_000;
 
 /**
@@ -137,8 +125,6 @@ async function runOnEdge<T>(call: AiCall<T>, started: number): Promise<AiResult<
   });
 
   if (error) {
-    // `FunctionsHttpError` carries the response; `FunctionsFetchError` carries
-    // what `fetch` threw, which is an `AbortError` when the timeout fired.
     const context = (error as { context?: unknown }).context;
     if (context instanceof Error && context.name === 'AbortError') {
       throw new AiError(`The ${edge.fn} function did not answer in time.`, 'timeout');
@@ -169,9 +155,6 @@ async function runOnEdge<T>(call: AiCall<T>, started: number): Promise<AiResult<
     throw new AiError(`The ${edge.fn} function refused: ${String(data.error)}.`, 'api_error');
   }
 
-  // The server runs the same Layer 1 the caller already ran. If it fires here
-  // the two disagreed about the same text — a tab older than the keyword
-  // list, say — and the screen owes the person containment, not an error.
   if (data && typeof data === 'object' && data['type'] === 'crisis') {
     throw new AiError(`The ${edge.fn} function saw a crisis the caller did not.`, 'crisis', {
       severity: data['severity'] === 'low' ? 'low' : 'high',
@@ -201,7 +184,6 @@ const CATEGORIES = new Set<CrisisCategory>([
   'indirecto',
 ]);
 
-/** The `error` field of a refusal's JSON body, or null if there is none. */
 async function errorCode(context: unknown): Promise<string | null> {
   if (!(context instanceof Response)) return null;
   try {

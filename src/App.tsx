@@ -84,15 +84,10 @@ export function App() {
   //
   // It resolves either way: a paused project or a missing configuration lands
   // on localStorage rather than on an error.
-  // Below `sm` the document itself scrolls, and the router keeps its offset:
-  // leaving a scrolled screen through the navigation landed mid-page on the
-  // next one.
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
 
-  // Every tab and every history entry read "Natus — Demo", and a screen
-  // reader announced nothing on navigation.
   useEffect(() => {
     document.title = titleFor(pathname);
   }, [pathname]);

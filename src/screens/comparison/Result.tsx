@@ -98,9 +98,6 @@ export function Result() {
   }, [profile, mine, synthesis, consent, id]);
 
   useEffect(() => {
-    // Automatic only until the first failure. `generating` returning to false
-    // after an error would otherwise fire this again, clear the error and call
-    // the function in a loop; after a failure only the button retries.
     if (active && !readableComparison(id) && !generating && error === null) void generate();
     // `version` is in the list so a regeneration re-evaluates what is stored.
   }, [active, id, generate, generating, error, version]);

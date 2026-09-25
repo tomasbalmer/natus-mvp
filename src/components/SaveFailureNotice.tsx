@@ -23,9 +23,6 @@ export function SaveFailureNotice({ offline = false }: { offline?: boolean }) {
     setWriteFailureHandler(setFailure);
   }, []);
 
-  // A session whose loads failed runs on this browser alone: no persister is
-  // set, so nothing written in this visit reaches the account, and the next
-  // load that succeeds replaces it. Same fact as a dropped write, said once.
   if (offline && !offlineSeen) {
     return (
       <div

@@ -1,10 +1,6 @@
 import { Link } from 'react-router-dom';
 import { PHOTO, Screen } from '@/design/Screen';
 
-/**
- * An unknown address used to render the Landing, so a mistyped or stale link
- * silently became the welcome screen. Saying so is the honest version.
- */
 export function NotFound() {
   return (
     <Screen backdrop="forest" scrim="heavy" opacity={PHOTO.content45}>

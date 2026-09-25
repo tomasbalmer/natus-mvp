@@ -50,8 +50,6 @@ export function Account() {
     link.href = url;
     link.download = name;
     link.click();
-    // Deferred: revoking in the same tick can cancel the download on iOS
-    // Safari, which starts it asynchronously.
     setTimeout(() => URL.revokeObjectURL(url), 1_000);
 
     setExported(name);
@@ -90,12 +88,6 @@ export function Account() {
     setBusy(true);
     const onServer = hasRemoteIdentity();
     await signOut().catch(() => {});
-    // Signing out is not deleting, but the browser copy has to go when the
-    // server holds the real one. Every write is mirrored into localStorage,
-    // and after the reload a visitor with no session reads from there — so
-    // the reload alone left the profile, the clinical answers and the chat on
-    // a shared phone for whoever opened it next. Without a server there is no
-    // other copy, and the data stays.
     if (onServer) {
       await clearStoredBlobs().catch(() => {});
       clearAll();

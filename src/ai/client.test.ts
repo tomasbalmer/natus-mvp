@@ -1,14 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 
-/**
- * What the server path makes of each answer a function can give.
- *
- * `functions.invoke` hands a non-2xx back as an error whose `context` is the
- * Response, so a refusal's body is never read unless something reads it. For a
- * while nothing did: the paywall and the spend limit reached the chat as
- * "No pudimos responder", and a crisis the server saw reached it as the same.
- */
 
 type Invoke = (fn: string, options: unknown) => Promise<{ data: unknown; error: unknown }>;
 

@@ -156,8 +156,6 @@ describe('hydrate', () => {
     await vi.runAllTimersAsync();
 
     expect(await result).toEqual({ kind: 'local', reason: 'failed' });
-    // The loads failed, the session did not: the delete must still reach the
-    // server, or it reports success over rows the next load brings back.
     expect(hasRemoteIdentity()).toBe(true);
   });
 });

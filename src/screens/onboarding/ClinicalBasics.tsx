@@ -142,13 +142,6 @@ export function ClinicalBasics({
           />
         </Question>
 
-        {/*
-          There was a free-text "¿Hay algo más…?" here, bound to nothing: what
-          people typed was dropped on the next step. Keeping it means storing
-          clinical free text, scanning it with Layer 1 and keeping it out of
-          every model payload — a product decision, not a wiring fix — so the
-          field is gone until that decision is made.
-        */}
       </div>
     </StepBody>
   );
