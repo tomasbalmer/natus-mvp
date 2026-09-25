@@ -2,33 +2,33 @@
 
 A live plan, not a record. The product belongs to the person who registered
 `natus.world`; this repository, the Supabase project and the paid keys are
-currently in Tomas's accounts and move to his. Delete this file when phase 8
+currently in Tomas's accounts and move to theirs. Delete this file when phase 8
 is done, and fold whatever is still true into `CLAUDE.md`.
 
 ## The shape at the end
 
 ```
-natus.world        his Lovable landing, unchanged, with an "Entrar" button
-app.natus.world    this PWA, on GitHub Pages under his organisation
-Supabase           this project, transferred to his organisation, same URL
+natus.world        their Lovable landing, unchanged, with an "Entrar" button
+app.natus.world    this PWA, on GitHub Pages under their organisation
+Supabase           this project, transferred to their organisation, same URL
 ```
 
-The landing is a separate Lovable site with a waitlist form writing to his
+The landing is a separate Lovable site with a waitlist form writing to their
 own Supabase project (`pwenxnhohjjrynacxshx`). Nothing here touches it; the
-waitlist is his list of first users to invite.
+waitlist is their list of first users to invite.
 
 `natus.world` is registered at GoDaddy (2026-03-02, expires 2027-03-02) and
 its DNS is GoDaddy's. It carries MX and SPF records for mail — do not touch
 them, or the root and `www` records that serve the landing.
 
-## Costs he takes on
+## Costs the owner takes on
 
 | What | Cost |
 |---|---|
 | GitHub Pages, custom domain, HTTPS | Free while the repository is public |
 | Supabase | Free tier. It pauses after inactivity; Pro is USD 25/month |
 | Anthropic | Usage. `MONTHLY_BUDGET_USD` caps it, default 50 |
-| RapidAPI (Astrologer) | His own subscription |
+| RapidAPI (Astrologer) | The owner's own subscription |
 | DNS records at GoDaddy | Free |
 
 ## Phases
@@ -37,9 +37,9 @@ Legend: **T** Tomas (with Claude), **O** the owner, **T+O** together.
 
 ### 0. Decisions — O, T+O
 - [ ] Confirm the subdomain: `app.natus.world`.
-- [ ] Name of his GitHub organisation.
+- [ ] Name of their GitHub organisation.
 - [ ] Whether Tomas stays on as a collaborator after the handover.
-- [ ] He has read what he takes on: the costs above, and phase 9.
+- [ ] The owner has read what they take on: the costs above, and phase 9.
 - [x] A revoked consent hides the reading rather than deleting it (2026-09-25).
 - [x] A simulated subscription buys six chat turns a month on top of the free
       three, for now (2026-09-25). See `SUBSCRIBED_QUESTIONS`.
@@ -58,11 +58,11 @@ Legend: **T** Tomas (with Claude), **O** the owner, **T+O** together.
 - [x] Branch `handover/custom-domain`: `VITE_BASE: /` and the docs that name
       the old URL, pushed to GitHub. **Not merged** until phase 5 — merged early it breaks the
       site at `tomasbalmer.github.io/natus-mvp/`.
-- [x] A page in Spanish for the owner: what he receives, what to create,
-      what it costs, what he does at each step. Published privately as a
-      claude.ai artifact from Tomas's account; he shares it when ready.
+- [x] A page in Spanish for the owner: what they receive, what to create,
+      what it costs, what they do at each step. Published privately as a
+      claude.ai artifact from Tomas's account; Tomas shares it when ready.
 
-### 3. His accounts — O
+### 3. The owner's accounts — O
 - [ ] GitHub organisation. Invites Tomas as an owner.
 - [ ] Supabase organisation. Invites Tomas as **Owner** — required to
       transfer a project into it.
@@ -71,13 +71,13 @@ Legend: **T** Tomas (with Claude), **O** the owner, **T+O** together.
 - [ ] Google Cloud: an empty project, for phase 6.
 
 ### 4. Transfer — T+O
-- [ ] Supabase: transfer project `khwrauqgwopkgyvbonmp` to his organisation.
+- [ ] Supabase: transfer project `khwrauqgwopkgyvbonmp` to their organisation.
       URL and keys do not change, so nothing in the code does.
-- [ ] Replace the secrets with his: `supabase secrets set ANTHROPIC_API_KEY=…`
+- [ ] Replace the secrets with the owner's: `supabase secrets set ANTHROPIC_API_KEY=…`
       and `RAPIDAPI_KEY=…`.
-- [ ] GitHub: transfer the repository to his organisation.
+- [ ] GitHub: transfer the repository to their organisation.
 - [ ] Check the repository's secrets and variables survived; set a new
-      `SUPABASE_ACCESS_TOKEN` from an account in his organisation.
+      `SUPABASE_ACCESS_TOKEN` from an account in their organisation.
 - [ ] Push a commit and watch all three jobs go green.
 
 ### 5. Domain — T+O
@@ -87,8 +87,8 @@ account that owns the repository.
 
       | Type  | Name                                   | Value                   |
       |-------|----------------------------------------|-------------------------|
-      | CNAME | `app`                                  | `<his-org>.github.io`   |
-      | TXT   | `_github-pages-challenge-<his-org>`    | from GitHub, at verify  |
+      | CNAME | `app`                                  | `<owner-org>.github.io`   |
+      | TXT   | `_github-pages-challenge-<owner-org>`    | from GitHub, at verify  |
 
 - [ ] Repository → Settings → Pages → custom domain `app.natus.world`; wait
       for the certificate; Enforce HTTPS.
@@ -105,9 +105,9 @@ Anybody who installed the PWA or signed in at the old URL starts again at the
 new one: the origin changed, and local storage does not follow it.
 
 ### 6. Sign-in — T+O
-- [ ] OAuth client in **his** Google Cloud project, with
+- [ ] OAuth client in **the owner's** Google Cloud project, with
       `https://app.natus.world` as an authorised origin. The consent screen
-      shows his brand, which is why it is his project.
+      shows their brand, which is why it is their project.
 - [ ] Decide `REQUIRE_INVITE`. Today the door is open.
 
 ### 7. Landing — O
