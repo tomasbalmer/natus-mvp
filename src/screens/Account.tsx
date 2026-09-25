@@ -50,7 +50,9 @@ export function Account() {
     link.href = url;
     link.download = name;
     link.click();
-    URL.revokeObjectURL(url);
+    // Deferred: revoking in the same tick can cancel the download on iOS
+    // Safari, which starts it asynchronously.
+    setTimeout(() => URL.revokeObjectURL(url), 1_000);
 
     setExported(name);
   };
@@ -86,10 +88,18 @@ export function Account() {
 
   const leave = async () => {
     setBusy(true);
+    const onServer = hasRemoteIdentity();
     await signOut().catch(() => {});
-    // Not `clearAll`: signing out is not deleting. What it must not leave is
-    // one person's data on screen for whoever opens the app next, and the
-    // mirror is what would do that, so the reload is the point.
+    // Signing out is not deleting, but the browser copy has to go when the
+    // server holds the real one. Every write is mirrored into localStorage,
+    // and after the reload a visitor with no session reads from there — so
+    // the reload alone left the profile, the clinical answers and the chat on
+    // a shared phone for whoever opened it next. Without a server there is no
+    // other copy, and the data stays.
+    if (onServer) {
+      await clearStoredBlobs().catch(() => {});
+      clearAll();
+    }
     window.location.assign(import.meta.env.BASE_URL);
   };
 

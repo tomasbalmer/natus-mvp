@@ -132,6 +132,12 @@ export async function hydrate(): Promise<HydrationResult> {
     // leaving the rest on localStorage would produce a session that is
     // half one person's data and half another's — the worst outcome
     // available here, and worse than simply being offline.
+    //
+    // The identity is kept all the same. The loads failed, the session did
+    // not, and `delete-account` needs nothing but the session: without it,
+    // "borrar todo" in this visit emptied the browser, reported success and
+    // left every row for the next load to bring back.
+    identity = { client, userId };
     markHydrationFailed();
     return { kind: 'local', reason: 'failed' };
   }

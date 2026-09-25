@@ -15,12 +15,37 @@ import { setWriteFailureHandler, type WriteFailure } from '@/store/hydrate.ts';
  * by hand would duplicate work the store does anyway. What is missing is not a
  * mechanism, it is the person knowing.
  */
-export function SaveFailureNotice() {
+export function SaveFailureNotice({ offline = false }: { offline?: boolean }) {
   const [failure, setFailure] = useState<WriteFailure | null>(null);
+  const [offlineSeen, setOfflineSeen] = useState(false);
 
   useEffect(() => {
     setWriteFailureHandler(setFailure);
   }, []);
+
+  // A session whose loads failed runs on this browser alone: no persister is
+  // set, so nothing written in this visit reaches the account, and the next
+  // load that succeeds replaces it. Same fact as a dropped write, said once.
+  if (offline && !offlineSeen) {
+    return (
+      <div
+        role="alert"
+        className="surface surface-p10 px-3.5 text-[length:var(--fs-body-11_5)] leading-relaxed text-crema"
+      >
+        <p>
+          No pudimos conectar con tu cuenta. Lo que hagas ahora queda solo en este navegador y no se
+          guarda.
+        </p>
+        <button
+          type="button"
+          className="mt-1.5 text-[length:var(--fs-label-10_5)] tracking-wide text-crema/60 uppercase underline"
+          onClick={() => setOfflineSeen(true)}
+        >
+          Entendido
+        </button>
+      </div>
+    );
+  }
 
   if (!failure) return null;
 
