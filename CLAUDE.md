@@ -103,7 +103,8 @@ nothing and the free questions become unlimited.
   number but the one that fits: `budget.test.ts` holds one person's worst
   month under a third of `MONTHLY_BUDGET_USD`, and the other purposes already
   use most of it. Offering more is raising the budget or lowering another
-  ceiling; the test fails until the sum is true.
+  ceiling; the test fails until the sum is true. Accepted for now by the
+  product owner on 2026-09-25, to be revisited.
 
 **Two open questions with the data now being collected for them:** whether the
 prompt cache is worth its 25% write surcharge on the once-per-account surfaces
