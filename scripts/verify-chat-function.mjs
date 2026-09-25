@@ -19,11 +19,17 @@
  *   supabase functions serve --env-file supabase/.env.local
  */
 import { createClient } from '@supabase/supabase-js';
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 
 const API = 'http://127.0.0.1:54321';
 const env = readFileSync('.env.local', 'utf8');
 const ANON = env.match(/VITE_SUPABASE_ANON_KEY=(.+)/)[1].trim();
+// Only to write the ledger the way the function does. Read from the running
+// stack, never from a file.
+const SERVICE = JSON.parse(
+  execFileSync('supabase', ['status', '-o', 'json'], { encoding: 'utf8' }),
+).SERVICE_ROLE_KEY;
 
 const results = [];
 const check = (name, pass, detail = '') => {
@@ -173,33 +179,30 @@ check('and costs nothing', crisisBody.counted === false, `counted=${crisisBody.c
 
 // ── the quota is counted where the person cannot reach it ───────────────────
 //
-// Written directly as the person, through the anon key and RLS — which is
-// exactly what somebody trying to inflate their own allowance would do. The
-// function counts with the service role, so these are visible to it.
+// Spent the way the function spends it: charged rows in the ledger, written
+// with the service role. It used to be spent here by inserting messages as
+// the person, which proved the count saw them — and, unnoticed, that the
+// person could delete them again and have the questions back.
+const elevated = createClient(API, SERVICE, { auth: { persistSession: false } });
 const spend = async (n) => {
-  const { data: synthesis } = await client
-    .from('soul_map_syntheses')
-    .insert({ user_id: userId, prompt_version: 'v1', synthesis: {}, mode: 'fixture' })
-    .select()
-    .single();
-  const { data: conversation } = await client
-    .from('conversations')
-    .insert({ user_id: userId, synthesis_id: synthesis.id })
-    .select()
-    .single();
-  await client.from('messages').insert(
+  await elevated.from('claude_api_calls').insert(
     Array.from({ length: n }, () => ({
       user_id: userId,
-      conversation_id: conversation.id,
-      role: 'assistant',
-      type: 'reflection',
-      text: 'x',
-      counted: true,
+      purpose: 'chat',
+      prompt_version: 'verify',
+      model: 'verify',
+      mode: 'server',
+      outcome: 'ok',
+      charged: true,
     })),
   );
 };
 
 await spend(3);
+
+// Everything the person can reach, tried before asking again.
+await client.from('messages').delete().eq('user_id', userId);
+await client.from('claude_api_calls').delete().eq('user_id', userId);
 
 const exhausted = await call({ message: 'otra pregunta mas' }, authed);
 const exhaustedBody = await exhausted.json();
@@ -230,7 +233,8 @@ check(
 const { data: logged } = await client
   .from('claude_api_calls')
   .select('outcome')
-  .eq('user_id', userId);
+  .eq('user_id', userId)
+  .neq('prompt_version', 'verify');
 const outcomes = (logged ?? []).map((r) => r.outcome).sort();
 check(
   'every refusal is recorded',

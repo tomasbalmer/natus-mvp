@@ -9,10 +9,11 @@ import { quotaState, type QuotaState } from './lib/quota.ts';
  * that objection and explicitly does not supersede this one — this file is the
  * answer to it, and the chat does not open to users until it exists.
  *
- * Counted with the elevated client on purpose. Under RLS the person can read
- * their own messages, which means they can also write them, which means a
- * quota derived from a client-side count is a suggestion. Here the count is a
- * `select` the caller has no hand in.
+ * Counted from `claude_api_calls`, which only the functions write. It used to
+ * count `messages where counted` — rows the browser writes and may delete, so
+ * deleting your own messages gave the free questions back. Running that
+ * select with the service role made it look protected; it was not. The chat
+ * function marks a call `charged` where the model answered, and nowhere else.
  */
 
 export async function currentQuota(
@@ -21,10 +22,11 @@ export async function currentQuota(
 ): Promise<QuotaState> {
   const [{ count }, { data: subscription }] = await Promise.all([
     elevated
-      .from('messages')
+      .from('claude_api_calls')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', userId)
-      .eq('counted', true),
+      .eq('purpose', 'chat')
+      .eq('charged', true),
     elevated.from('subscriptions').select('status').eq('user_id', userId).maybeSingle(),
   ]);
 

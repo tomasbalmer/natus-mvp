@@ -124,6 +124,28 @@ describe('asking again', () => {
     expect(listConsents()).toHaveLength(1);
     expect(consentFor(profile.id)?.status).toBe('pending');
   });
+
+  it('drops the reading made under the answer it replaces', () => {
+    const { profile, consent } = setup();
+    respondToConsent(consent.id, 'granted', T0);
+    saveComparison({
+      externalProfileId: profile.id,
+      consentId: consent.id,
+      result: RESULT,
+      promptVersion: 'test',
+      mode: 'fixture',
+      now: T0,
+    });
+    revokeConsent(consent.id, T0 + 50);
+
+    const again = requestConsent({ externalProfileId: profile.id, scope: SCOPE }, T0 + 100);
+    respondToConsent(again.id, 'granted', T0 + 200);
+
+    // Postgres cascaded the old reading away with its consent; the store must
+    // not show it under the new one.
+    expect(listComparisons()).toEqual([]);
+    expect(readableComparison(profile.id, T0 + 300)).toBeUndefined();
+  });
 });
 
 describe('the owner can delete the other person', () => {

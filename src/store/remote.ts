@@ -606,8 +606,26 @@ const consents: Adapter<ComparisonConsent[]> = {
       expires_at: ms(r.expires_at),
     }));
   },
-  save: (client, userId, value) =>
-    replaceRows(
+  /**
+   * `one_live_consent_per_profile` allows one row per profile, and asking
+   * again hands this a new id for a profile that already has one. The generic
+   * upsert-then-prune would hold both for a moment and violate the index, so
+   * the replaced request goes first. Its readings go with it, by cascade —
+   * which `requestConsent` mirrors in the store.
+   */
+  async save(client, userId, value) {
+    const profiles = value.map((c) => c.external_profile_id);
+    if (profiles.length > 0) {
+      const { error } = await client
+        .from('comparison_consents')
+        .delete()
+        .eq('user_id', userId)
+        .in('external_profile_id', profiles)
+        .not('id', 'in', `(${value.map((c) => c.id).join(',')})`);
+      if (error) throw new Error(`comparison_consents (replace): ${error.message}`);
+    }
+
+    await replaceRows(
       client,
       'comparison_consents',
       userId,
@@ -621,7 +639,8 @@ const consents: Adapter<ComparisonConsent[]> = {
         responded_at: c.responded_at === null ? null : iso(c.responded_at),
         expires_at: iso(c.expires_at),
       })),
-    ),
+    );
+  },
 };
 
 const comparisons: Adapter<StoredComparison[]> = {
@@ -640,12 +659,33 @@ const comparisons: Adapter<StoredComparison[]> = {
       created_at: ms(r.created_at),
     }));
   },
-  save: (client, userId, value) =>
-    replaceRows(
-      client,
-      'chart_comparisons',
-      userId,
-      value.map((c) => ({
+  /**
+   * Write-once rows behind a gate that moves with the clock.
+   *
+   * `replaceRows` would upsert every row in the list, and that fails here two
+   * ways. An existing row takes the upsert's UPDATE path, which has no policy —
+   * deliberately, a reading is never edited. And a row whose consent has since
+   * been revoked or has expired fails the INSERT check it passed when it was
+   * made, so one lapsed consent would block every comparison after it.
+   *
+   * So: insert only rows whose consent is live now, skip the ones already
+   * there, and prune what the list no longer holds. A row under a lapsed
+   * consent is invisible to its owner by policy and cannot be pruned from
+   * here; it goes when its profile does, by cascade, or with the account.
+   */
+  async save(client, userId, value) {
+    const { data: live, error: liveErr } = await client
+      .from('comparison_consents')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('status', 'granted')
+      .gt('expires_at', new Date().toISOString());
+    if (liveErr) throw new Error(`chart_comparisons (consents): ${liveErr.message}`);
+    const liveIds = new Set((live ?? []).map((c) => c.id));
+
+    const rows = value
+      .filter((c) => liveIds.has(c.consent_id))
+      .map((c) => ({
         id: c.id,
         user_id: userId,
         external_profile_id: c.external_profile_id,
@@ -654,8 +694,19 @@ const comparisons: Adapter<StoredComparison[]> = {
         result: c.result,
         mode: c.mode,
         created_at: iso(c.created_at),
-      })),
-    ),
+      }));
+    if (rows.length > 0) {
+      const { error } = await client
+        .from('chart_comparisons')
+        .upsert(rows, { onConflict: 'id', ignoreDuplicates: true });
+      if (error) throw new Error(`chart_comparisons: ${error.message}`);
+    }
+
+    let prune = client.from('chart_comparisons').delete().eq('user_id', userId);
+    if (value.length > 0) prune = prune.not('id', 'in', `(${value.map((c) => c.id).join(',')})`);
+    const { error } = await prune;
+    if (error) throw new Error(`chart_comparisons (prune): ${error.message}`);
+  },
 };
 
 const crisisEvents: Adapter<CrisisEvent[]> = {

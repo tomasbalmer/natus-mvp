@@ -114,10 +114,22 @@ export function requestConsent(
   };
   // One live request per person: asking again replaces the old one rather than
   // leaving two answers to choose between.
+  const replaced = new Set(
+    listConsents()
+      .filter((c) => c.external_profile_id === input.externalProfileId)
+      .map((c) => c.id),
+  );
   write('comparison_consents', [
-    ...listConsents().filter((c) => c.external_profile_id !== input.externalProfileId),
+    ...listConsents().filter((c) => !replaced.has(c.id)),
     consent,
   ]);
+  // A reading belongs to the consent it was made under. Postgres removes it
+  // with that consent, by cascade; the store does the same, so a reading from
+  // the old answer cannot surface under the new one.
+  write(
+    'chart_comparisons',
+    listComparisons().filter((c) => !replaced.has(c.consent_id)),
+  );
   return consent;
 }
 

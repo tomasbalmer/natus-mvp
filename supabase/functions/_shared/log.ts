@@ -39,6 +39,8 @@ export type CallRecord = {
   cacheReadTokens?: number | null;
   latencyMs: number;
   errorKind?: string | null;
+  /** Whether a chat turn spent a free question. The quota counts these. */
+  charged?: boolean;
 };
 
 export async function logCall(elevated: SupabaseClient, record: CallRecord): Promise<void> {
@@ -56,6 +58,7 @@ export async function logCall(elevated: SupabaseClient, record: CallRecord): Pro
       cache_read_tokens: record.cacheReadTokens ?? null,
       latency_ms: Math.round(record.latencyMs),
       error_kind: record.errorKind ?? null,
+      charged: record.charged ?? false,
     });
   } catch {
     // See above. Deliberately silent.

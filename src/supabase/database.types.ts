@@ -191,6 +191,7 @@ export type Database = {
         Row: {
           cache_read_tokens: number | null
           cache_write_tokens: number | null
+          charged: boolean
           created_at: string
           error_kind: string | null
           id: string
@@ -207,6 +208,7 @@ export type Database = {
         Insert: {
           cache_read_tokens?: number | null
           cache_write_tokens?: number | null
+          charged?: boolean
           created_at?: string
           error_kind?: string | null
           id?: string
@@ -223,6 +225,7 @@ export type Database = {
         Update: {
           cache_read_tokens?: number | null
           cache_write_tokens?: number | null
+          charged?: boolean
           created_at?: string
           error_kind?: string | null
           id?: string

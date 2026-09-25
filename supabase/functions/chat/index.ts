@@ -3,6 +3,7 @@ import { authenticate, Unauthorized } from '../_shared/auth.ts';
 import { currentQuota } from '../_shared/quota.ts';
 import { overDeploymentBudget } from '../_shared/spend.ts';
 import { MAX_OUTPUT_TOKENS } from '../_shared/lib/budget.ts';
+import { isChargeable } from '../_shared/lib/quota.ts';
 import { logCall } from '../_shared/log.ts';
 import { scanText } from '../_shared/lib/safety.ts';
 import { resourcesForCountry } from '../_shared/lib/crisis-resources.ts';
@@ -170,6 +171,10 @@ Deno.serve(async (request) => {
       maxTokens: MAX_OUTPUT_TOKENS.chat,
     });
 
+    // The model can classify a turn as crisis too, and that turn is free for
+    // the same reason the deterministic one is.
+    const charged = isChargeable(generated.value.type);
+
     await logCall(elevated, {
       userId,
       purpose: 'chat',
@@ -182,13 +187,14 @@ Deno.serve(async (request) => {
       cacheWriteTokens: generated.cacheWriteTokens,
       cacheReadTokens: generated.cacheReadTokens,
       latencyMs: Date.now() - started,
+      charged,
     });
 
     return json(request, {
       result: generated.value,
       input_tokens: generated.inputTokens,
       output_tokens: generated.outputTokens,
-      remaining: quota.remaining - 1,
+      remaining: quota.remaining - (charged ? 1 : 0),
       unlimited: quota.unlimited,
     });
   } catch (error) {

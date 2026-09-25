@@ -45,24 +45,28 @@ export function hasRemoteIdentity(): boolean {
 }
 
 /**
- * Delete this person's rows, everywhere.
+ * Delete this person's account, and with it every row they own.
  *
- * In reverse namespace order, because the schema cascades parent to child and
- * the list is written parent first: `messages` before `conversations`,
- * `chart_comparisons` before the consents and profiles it points at. Cascade
- * would cover most of it, but relying on that means the delete is correct by
- * accident of schema rather than by what this function does.
+ * One call to `delete-account`, which removes the auth user. Every owned table
+ * cascades from `auth.users`, so Postgres removes the rest in the same
+ * transaction. This used to be fourteen adapter saves with `null`, and all but
+ * two adapters read `null` as a value rather than as "delete": the second one
+ * threw, and the account and every row survived. `remote.integration.test.ts`
+ * is what found it; recorded adapters never could.
  *
- * Sequential, and it throws on the first failure. Fourteen parallel deletes
- * that half succeed leave an account nobody can describe, and the caller has
- * to be able to tell somebody the truth about what is gone.
+ * Throws when the function does not confirm, and keeps the identity so the
+ * button can be pressed again. The caller touches nothing local until this
+ * resolves.
  */
 export async function purgeRemote(): Promise<void> {
   if (!identity) return;
-  const { client, userId } = identity;
 
-  for (const ns of [...REMOTE_NAMESPACES].reverse()) {
-    await ADAPTERS[ns].save(client, userId, null);
+  const { data, error } = await identity.client.functions.invoke<{ deleted?: boolean }>(
+    'delete-account',
+    { method: 'POST' },
+  );
+  if (error || data?.deleted !== true) {
+    throw new Error(`delete-account: ${error?.message ?? 'not confirmed'}`);
   }
 
   identity = null;

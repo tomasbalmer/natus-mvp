@@ -162,7 +162,9 @@ pnpm verify:chat && pnpm verify:models
 
 ```
 pnpm typecheck      tsc --noEmit
-pnpm test           vitest, 767 tests
+pnpm test           vitest, 772 tests
+pnpm test:db        pgTAP policies + the adapters and functions against a
+                    real Postgres; needs `supabase start`
 pnpm build          production build
 pnpm dev            development server
 pnpm sync:shared    re-copy src/lib and src/ai/prompts into _shared
@@ -174,6 +176,11 @@ while iterating on one.
 
 All three must pass before a commit. CI runs the same and deploys on push to
 `main`.
+
+Run `pnpm test:db` after touching `src/store/remote.ts`, a migration or a
+function. The store's adapters passed every unit test while three of them
+failed against Postgres — a policy or a constraint is only tested by the
+database that enforces it.
 
 Verify UI work in a browser, not by reasoning about it. Every defect found
 during the build — a stopped wizard, an overlapping constellation, a stale
