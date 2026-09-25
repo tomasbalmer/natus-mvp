@@ -98,9 +98,12 @@ export function Result() {
   }, [profile, mine, synthesis, consent, id]);
 
   useEffect(() => {
-    if (active && !readableComparison(id) && !generating) void generate();
+    // Automatic only until the first failure. `generating` returning to false
+    // after an error would otherwise fire this again, clear the error and call
+    // the function in a loop; after a failure only the button retries.
+    if (active && !readableComparison(id) && !generating && error === null) void generate();
     // `version` is in the list so a regeneration re-evaluates what is stored.
-  }, [active, id, generate, generating, version]);
+  }, [active, id, generate, generating, error, version]);
 
   if (!profile) {
     return <Missing message="Esa persona ya no está cargada." />;
