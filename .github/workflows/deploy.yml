@@ -119,9 +119,11 @@ jobs:
 
       - name: Build
         # VITE_BASE is set here rather than committed, so attaching a custom
-        # domain later means changing this one line (or deleting it).
+        # domain means changing this one line. At app.natus.world the site
+        # is served from the root; the `/natus-mvp/` it had on github.io is
+        # gone, and GitHub redirects the old URL to the domain.
         env:
-          VITE_BASE: /natus-mvp/
+          VITE_BASE: /
           # Repository *variables*, not secrets. Both ship in the bundle by
           # design — the publishable key is a public identifier and is safe
           # only because Row Level Security is on for every table. Filing a
