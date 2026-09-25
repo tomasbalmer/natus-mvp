@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { PHOTO, Screen } from '@/design/Screen';
 import { currentSynthesis } from '@/store/soulMap';
 
@@ -13,10 +13,10 @@ export function Landing() {
       <div className="mt-auto flex flex-col items-center px-7 pb-13 text-center">
         <div className="relative mb-5 flex size-16 items-center justify-center rounded-full border border-crema/35">
           <span aria-hidden="true" className="absolute inset-1.5 rounded-full border border-crema/15" />
-          <span className="font-serif text-[length:var(--fs-voice-22)] font-light tracking-wide text-crema">◯</span>
+          <span aria-hidden="true" className="font-serif text-[length:var(--fs-voice-22)] font-light tracking-wide text-crema">◯</span>
         </div>
 
-        <p className="eyebrow mb-3">Bienvenido a tu camino</p>
+        <p className="eyebrow mb-3">Te damos la bienvenida</p>
 
         <h1 className="mb-3.5 text-[length:var(--fs-display)] leading-[var(--lh-heading-1_12)] text-blanco">
           El Inicio
@@ -60,12 +60,6 @@ export function Landing() {
             Empezar de nuevo
           </button>
         )}
-
-        <div className="mt-4 flex items-center gap-4 text-[length:var(--fs-label-10)] tracking-wide uppercase">
-          <Link to="/lab/safety" className="text-crema/55 no-underline hover:text-crema/60">
-            Safety
-          </Link>
-        </div>
       </div>
     </Screen>
   );

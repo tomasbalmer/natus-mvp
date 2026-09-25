@@ -3,6 +3,42 @@ import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import type { Plugin } from 'vite';
+
+/**
+ * Link previews. WhatsApp, Slack and iMessage need an absolute image URL, and
+ * the rest of index.html is deliberately relative so the site can move between
+ * a subpath and a domain root. The absolute part comes from `VITE_SITE_URL`,
+ * set beside `VITE_BASE` in the deploy workflow; without it (local builds) the
+ * tags are simply not emitted.
+ */
+function linkPreview(): Plugin {
+  const site = process.env['VITE_SITE_URL']?.replace(/\/?$/, '/');
+  const title = 'Natus';
+  const description = 'Un espejo para lo que estás atravesando. Sin cuenta, sin diagnóstico.';
+  return {
+    name: 'natus-link-preview',
+    transformIndexHtml() {
+      if (!site) return [];
+      const meta = (attr: 'name' | 'property', key: string, content: string) => ({
+        tag: 'meta',
+        attrs: { [attr]: key, content },
+        injectTo: 'head' as const,
+      });
+      return [
+        meta('property', 'og:type', 'website'),
+        meta('property', 'og:locale', 'es_AR'),
+        meta('property', 'og:title', title),
+        meta('property', 'og:description', description),
+        meta('property', 'og:url', site),
+        meta('property', 'og:image', `${site}og.jpg`),
+        meta('property', 'og:image:width', '1200'),
+        meta('property', 'og:image:height', '630'),
+        meta('name', 'twitter:card', 'summary_large_image'),
+      ];
+    },
+  };
+}
 
 // `base` is intentionally an environment variable, not a literal.
 //
@@ -15,7 +51,7 @@ import tailwindcss from '@tailwindcss/vite';
 // reads the same value through `import.meta.env.BASE_URL`, so routing follows.
 export default defineConfig({
   base: process.env['VITE_BASE'] ?? '/',
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), linkPreview()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

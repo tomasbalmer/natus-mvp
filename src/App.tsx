@@ -24,6 +24,7 @@ import { activeHighSeverityEvent } from '@/store/crisis';
 import { hydrate } from '@/store/hydrate.ts';
 import { isBackendConfigured, requiresInvite } from '@/supabase/client.ts';
 import { Gate } from '@/screens/Gate';
+import { NotFound } from '@/screens/NotFound';
 
 /**
  * Where the navigation belongs. Onboarding, the landing and the signup are
@@ -42,6 +43,27 @@ const NAV_ROUTES = [
   '/biblioteca',
   '/comparacion',
 ];
+
+const TITLES: [prefix: string, title: string][] = [
+  ['/onboarding', 'Empezar'],
+  ['/mapa', 'Tu mapa'],
+  ['/recomendaciones', 'Caminos'],
+  ['/rutina', 'Rutina'],
+  ['/inicio', 'Inicio'],
+  ['/registro', 'Guardar mi mapa'],
+  ['/cuenta', 'Mi cuenta'],
+  ['/chat', 'Conversación'],
+  ['/meditaciones', 'Meditaciones'],
+  ['/biblioteca', 'Biblioteca'],
+  ['/comparacion', 'Cruce de mapas'],
+  ['/lab', 'Safety lab'],
+];
+
+function titleFor(pathname: string): string {
+  if (pathname === '/') return 'Natus';
+  const match = TITLES.find(([prefix]) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+  return `${match?.[1] ?? 'Página no encontrada'} · Natus`;
+}
 
 /** Prefixes, not exact paths: the comparison flow has nested routes and losing
  *  the nav halfway through it strands the person on a sub-screen. */
@@ -67,6 +89,12 @@ export function App() {
   // next one.
   useEffect(() => {
     window.scrollTo(0, 0);
+  }, [pathname]);
+
+  // Every tab and every history entry read "Natus — Demo", and a screen
+  // reader announced nothing on navigation.
+  useEffect(() => {
+    document.title = titleFor(pathname);
   }, [pathname]);
 
   const [ready, setReady] = useState(false);
@@ -129,26 +157,28 @@ export function App() {
         are how somebody leaves a screen that failed, so they have to survive
         it.
       */}
-      <ErrorBoundary key={pathname}>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/mapa" element={<SoulMap />} />
-          <Route path="/recomendaciones" element={<Recommendations />} />
-          <Route path="/rutina" element={<Routine />} />
-          <Route path="/inicio" element={<Dashboard />} />
-          <Route path="/registro" element={<Signup />} />
-          <Route path="/cuenta" element={<Account />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/meditaciones" element={<Meditation />} />
-          <Route path="/biblioteca" element={<Library />} />
-          <Route path="/comparacion" element={<ExternalProfile />} />
-          <Route path="/comparacion/consentimiento/:id" element={<Consent />} />
-          <Route path="/comparacion/resultado/:id" element={<Result />} />
-          <Route path="/lab/safety" element={<SafetyLab />} />
-          <Route path="*" element={<Landing />} />
-        </Routes>
-      </ErrorBoundary>
+      <main className="h-full">
+        <ErrorBoundary key={pathname}>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/mapa" element={<SoulMap />} />
+            <Route path="/recomendaciones" element={<Recommendations />} />
+            <Route path="/rutina" element={<Routine />} />
+            <Route path="/inicio" element={<Dashboard />} />
+            <Route path="/registro" element={<Signup />} />
+            <Route path="/cuenta" element={<Account />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/meditaciones" element={<Meditation />} />
+            <Route path="/biblioteca" element={<Library />} />
+            <Route path="/comparacion" element={<ExternalProfile />} />
+            <Route path="/comparacion/consentimiento/:id" element={<Consent />} />
+            <Route path="/comparacion/resultado/:id" element={<Result />} />
+            <Route path="/lab/safety" element={<SafetyLab />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </ErrorBoundary>
+      </main>
       {/*
         A crisis takeover has to actually take the screen over. Leaving a glass
         bar offering "Caminos" and "Chat" across the bottom of it turns the

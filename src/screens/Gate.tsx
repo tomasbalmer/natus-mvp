@@ -36,7 +36,7 @@ export function Gate() {
       <div className="mt-auto flex flex-col items-center px-7 pb-13 text-center">
         <div className="relative mb-5 flex size-16 items-center justify-center rounded-full border border-crema/35">
           <span aria-hidden="true" className="absolute inset-1.5 rounded-full border border-crema/15" />
-          <span className="font-serif text-[length:var(--fs-voice-22)] font-light tracking-wide text-crema">◯</span>
+          <span aria-hidden="true" className="font-serif text-[length:var(--fs-voice-22)] font-light tracking-wide text-crema">◯</span>
         </div>
 
         <p className="eyebrow mb-3">Natus</p>

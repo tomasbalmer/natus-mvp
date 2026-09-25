@@ -47,6 +47,14 @@ sed -n '114p' natus-mockups.html \
 sips -s format avif -s formatOptions 68 forest-source.jpg --out forest.avif
 ```
 
+### Link preview
+
+`public/og.jpg`, 1200 x 630, is `forest` with the wordmark and the landing's
+line set over it in the product's two typefaces — rendered from a throwaway
+HTML page in a browser and screenshotted. Same origin as the photograph, so
+the same licensing note applies. The source photo carries 60 px grey bands on
+both edges, which the app's portrait crop hides; the card zooms past them.
+
 ## Typography
 
 Cormorant Garamond and DM Sans, loaded from Google Fonts in `index.html`.

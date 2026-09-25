@@ -122,6 +122,8 @@ jobs:
         # domain later means changing this one line (or deleting it).
         env:
           VITE_BASE: /natus-mvp/
+          # Absolute, for the link-preview tags only. Change it with VITE_BASE.
+          VITE_SITE_URL: https://tomasbalmer.github.io/natus-mvp/
           # Repository *variables*, not secrets. Both ship in the bundle by
           # design — the publishable key is a public identifier and is safe
           # only because Row Level Security is on for every table. Filing a
