@@ -235,9 +235,10 @@ licence to reverse.
   confirmed by the product owner on 2026-09-25 when asked outright.
 - **Safety runs in front of the model, deterministically.** Clinical
   exclusions are a predicate, not a prompt instruction — applied in the
-  browser for the screen and again in `supabase/functions/match/clinical.ts`
-  from the person's stored answers, failing closed. The server's is the one
-  that counts.
+  browser for the screen and again on the server by
+  `supabase/functions/_shared/clinical.ts` — for the match and for every chat
+  turn — from the person's stored answers, failing closed. The server's is
+  the one that counts.
 - **Raw `clinical_basics` never enters a model payload.** A derived risk level
   instead.
 - **The copy lint governs fixtures as well as model output.** A hand-written

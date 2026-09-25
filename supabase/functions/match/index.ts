@@ -2,7 +2,7 @@ import { serveModel } from '../_shared/serve-model.ts';
 import { matchInputSchema } from '../_shared/lib/model-input.ts';
 import { matchResultSchema } from '../_shared/lib/schemas/index.ts';
 import { modalityBySlug } from '../_shared/lib/catalog.ts';
-import { callerIsClinicallyVulnerable, withoutClinicalExclusions } from './clinical.ts';
+import { callerIsClinicallyVulnerable, withoutClinicalExclusions } from '../_shared/clinical.ts';
 import type { Modality } from '../_shared/lib/schemas/index.ts';
 import {
   MATCH_PROMPT_VERSION,

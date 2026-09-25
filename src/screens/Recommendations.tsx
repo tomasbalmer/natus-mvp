@@ -35,7 +35,8 @@ export function Recommendations() {
   // which is the kind of staleness nobody notices until it is embarrassing.
   const [match, setMatch] = useState<StoredMatch | undefined>(() => {
     const stored = currentSynthesis();
-    return stored ? currentMatchFor(stored.id) : undefined;
+    const found = stored ? currentMatchFor(stored.id) : undefined;
+    return found && !excludedNow(found) ? found : undefined;
   });
   const [loading, setLoading] = useState(!match);
   const [framing, setFraming] = useState('');
@@ -196,5 +197,16 @@ export function Recommendations() {
         </div>
       </div>
     </Screen>
+  );
+}
+
+function excludedNow(match: StoredMatch): boolean {
+  const vulnerable = isClinicallyVulnerable({
+    clinicalBasics: activeProfile()?.draft.clinical_basics ?? {},
+    recentCrisisWithin30Days: hadCrisisWithin30Days(),
+  });
+  return (
+    vulnerable &&
+    match.result.matched_modalities.some((m) => modalityBySlug(m.modality_slug)?.requires_clinical_support)
   );
 }

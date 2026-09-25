@@ -4,13 +4,13 @@ import { PHOTO, Screen } from '@/design/Screen';
 import { Paywall } from '@/components/Paywall';
 import { CrisisResourceList } from '@/components/CrisisResourceList';
 import { modalityBySlug } from '@/lib/catalog';
-import { detectCrisis, riskLevel } from '@/lib/safety';
+import { detectCrisis, isClinicallyVulnerable, riskLevel } from '@/lib/safety';
 import { askChat } from '@/ai/chat';
 import { AiError } from '@/ai/client';
 import { activeProfile } from '@/store/account';
 import { currentSynthesis } from '@/store/soulMap';
 import { currentMatchFor } from '@/store/matches';
-import { activeHighSeverityEvent, markFalsePositive, recordCrisisEvent } from '@/store/crisis';
+import { activeHighSeverityEvent, hadCrisisWithin30Days, markFalsePositive, recordCrisisEvent } from '@/store/crisis';
 import { isSubscribed, simulateSubscribe } from '@/store/subscription';
 import {
   FREE_QUESTIONS,
@@ -85,7 +85,13 @@ export function Chat() {
 
   const remaining = remainingQuestions();
   const match = currentMatchFor(synthesis.id);
-  const recommendedSlugs = match?.result.matched_modalities.map((m) => m.modality_slug) ?? [];
+  const vulnerable = isClinicallyVulnerable({
+    clinicalBasics: profile.draft.clinical_basics,
+    recentCrisisWithin30Days: hadCrisisWithin30Days(),
+  });
+  const recommendedSlugs = (match?.result.matched_modalities.map((m) => m.modality_slug) ?? []).filter(
+    (slug) => !(vulnerable && modalityBySlug(slug)?.requires_clinical_support),
+  );
 
   const send = async () => {
     const question = draft.trim();
@@ -129,7 +135,10 @@ export function Chat() {
         synthesis: synthesis.synthesis,
         numerology: synthesis.numerology,
         // PDR 10.2: a derived level, never the clinical answers themselves.
-        risk: riskLevel({ clinicalBasics: profile.draft.clinical_basics }),
+        risk: riskLevel({
+          clinicalBasics: profile.draft.clinical_basics,
+          recentCrisisWithin30Days: hadCrisisWithin30Days(),
+        }),
         recommendedSlugs,
         country: profile.draft.country,
         history: listMessages(conversation.id)
@@ -139,9 +148,6 @@ export function Chat() {
       appendAssistantMessage(conversation.id, result.value);
       setMessages(listMessages(conversation.id));
     } catch (err) {
-      // The server's Layer 1 disagreed with this one — a tab older than the
-      // keyword list, say. Containment, exactly as if it had fired here; the
-      // question stays in the thread because it was asked.
       if (err instanceof AiError && err.kind === 'crisis' && err.crisis) {
         const event = recordCrisisEvent(
           { ...err.crisis, layer: 'deterministic', matched: [], excerpt: '' },
@@ -163,9 +169,6 @@ export function Chat() {
       setMessages(listMessages(conversation.id));
       setDraft(question);
 
-      // The server's count is the one that charges. When it says the
-      // questions are spent and this screen thought otherwise — a turn charged
-      // whose answer never arrived — the paywall is the true answer.
       if (err instanceof AiError && err.kind === 'quota') {
         if (isSubscribed()) {
           setError('Llegaste al máximo de preguntas de este mes. Lo que escribiste sigue acá.');

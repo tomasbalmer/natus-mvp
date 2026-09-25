@@ -1,6 +1,6 @@
 import type { SupabaseClient } from 'jsr:@supabase/supabase-js@2';
-import { isClinicallyVulnerable, type ClinicalBasics } from '../_shared/lib/safety.ts';
-import { modalityBySlug } from '../_shared/lib/catalog.ts';
+import { isClinicallyVulnerable, type ClinicalBasics } from './lib/safety.ts';
+import { modalityBySlug } from './lib/catalog.ts';
 
 /**
  * PDR 7.2's clinical exclusion, where it counts.

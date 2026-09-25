@@ -6,6 +6,7 @@ import { MAX_OUTPUT_TOKENS } from '../_shared/lib/budget.ts';
 import { isChargeable } from '../_shared/lib/quota.ts';
 import { logCall } from '../_shared/log.ts';
 import { scanText } from '../_shared/lib/safety.ts';
+import { callerIsClinicallyVulnerable, withoutClinicalExclusions } from '../_shared/clinical.ts';
 import { resourcesForCountry } from '../_shared/lib/crisis-resources.ts';
 import { chatContextSchema, chatEnvelopeSchema } from '../_shared/lib/model-input.ts';
 import { MODEL, ModelError, generate, hasKey } from '../_shared/anthropic.ts';
@@ -60,7 +61,7 @@ Deno.serve(async (request) => {
     return json(request, { error: 'misconfigured' }, 500);
   }
 
-  const { userId, elevated } = auth;
+  const { userId, caller, elevated } = auth;
   const started = Date.now();
 
   let body: unknown;
@@ -169,6 +170,10 @@ Deno.serve(async (request) => {
   const context = chatContextSchema.safeParse(body);
   if (!context.success) return json(request, { error: 'invalid_context' }, 400);
 
+  const vulnerable = await callerIsClinicallyVulnerable(caller, userId);
+  const recommendedSlugs = withoutClinicalExclusions(context.data.recommendedSlugs, vulnerable).kept;
+  const risk = vulnerable && context.data.risk === 'none' ? 'elevated' : context.data.risk;
+
   // The prompt is built here, from the contract in `_shared/prompts`, and
   // never accepted from the caller. A function that takes a system prompt in
   // its body is a general-purpose model endpoint with somebody else's key in
@@ -180,8 +185,8 @@ Deno.serve(async (request) => {
         question: message,
         synthesis: context.data.synthesis,
         numerology: context.data.numerology,
-        risk: context.data.risk,
-        recommendedSlugs: context.data.recommendedSlugs,
+        risk,
+        recommendedSlugs,
         history: context.data.history,
       }),
       schema: chatResponseSchema,
@@ -207,8 +212,12 @@ Deno.serve(async (request) => {
       charged,
     });
 
+    const allowed = new Set(recommendedSlugs);
     return json(request, {
-      result: generated.value,
+      result: {
+        ...generated.value,
+        linked_modality_slugs: generated.value.linked_modality_slugs.filter((slug) => allowed.has(slug)),
+      },
       input_tokens: generated.inputTokens,
       output_tokens: generated.outputTokens,
       remaining: quota.remaining - (charged ? 1 : 0),
