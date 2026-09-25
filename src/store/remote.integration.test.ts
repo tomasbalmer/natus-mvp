@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { createClient } from '@supabase/supabase-js';
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it, vi } from 'vitest';
 import crisisSeed from '@data/crisis-resources.json';
 import modalitySeed from '@data/modalities.json';
 import topicSeed from '@data/topics.json';
@@ -176,6 +176,23 @@ describe.skipIf(!configured)('adapters against Postgres', () => {
 
   afterAll(async () => {
     for (const p of people) await admin().auth.admin.deleteUser(p.userId);
+  });
+
+  it('a save from one tab does not delete rows another tab wrote', async () => {
+    const { client, userId } = await person();
+    const [a, b, c] = [profile(), profile(), profile()];
+    await ADAPTERS.external_profiles.save(client, userId, [a]);
+
+    vi.resetModules();
+    const other = (await import('./remote.ts')).ADAPTERS;
+    await other.external_profiles.load(client, userId);
+    await other.external_profiles.save(client, userId, [a, b]);
+
+    await ADAPTERS.external_profiles.save(client, userId, [a, c]);
+    await ADAPTERS.external_profiles.save(client, userId, [c]);
+
+    const ids = (await ADAPTERS.external_profiles.load(client, userId)).map((p: ExternalProfile) => p.id).sort();
+    expect(ids).toEqual([b.id, c.id].sort());
   });
 
   it('a second comparison saves beside the first', async () => {

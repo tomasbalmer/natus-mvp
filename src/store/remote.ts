@@ -155,13 +155,12 @@ function columnsToDraft(row: DraftRow): OnboardingDraft {
 // ── row-set replacement ─────────────────────────────────────────────────────
 
 /**
- * Make `table` hold exactly `rows` for this user.
- *
- * The store hands whole arrays because that is how `localStorage` worked, so
- * a save is a set replacement rather than a diff. Upsert what is present,
- * then delete what is not — in that order, because the reverse leaves a
- * window in which the person's data is gone.
+ * Upsert `rows`, then delete the rows this session loaded or wrote that are no
+ * longer in `rows`. Rows it never saw — written by another tab or device — are
+ * left alone.
  */
+const known = new Map<string, Set<string>>();
+
 type TableName = keyof Database['public']['Tables'];
 
 async function replaceRows(
@@ -181,10 +180,14 @@ async function replaceRows(
     if (error) throw new Error(`${table}: ${error.message}`);
   }
 
-  let query = loose.delete().eq('user_id', userId);
-  if (rows.length > 0) query = query.not('id', 'in', `(${rows.map((r) => r.id).join(',')})`);
-  const { error } = await query;
-  if (error) throw new Error(`${table} (prune): ${error.message}`);
+  const key = `${userId}:${table}`;
+  const current = new Set(rows.map((r) => r.id));
+  const gone = [...(known.get(key) ?? [])].filter((id) => !current.has(id));
+  if (gone.length > 0) {
+    const { error } = await loose.delete().eq('user_id', userId).in('id', gone);
+    if (error) throw new Error(`${table} (prune): ${error.message}`);
+  }
+  known.set(key, current);
 }
 
 async function selectAll<T extends TableName>(
@@ -198,6 +201,7 @@ async function selectAll<T extends TableName>(
     .select('*')
     .eq('user_id', userId)
     .order(order, { ascending: true });
+  if (!error && data) known.set(`${userId}:${table}`, new Set(data.map((r: { id: string }) => r.id)));
   if (error) throw new Error(`${table}: ${(error as { message: string }).message}`);
   return (data ?? []) as Array<Database['public']['Tables'][T]['Row']>;
 }
