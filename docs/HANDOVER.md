@@ -55,11 +55,12 @@ Legend: **T** Tomas (with Claude), **O** the owner, **T+O** together.
 ### 2. Prepare the repository — T
 - [x] Migrations apply in CI before functions deploy.
 - [x] This file.
-- [ ] Branch `handover/custom-domain`: `VITE_BASE: /` and the docs that name
-      the old URL. **Not merged** until phase 5 — merged early it breaks the
+- [x] Branch `handover/custom-domain`: `VITE_BASE: /` and the docs that name
+      the old URL, pushed to GitHub. **Not merged** until phase 5 — merged early it breaks the
       site at `tomasbalmer.github.io/natus-mvp/`.
-- [ ] A page in Spanish for the owner: what he receives, what to create,
-      what it costs, what he does at each step.
+- [x] A page in Spanish for the owner: what he receives, what to create,
+      what it costs, what he does at each step. Published privately as a
+      claude.ai artifact from Tomas's account; he shares it when ready.
 
 ### 3. His accounts — O
 - [ ] GitHub organisation. Invites Tomas as an owner.
