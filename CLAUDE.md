@@ -29,13 +29,6 @@ carries the verification protocol this repository expects of visual work. Read
 it before touching `src/design`, `src/styles` or anything visual. Delete it
 when that step is done and fold what is still true into this file.
 
-`docs/HANDOVER.md` is the other live plan: moving the product to its owner's
-accounts and to `app.natus.world`. It says who does each step and in what
-order, and the order is load-bearing in two places — the domain after the
-repository transfer, and the `handover/custom-domain` branch merged only once
-the domain answers. Read it before touching deployment, DNS, secrets or auth
-URLs.
-
 ## Where the reasoning lives
 
 **This file is it.** The design record — two implementation plans, a decision
