@@ -1,6 +1,6 @@
 import { json, preflight } from '../_shared/cors.ts';
 import { authenticate, Unauthorized } from '../_shared/auth.ts';
-import { currentQuota, overSubscribedLimit } from '../_shared/quota.ts';
+import { currentQuota, overSubscribedLimit, reserveChatTurn } from '../_shared/quota.ts';
 import { overDeploymentBudget } from '../_shared/spend.ts';
 import { MAX_OUTPUT_TOKENS } from '../_shared/lib/budget.ts';
 import { isChargeable } from '../_shared/lib/quota.ts';
@@ -178,6 +178,18 @@ Deno.serve(async (request) => {
   // never accepted from the caller. A function that takes a system prompt in
   // its body is a general-purpose model endpoint with somebody else's key in
   // it, whatever the rest of the file says it is.
+  let reservedId: string | null;
+  try {
+    reservedId = await reserveChatTurn(elevated, userId, quota.unlimited, PROMPT_VERSION, MODEL);
+  } catch {
+    return json(request, { error: 'quota_unavailable' }, 500);
+  }
+  if (reservedId === null) {
+    return quota.unlimited
+      ? json(request, { error: 'spend_limit', scope: 'person' }, 429)
+      : json(request, { error: 'quota_exhausted', used: quota.used, remaining: 0 }, 402);
+  }
+
   try {
     const generated = await generate({
       system: CHAT_SYSTEM_PROMPT,
@@ -210,7 +222,7 @@ Deno.serve(async (request) => {
       cacheReadTokens: generated.cacheReadTokens,
       latencyMs: Date.now() - started,
       charged,
-    });
+    }, reservedId);
 
     const allowed = new Set(recommendedSlugs);
     return json(request, {
@@ -244,7 +256,7 @@ Deno.serve(async (request) => {
             cacheReadTokens: error.usage.cacheReadTokens,
           }
         : {}),
-    });
+    }, reservedId);
 
     // The turn is not charged. The provider's message does not travel — it
     // can carry the request back — but its error class does, because

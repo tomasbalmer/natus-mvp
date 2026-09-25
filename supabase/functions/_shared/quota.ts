@@ -66,3 +66,23 @@ export async function overSubscribedLimit(
     return false;
   }
 }
+
+export async function reserveChatTurn(
+  elevated: SupabaseClient,
+  userId: string,
+  subscribed: boolean,
+  promptVersion: string,
+  model: string,
+): Promise<string | null> {
+  const { data, error } = await elevated.rpc('reserve_chat_turn', {
+    p_user: userId,
+    p_limit: subscribed ? FREE_QUESTIONS + SUBSCRIBED_QUESTIONS : FREE_QUESTIONS,
+    p_since: subscribed
+      ? new Date(Date.now() - SUBSCRIBED_WINDOW_HOURS * 3_600_000).toISOString()
+      : null,
+    p_prompt_version: promptVersion,
+    p_model: model,
+  });
+  if (error) throw new Error(`reserve_chat_turn: ${error.message}`);
+  return (data as string | null) ?? null;
+}

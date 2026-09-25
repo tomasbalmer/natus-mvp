@@ -856,6 +856,16 @@ export type Database = {
           output_tokens: number
         }[]
       }
+      reserve_chat_turn: {
+        Args: {
+          p_limit: number
+          p_model: string
+          p_prompt_version: string
+          p_since: string
+          p_user: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

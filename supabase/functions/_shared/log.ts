@@ -24,7 +24,8 @@ export type CallOutcome =
   | 'api_error'
   | 'timeout'
   | 'refused_quota'
-  | 'refused_crisis';
+  | 'refused_crisis'
+  | 'pending';
 
 export type CallRecord = {
   userId: string;
@@ -43,23 +44,34 @@ export type CallRecord = {
   charged?: boolean;
 };
 
-export async function logCall(elevated: SupabaseClient, record: CallRecord): Promise<void> {
+export async function logCall(
+  elevated: SupabaseClient,
+  record: CallRecord,
+  reservedId?: string,
+): Promise<void> {
+  const result = {
+    outcome: record.outcome,
+    input_tokens: record.inputTokens ?? null,
+    output_tokens: record.outputTokens ?? null,
+    cache_write_tokens: record.cacheWriteTokens ?? null,
+    cache_read_tokens: record.cacheReadTokens ?? null,
+    latency_ms: Math.round(record.latencyMs),
+    error_kind: record.errorKind ?? null,
+    charged: record.charged ?? false,
+  };
   try {
-    await elevated.from('claude_api_calls').insert({
-      user_id: record.userId,
-      purpose: record.purpose,
-      prompt_version: record.promptVersion,
-      model: record.model,
-      mode: record.mode,
-      outcome: record.outcome,
-      input_tokens: record.inputTokens ?? null,
-      output_tokens: record.outputTokens ?? null,
-      cache_write_tokens: record.cacheWriteTokens ?? null,
-      cache_read_tokens: record.cacheReadTokens ?? null,
-      latency_ms: Math.round(record.latencyMs),
-      error_kind: record.errorKind ?? null,
-      charged: record.charged ?? false,
-    });
+    if (reservedId) {
+      await elevated.from('claude_api_calls').update(result).eq('id', reservedId);
+    } else {
+      await elevated.from('claude_api_calls').insert({
+        user_id: record.userId,
+        purpose: record.purpose,
+        prompt_version: record.promptVersion,
+        model: record.model,
+        mode: record.mode,
+        ...result,
+      });
+    }
   } catch {
     // See above. Deliberately silent.
   }

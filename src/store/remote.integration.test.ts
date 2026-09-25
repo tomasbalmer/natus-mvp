@@ -113,6 +113,13 @@ async function edgeShared(): Promise<{
   logCall: (client: unknown, record: Record<string, unknown>) => Promise<void>;
   overDeploymentBudget: (client: unknown) => Promise<boolean>;
   overSubscribedLimit: (client: unknown, userId: string) => Promise<boolean>;
+  reserveChatTurn: (
+    client: unknown,
+    userId: string,
+    subscribed: boolean,
+    promptVersion: string,
+    model: string,
+  ) => Promise<string | null>;
 }> {
   const base = '../../supabase/functions/_shared';
   const [quota, log, spend] = await Promise.all([
@@ -125,6 +132,7 @@ async function edgeShared(): Promise<{
     logCall: log.logCall,
     overDeploymentBudget: spend.overDeploymentBudget,
     overSubscribedLimit: quota.overSubscribedLimit,
+    reserveChatTurn: quota.reserveChatTurn,
   };
 }
 
@@ -334,6 +342,17 @@ describe.skipIf(!configured)('adapters against Postgres', () => {
 
     await logCall(admin(), { ...turn, mode: 'server', outcome: 'ok', charged: true });
     expect(await overSubscribedLimit(admin(), userId)).toBe(true);
+  });
+
+  it('parallel chat turns cannot spend more than the free questions', async () => {
+    const { userId } = await person();
+    const { reserveChatTurn } = await edgeShared();
+
+    const reserved = await Promise.all(
+      Array.from({ length: 10 }, () => reserveChatTurn(admin(), userId, false, 'test', 'test')),
+    );
+
+    expect(reserved.filter((id) => id !== null)).toHaveLength(3);
   });
 
   it('the chat quota cannot be given back by the person it limits', async () => {
