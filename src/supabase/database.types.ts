@@ -710,6 +710,24 @@ export type Database = {
           },
         ]
       }
+      natal_chart_calls: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       preferences: {
         Row: {
           bed_volume: number

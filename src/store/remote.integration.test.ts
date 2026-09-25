@@ -47,6 +47,7 @@ const OWNED_TABLES = [
   'comparison_consents',
   'chart_comparisons',
   'crisis_events',
+  'natal_chart_calls',
 ] as const satisfies ReadonlyArray<keyof Database['public']['Tables']>;
 
 type Person = { client: TypedClient; userId: string };

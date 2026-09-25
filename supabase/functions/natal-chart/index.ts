@@ -5,6 +5,7 @@ import { parseAstrologerSubject, resolveLocation } from '../_shared/astrology.ts
 const ENDPOINT = 'https://astrologer.p.rapidapi.com/api/v5/context/birth-chart';
 const HOST = 'astrologer.p.rapidapi.com';
 const TIMEOUT_MS = 20_000;
+const CALLS_PER_DAY = 5;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -15,12 +16,14 @@ Deno.serve(async (request) => {
   if (cors) return cors;
   if (request.method !== 'POST') return json(request, { error: 'method_not_allowed' }, 405);
 
+  let auth;
   try {
-    await authenticate(request);
+    auth = await authenticate(request);
   } catch (error) {
     if (error instanceof Unauthorized) return json(request, { error: 'unauthorized' }, 401);
     return json(request, { error: 'misconfigured' }, 500);
   }
+  const { userId, elevated } = auth;
 
   let body: unknown;
   try {
@@ -36,6 +39,15 @@ Deno.serve(async (request) => {
   if (!rapidApiKey) {
     return json(request, { error: 'astrologer_not_configured' }, 503);
   }
+
+  const since = new Date(Date.now() - 24 * 3_600_000).toISOString();
+  const { count } = await elevated
+    .from('natal_chart_calls')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .gte('created_at', since);
+  if ((count ?? 0) >= CALLS_PER_DAY) return json(request, { error: 'spend_limit', scope: 'person' }, 429);
+  await elevated.from('natal_chart_calls').insert({ user_id: userId });
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
