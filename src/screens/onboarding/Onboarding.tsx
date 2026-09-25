@@ -133,7 +133,7 @@ export function Onboarding() {
     if (failure) {
       return (
         <Screen backdrop="surf" scrim="diagonal" opacity={PHOTO.veil60}>
-          <div className="flex min-h-dvh flex-col items-center justify-center gap-6 px-8 text-center sm:min-h-0">
+          <div className="flex min-h-dvh flex-col items-center justify-center gap-6 px-8 text-center sm:min-h-0 sm:flex-1">
             <p className="text-[length:var(--fs-body-14)] leading-relaxed text-crema/75">{failure}</p>
             <button
               type="button"

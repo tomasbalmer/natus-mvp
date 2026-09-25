@@ -103,7 +103,7 @@ export function Recommendations() {
   if (!currentSynthesis()) {
     return (
       <Screen backdrop="grass" scrim="heavy" opacity={PHOTO.content40}>
-        <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
+        <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0 sm:flex-1">
           <p className="text-[length:var(--fs-body-14)] leading-relaxed text-crema/65">
             Las terapias sugeridas salen de tu mapa. Generalo primero.
           </p>
@@ -118,7 +118,7 @@ export function Recommendations() {
   if (loading || !match) {
     return (
       <Screen backdrop="grass" scrim="heavy" opacity={PHOTO.content40}>
-        <div className="flex min-h-dvh flex-col items-center justify-center gap-4 px-8 text-center sm:min-h-0">
+        <div className="flex min-h-dvh flex-col items-center justify-center gap-4 px-8 text-center sm:min-h-0 sm:flex-1">
           <div className="relative flex size-24 items-center justify-center">
             <span className="orb-pulse" aria-hidden="true" />
             <span className="circle relative z-10 size-14" />

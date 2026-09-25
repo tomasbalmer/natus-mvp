@@ -112,7 +112,7 @@ export function Generating({
 
   return (
     <Screen backdrop="surf" scrim="diagonal" opacity={PHOTO.veil70}>
-      <div className="flex min-h-dvh flex-col items-center justify-center gap-9 px-8 text-center sm:min-h-0">
+      <div className="flex min-h-dvh flex-col items-center justify-center gap-9 px-8 text-center sm:min-h-0 sm:flex-1">
         <div className="relative flex size-30 items-center justify-center">
           <span className="orb-pulse" aria-hidden="true" />
           <span className="orb-pulse orb-pulse-2" aria-hidden="true" />

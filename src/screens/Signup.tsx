@@ -36,7 +36,7 @@ export function Signup() {
   if (isSignedIn()) {
     return (
       <Screen backdrop="surf" scrim="heavy" opacity={PHOTO.content50}>
-        <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
+        <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0 sm:flex-1">
           <p className="text-[length:var(--fs-body-14)] leading-relaxed text-crema/65">Tu cuenta ya está creada.</p>
           <Link to="/inicio" className="cta no-underline">
             Ir a mi espacio
@@ -49,7 +49,7 @@ export function Signup() {
   if (!currentSynthesis()) {
     return (
       <Screen backdrop="surf" scrim="heavy" opacity={PHOTO.content50}>
-        <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
+        <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0 sm:flex-1">
           <p className="text-[length:var(--fs-body-14)] leading-relaxed text-crema/65">
             Primero generamos tu mapa. La cuenta viene después, cuando ya tengas algo que
             guardar.
@@ -105,7 +105,7 @@ export function Signup() {
   if (sent) {
     return (
       <Screen backdrop="surf" scrim="heavy" opacity={PHOTO.content50}>
-        <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
+        <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0 sm:flex-1">
           <p className="text-[length:var(--fs-body-14)] leading-relaxed text-crema/65">
             Te mandamos un correo a <span className="text-blanco">{email}</span>. Abrilo para
             confirmar la dirección.

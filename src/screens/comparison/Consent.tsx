@@ -54,7 +54,7 @@ export function Consent() {
     return (
       <ComparisonGate>
         <Screen backdrop="surf" scrim="heavy" opacity={PHOTO.content45}>
-          <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
+          <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0 sm:flex-1">
             <p className="text-[length:var(--fs-body-14)] leading-relaxed text-crema/65">Esa persona ya no está cargada.</p>
             <Link to="/comparacion" className="cta no-underline">
               Volver

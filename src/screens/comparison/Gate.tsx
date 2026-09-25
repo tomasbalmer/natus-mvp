@@ -25,7 +25,7 @@ export function ComparisonGate({ children }: { children: ReactNode }) {
   if (!profile || !currentSynthesis()) {
     return (
       <Screen backdrop="surf" scrim="heavy" opacity={PHOTO.content45}>
-        <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
+        <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0 sm:flex-1">
           <p className="text-[length:var(--fs-body-14)] leading-relaxed text-crema/65">
             Para comparar hace falta tu mapa primero. El de la otra persona lo cargás después.
           </p>

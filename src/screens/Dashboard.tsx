@@ -57,7 +57,7 @@ export function Dashboard() {
   if (!profile || !synthesis) {
     return (
       <Screen backdrop="forest" scrim="heavy" opacity={PHOTO.content45}>
-        <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0">
+        <div className="flex min-h-dvh flex-col justify-center gap-6 px-6 text-center sm:min-h-0 sm:flex-1">
           <p className="text-[length:var(--fs-body-14)] leading-relaxed text-crema/65">
             Tu espacio se arma con tu mapa. Empecemos por ahí.
           </p>

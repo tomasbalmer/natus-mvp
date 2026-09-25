@@ -75,7 +75,7 @@ export class ErrorBoundary extends Component<Props, State> {
     return (
       <div
         role="alert"
-        className="flex min-h-dvh flex-col justify-center gap-6 bg-fondo px-6 py-10"
+        className="flex min-h-dvh flex-col justify-center gap-6 bg-fondo px-6 py-10 sm:h-full sm:min-h-0"
       >
         {active ? (
           <>
