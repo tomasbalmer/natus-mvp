@@ -189,6 +189,19 @@ check(
   `status=${crisisMeditation.status}`,
 );
 
+// A low-severity verdict — two indirect markers — is not refused. The screens
+// let the person continue with a banner, and a server that refused here failed
+// every generation for them with a generic error.
+const lowSeverity = await call('meditation', {
+  ...BODIES.meditation,
+  intent: 'estoy cansada de todo y no veo salida',
+});
+check(
+  'meditation: a low-severity signal is not refused',
+  lowSeverity.status !== 403,
+  `status=${lowSeverity.status}`,
+);
+
 // ── the aspect list is the server's, not the caller's ───────────────────────
 const supplied = await call('comparison', {
   ...BODIES.comparison,

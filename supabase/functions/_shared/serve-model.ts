@@ -103,8 +103,12 @@ export function serveModel<I, O>(route: ModelRoute<I, O>): (request: Request) =>
 
     // Before the key check, not after: a deployment without a model still must
     // not be the thing that decides whether somebody in crisis is noticed.
+    // High severity only, the same threshold the screens use. A low-severity
+    // verdict — two indirect markers — lets the person continue with a banner
+    // there, so refusing it here failed every generation for them.
     const prose = route.prose?.(parsed.data) ?? '';
-    if (prose.trim() !== '' && scanText(prose).crisis) {
+    const verdict = prose.trim() === '' ? { crisis: false as const } : scanText(prose);
+    if (verdict.crisis && verdict.severity === 'high') {
       await logCall(elevated, {
         ...record,
         outcome: 'refused_crisis',
