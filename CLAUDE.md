@@ -55,6 +55,15 @@ The product runs end to end in production: onboarding, natal chart by
 ephemeris, Soul Map, recommendations, chat, meditations and synastry, all with
 real generation, all walked on the deployed site.
 
+**Before the next deploy: five migrations are not in production yet.**
+`20260925120000` through `20260925160000` — the chat quota moved to the
+ledger, reference-data parity, the deployment spend summed in SQL, the
+claimed-session pointer made soft, and foreign-key indexes. CI deploys
+functions, never migrations, so run `supabase db push` **before** merging.
+The order matters: the chat function writes `claude_api_calls.charged`, and
+`logCall` never throws, so a function deployed ahead of its column logs
+nothing and the free questions become unlimited.
+
 **What is left is not code.** In rough order of weight:
 
 - The sixteen crisis numbers carry `2026-08-19`, which records the product
@@ -84,6 +93,24 @@ real generation, all walked on the deployed site.
   It works. It is still duplication held together by tooling, and the fix is
   a pnpm workspace package — the shape `waterplan-frontend` already uses.
 - `crisis-keywords.json` is `"status": "preliminary"` and wants a clinician.
+
+**Three things found in the data layer and deliberately left, each a product
+call rather than a fix:**
+
+- Any person can set their own `subscriptions.status` to `active`, and the
+  chat function reads it as unlimited questions. It is the simulated paywall
+  working as built — there is no payment provider — but the questions it
+  unlocks are paid for by whoever holds the Anthropic key. The monthly
+  budget ceiling bounds it. It closes when payments are real.
+- The PDR 7.2 clinical exclusion runs in the browser. The match function
+  rehydrates the slugs it is sent but does not re-apply the filter, so a
+  person who tampers with their own client can see modalities excluded for
+  them. Closing it means the function deriving the risk level from the
+  stored clinical columns itself.
+- A reading made under a consent later revoked or expired stays in
+  `chart_comparisons`, unreadable by policy, until its profile or the
+  account is deleted. Deleting it at revocation is a one-line change in
+  `revokeConsent` — and a decision about the other person's data.
 
 **Two open questions with the data now being collected for them:** whether the
 prompt cache is worth its 25% write surcharge on the once-per-account surfaces

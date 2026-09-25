@@ -311,15 +311,7 @@ export type Database = {
           soul_map_id?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "clients_claimed_session_id_fkey"
-            columns: ["claimed_session_id"]
-            isOneToOne: false
-            referencedRelation: "anonymous_sessions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       comparison_consents: {
         Row: {
@@ -837,7 +829,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      deployment_token_totals: {
+        Args: { since: string }
+        Returns: {
+          cache_read_tokens: number
+          cache_write_tokens: number
+          input_tokens: number
+          output_tokens: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

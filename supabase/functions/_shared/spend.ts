@@ -76,23 +76,27 @@ export async function overDeploymentBudget(elevated: SupabaseClient): Promise<bo
   const since = new Date(Date.now() - 30 * 24 * 3_600_000).toISOString();
 
   try {
+    // Summed in Postgres. Selecting the rows and adding them here stopped at
+    // PostgREST's 1,000-row page, so the ceiling undercounted exactly when
+    // traffic was high enough for it to matter.
     const { data, error } = await elevated
-      .from('claude_api_calls')
-      .select('input_tokens,output_tokens,cache_write_tokens,cache_read_tokens')
-      .eq('mode', 'server')
-      .gte('created_at', since);
+      .rpc('deployment_token_totals', { since })
+      .single();
 
     if (error || !data) return false;
 
-    let spent = 0;
-    for (const row of data) {
-      spent += costUsd({
-        inputTokens: row.input_tokens ?? 0,
-        outputTokens: row.output_tokens ?? 0,
-        cacheWriteTokens: row.cache_write_tokens ?? 0,
-        cacheReadTokens: row.cache_read_tokens ?? 0,
-      });
-    }
+    const totals = data as {
+      input_tokens: number;
+      output_tokens: number;
+      cache_write_tokens: number;
+      cache_read_tokens: number;
+    };
+    const spent = costUsd({
+      inputTokens: totals.input_tokens,
+      outputTokens: totals.output_tokens,
+      cacheWriteTokens: totals.cache_write_tokens,
+      cacheReadTokens: totals.cache_read_tokens,
+    });
     return spent >= budget;
   } catch {
     return false;

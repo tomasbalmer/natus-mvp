@@ -1,10 +1,16 @@
 import { execFileSync } from 'node:child_process';
 import { createClient } from '@supabase/supabase-js';
 import { afterAll, describe, expect, it } from 'vitest';
+import crisisSeed from '@data/crisis-resources.json';
+import modalitySeed from '@data/modalities.json';
+import topicSeed from '@data/topics.json';
+import bedTrackSeed from '@data/bed-tracks.json';
 import type { TypedClient } from '@/supabase/client.ts';
 import type { Database } from '@/supabase/database.types.ts';
 import { ADAPTERS } from './remote.ts';
 import type { ComparisonConsent, ExternalProfile, StoredComparison } from './comparison.ts';
+import { emptyDraft, type AnonymousSession } from './session.ts';
+import type { Client } from './account.ts';
 
 /**
  * The adapters, against a real Postgres.
@@ -57,25 +63,43 @@ function admin() {
   return createClient<Database>(URL!, SERVICE!, { auth: { persistSession: false } });
 }
 
-/**
- * Counted as the database owner, past every policy and grant, so a row a
- * policy hides from its owner still counts as left behind.
- */
-function rowsOwnedBy(userId: string): Record<string, number> {
-  const sql = OWNED_TABLES.map(
-    (t) => `select '${t}', count(*) from public.${t} where user_id = '${userId}'`,
-  ).join(' union all ');
-  const out = execFileSync(
+/** A query as the database owner, past every policy and grant. */
+function asOwner(sql: string): string {
+  return execFileSync(
     'docker',
     ['exec', DB_CONTAINER!, 'psql', '-U', 'postgres', '-tAF', ',', '-c', sql],
     { encoding: 'utf8' },
+  ).trim();
+}
+
+/**
+ * Counted as the database owner, so a row a policy hides from its owner
+ * still counts as left behind.
+ */
+function rowsOwnedBy(userId: string): Record<string, number> {
+  const out = asOwner(
+    OWNED_TABLES.map(
+      (t) => `select '${t}', count(*) from public.${t} where user_id = '${userId}'`,
+    ).join(' union all '),
   );
   const counts: Record<string, number> = {};
-  for (const line of out.trim().split('\n')) {
+  for (const line of out.split('\n')) {
     const [table, count] = line.split(',');
     if (table && Number(count) > 0) counts[table] = Number(count);
   }
   return counts;
+}
+
+/** Rows as JSON, in a stable order, with only the columns the seed carries. */
+function tableAsJson(table: string, columns: string[], orderBy: string): unknown[] {
+  const out = asOwner(
+    `select coalesce(json_agg(r order by ${orderBy}), '[]') from (select ${columns.join(', ')} from public.${table}) r`,
+  );
+  return JSON.parse(out) as unknown[];
+}
+
+function pick<T extends Record<string, unknown>>(rows: T[], columns: string[]): unknown[] {
+  return rows.map((r) => Object.fromEntries(columns.map((c) => [c, r[c] ?? null])));
 }
 
 /**
@@ -86,13 +110,19 @@ function rowsOwnedBy(userId: string): Record<string, number> {
 async function edgeShared(): Promise<{
   currentQuota: (client: unknown, userId: string) => Promise<{ used: number }>;
   logCall: (client: unknown, record: Record<string, unknown>) => Promise<void>;
+  overDeploymentBudget: (client: unknown) => Promise<boolean>;
 }> {
   const base = '../../supabase/functions/_shared';
-  const [quota, log] = await Promise.all([
+  const [quota, log, spend] = await Promise.all([
     import(/* @vite-ignore */ `${base}/quota.ts`),
     import(/* @vite-ignore */ `${base}/log.ts`),
+    import(/* @vite-ignore */ `${base}/spend.ts`),
   ]);
-  return { currentQuota: quota.currentQuota, logCall: log.logCall };
+  return {
+    currentQuota: quota.currentQuota,
+    logCall: log.logCall,
+    overDeploymentBudget: spend.overDeploymentBudget,
+  };
 }
 
 const NOW = Date.now();
@@ -216,6 +246,42 @@ describe.skipIf(!configured)('adapters against Postgres', () => {
     expect(loaded.map((c) => c.id)).toEqual([again.id]);
   });
 
+  it('the account survives the anonymous session it claimed', async () => {
+    const { client, userId } = await person();
+    const session: AnonymousSession = {
+      id: crypto.randomUUID(),
+      created_at: NOW,
+      expires_at: NOW + 3_600_000,
+      step: 4,
+      draft: emptyDraft(),
+      soul_map_id: null,
+      claimed_by: null,
+    };
+    await ADAPTERS.anonymous_session.save(client, userId, session);
+
+    // signup() in account.ts, then claimSession: the client points at the
+    // session, and the session expires on the spot.
+    const account: Client = {
+      id: crypto.randomUUID(),
+      email: 'ana@example.com',
+      created_at: NOW,
+      profile: emptyDraft(),
+      soul_map_id: null,
+      claimed_session_id: session.id,
+    };
+    await ADAPTERS.client.save(client, userId, account);
+    await ADAPTERS.anonymous_session.save(client, userId, { ...session, claimed_by: account.id, expires_at: NOW });
+
+    // The next getSession() sees it expired and writes null, which deletes
+    // the row; `on delete set null` clears the pointer in Postgres but not in
+    // the mirror. Then a Soul Map is generated and attachSoulMapToClient
+    // writes the account again, stale pointer and all.
+    await ADAPTERS.anonymous_session.save(client, userId, null);
+    await ADAPTERS.client.save(client, userId, { ...account, soul_map_id: crypto.randomUUID() });
+
+    expect(rowsOwnedBy(userId)['clients']).toBe(1);
+  });
+
   it('deleting the account leaves no row behind', async () => {
     const { client, userId } = await person();
     const p = profile();
@@ -258,5 +324,125 @@ describe.skipIf(!configured)('adapters against Postgres', () => {
     await client.from('claude_api_calls').update({ charged: false }).eq('user_id', userId);
 
     expect(await currentQuota(admin(), userId)).toEqual(before);
+  });
+});
+
+describe.skipIf(!configured)('the deployment budget', () => {
+  const MARK = 'spend-test';
+
+  afterAll(() => {
+    asOwner(`delete from public.claude_api_calls where prompt_version = '${MARK}'`);
+  });
+
+  it('counts past the thousand rows PostgREST returns', async () => {
+    // 1,200 server calls at 1,000 output tokens each: $30.00. The first
+    // thousand alone come to $25.00, so a $27 ceiling tells the two apart.
+    asOwner(
+      `insert into public.claude_api_calls (purpose, prompt_version, model, mode, outcome, output_tokens)
+       select 'chat', '${MARK}', 'test', 'server', 'ok', 1000 from generate_series(1, 1200)`,
+    );
+    (globalThis as { Deno?: unknown }).Deno = {
+      env: { get: (k: string) => (k === 'MONTHLY_BUDGET_USD' ? '27' : undefined) },
+    };
+    const { overDeploymentBudget } = await edgeShared();
+
+    expect(await overDeploymentBudget(admin())).toBe(true);
+  });
+
+  it('and is not simply refusing: under the ceiling it answers false', async () => {
+    (globalThis as { Deno?: unknown }).Deno = {
+      env: { get: (k: string) => (k === 'MONTHLY_BUDGET_USD' ? '31' : undefined) },
+    };
+    const { overDeploymentBudget } = await edgeShared();
+
+    expect(await overDeploymentBudget(admin())).toBe(false);
+  });
+
+  it('is not callable by a person', async () => {
+    const { client } = await signIn();
+    const { error } = await client.rpc('deployment_token_totals', { since: new Date(0).toISOString() });
+    expect(error?.code).toBe('42501');
+  });
+});
+
+/**
+ * The reference tables against the JSON they were generated from.
+ *
+ * `data/*.json` is what the application and the functions read; the tables
+ * are copies, and one of them — `modalities` — is what `match_reactions`
+ * holds a foreign key into. A copy nothing compares is a copy that drifts:
+ * the crisis resources had lost their verification date and could be seeded
+ * twice before this existed.
+ */
+describe.skipIf(!configured)('reference data matches data/*.json', () => {
+  const byKey = (key: string) => (a: Record<string, unknown>, b: Record<string, unknown>) =>
+    String(a[key]).localeCompare(String(b[key]));
+
+  it('crisis resources', () => {
+    const columns = ['country', 'type', 'name', 'contact', 'note', 'priority', 'is_active', 'verified_at'];
+    const db = tableAsJson(
+      'crisis_resources',
+      columns.map((c) => (c === 'verified_at' ? 'verified_at::date::text as verified_at' : c)),
+      'country, priority',
+    );
+    const seed = [...crisisSeed.resources].sort(
+      (a, b) => a.country.localeCompare(b.country) || a.priority - b.priority,
+    );
+    expect(db).toEqual(pick(seed, columns));
+  });
+
+  it('modalities', () => {
+    const columns = Object.keys(modalitySeed.modalities[0]!);
+    const db = tableAsJson('modalities', columns, 'slug');
+    const seed = [...modalitySeed.modalities].sort(byKey('slug'));
+    expect(db).toEqual(pick(seed, columns));
+  });
+
+  it('topics', () => {
+    const columns = ['slug', 'name_es', 'name_en'];
+    const seed = [...topicSeed.topics].sort(byKey('slug'));
+    expect(tableAsJson('topics', columns, 'slug')).toEqual(pick(seed, columns));
+  });
+
+  it('bed tracks', () => {
+    const columns = ['id', 'name', 'frequency_hz', 'suits', 'synthesis', 'is_active'];
+    const seed = [...bedTrackSeed.tracks].sort(byKey('id'));
+    expect(tableAsJson('bed_tracks', columns, 'id')).toEqual(pick(seed, columns));
+  });
+});
+
+describe.skipIf(!configured)('the schema', () => {
+  it('refuses a new row in the removed pasted-key mode', async () => {
+    const { client, userId } = await signIn();
+    const { error } = await client.from('meditations').insert({
+      user_id: userId,
+      intent: 'test',
+      requested_minutes: 5,
+      estimated_minutes: 5,
+      script: {},
+      prompt_version: 'test',
+      mode: 'byok',
+    });
+    expect(error?.code).toBe('23514');
+    await admin().auth.admin.deleteUser(userId);
+  });
+
+  it('indexes every foreign key', () => {
+    // A cascade scans the child table for the parent's key. Without an index
+    // leading on that column, deleting one account is a sequential scan per
+    // table, inside the transaction delete-account depends on.
+    const unindexed = asOwner(`
+      select c.conrelid::regclass || '.' || a.attname
+      from pg_constraint c
+      join pg_attribute a on a.attrelid = c.conrelid and a.attnum = c.conkey[1]
+      where c.contype = 'f'
+        and c.connamespace = 'public'::regnamespace
+        and array_length(c.conkey, 1) = 1
+        and not exists (
+          select 1 from pg_index i
+          where i.indrelid = c.conrelid and i.indkey[0] = c.conkey[1] and i.indpred is null
+        )
+      order by 1`);
+    expect(unindexed === '' ? [] : unindexed.split('\n')).toEqual([]);
   });
 });
