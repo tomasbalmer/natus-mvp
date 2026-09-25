@@ -94,22 +94,21 @@ nothing and the free questions become unlimited.
   a pnpm workspace package — the shape `waterplan-frontend` already uses.
 - `crisis-keywords.json` is `"status": "preliminary"` and wants a clinician.
 
-**Three things found in the data layer and deliberately left, each a product
-call rather than a fix:**
+**Two product calls for the owner, found in the data layer:**
 
-- Any person can set their own `subscriptions.status` to `active`, and the
-  chat function reads it as unlimited questions. It is the simulated paywall
-  working as built — there is no payment provider — but the questions it
-  unlocks are paid for by whoever holds the Anthropic key. The monthly
-  budget ceiling bounds it. It closes when payments are real.
-- The PDR 7.2 clinical exclusion runs in the browser. The match function
-  rehydrates the slugs it is sent but does not re-apply the filter, so a
-  person who tampers with their own client can see modalities excluded for
-  them. Closing it means the function deriving the risk level from the
-  stored clinical columns itself.
-- A reading made under a consent later revoked or expired stays in
-  `chart_comparisons`, unreadable by policy, until its profile or the
-  account is deleted. Deleting it at revocation is a one-line change in
+- **What a subscription buys.** The paywall's button activates a simulated
+  subscription for free, and every question after it is a real model call on
+  the deployment's key. It is capped at six per thirty days on top of the
+  free three (`SUBSCRIBED_QUESTIONS` in `src/lib/quota.ts`) — not a product
+  number but the one that fits: `budget.test.ts` holds one person's worst
+  month under a third of `MONTHLY_BUDGET_USD`, and the other purposes already
+  use most of it. Offering more is raising the budget or lowering another
+  ceiling; the test fails until the sum is true.
+- **Whether a reading outlives its consent.** A comparison made under a
+  consent later revoked or expired stays in `chart_comparisons`, unreadable by
+  policy, until its profile or the account goes. This was seen and accepted
+  when the demo was built; why it is kept rather than deleted was never
+  written down. Deleting it at revocation is a one-line change in
   `revokeConsent` — and a decision about the other person's data.
 
 **Two open questions with the data now being collected for them:** whether the
@@ -242,7 +241,10 @@ licence to reverse.
 - **No match percentages, ever.** The ranking orders; it does not score.
 - **No facilitator names.** The MVP recommends modalities, not people.
 - **Safety runs in front of the model, deterministically.** Clinical
-  exclusions are a predicate, not a prompt instruction.
+  exclusions are a predicate, not a prompt instruction — applied in the
+  browser for the screen and again in `supabase/functions/match/clinical.ts`
+  from the person's stored answers, failing closed. The server's is the one
+  that counts.
 - **Raw `clinical_basics` never enters a model payload.** A derived risk level
   instead.
 - **The copy lint governs fixtures as well as model output.** A hand-written

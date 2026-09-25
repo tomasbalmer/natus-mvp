@@ -1,4 +1,5 @@
 import type { ZodType } from 'zod';
+import type { SupabaseClient } from 'jsr:@supabase/supabase-js@2';
 import { json, preflight } from './cors.ts';
 import { authenticate, Unauthorized } from './auth.ts';
 import { logCall, type CallRecord } from './log.ts';
@@ -49,8 +50,12 @@ export type ModelRoute<I, O> = {
    * it to compute the synastry aspects: they are the one part of that prompt
    * the caller must not supply, because a caller who could supply them would
    * be telling the model which placements to read out.
+   *
+   * `match` uses it to re-apply the clinical exclusion from the person's own
+   * stored answers, which is why it is handed the caller: a client subject to
+   * RLS, acting as the person, never the elevated one.
    */
-  enrich?: (input: I) => Promise<I>;
+  enrich?: (input: I, context: { caller: SupabaseClient; userId: string }) => Promise<I>;
   /**
    * A rule about the answer that the schema cannot express. Returns a reason
    * to reject, or null to accept. Rejection is logged as `copy_violation` —
@@ -130,7 +135,9 @@ export function serveModel<I, O>(route: ModelRoute<I, O>): (request: Request) =>
     }
 
     try {
-      const input = route.enrich ? await route.enrich(parsed.data) : parsed.data;
+      const input = route.enrich
+        ? await route.enrich(parsed.data, { caller: auth.caller, userId })
+        : parsed.data;
       const generated = await generate({
         system: route.system,
         user: route.user(input),

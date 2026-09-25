@@ -1,6 +1,6 @@
 import { json, preflight } from '../_shared/cors.ts';
 import { authenticate, Unauthorized } from '../_shared/auth.ts';
-import { currentQuota } from '../_shared/quota.ts';
+import { currentQuota, overSubscribedLimit } from '../_shared/quota.ts';
 import { overDeploymentBudget } from '../_shared/spend.ts';
 import { MAX_OUTPUT_TOKENS } from '../_shared/lib/budget.ts';
 import { isChargeable } from '../_shared/lib/quota.ts';
@@ -115,6 +115,23 @@ Deno.serve(async (request) => {
       latencyMs: Date.now() - started,
     });
     return json(request, { error: 'quota_exhausted', used: quota.used, remaining: 0 }, 402);
+  }
+
+  // A subscriber is past the paywall, not past the budget. While the
+  // subscription is simulated, "unlimited" is bounded here. A 429 rather than
+  // the 402 above: this is not a state the product asks money for.
+  if (quota.unlimited && (await overSubscribedLimit(elevated, userId))) {
+    await logCall(elevated, {
+      userId,
+      purpose: 'chat',
+      promptVersion: PROMPT_VERSION,
+      model: MODEL,
+      mode: 'fixture',
+      outcome: 'refused_quota',
+      latencyMs: Date.now() - started,
+      errorKind: 'subscribed',
+    });
+    return json(request, { error: 'spend_limit', scope: 'person' }, 429);
   }
 
   // ── 5. The model ──────────────────────────────────────────────────────────

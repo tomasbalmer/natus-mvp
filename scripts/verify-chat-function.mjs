@@ -251,6 +251,43 @@ if (ordinary.status === 200) {
   );
 }
 
+// ── a simulated subscription is past the paywall, not past the budget ──────
+//
+// A second person, so the refusals above keep their exact counts. The paywall
+// button writes this row as the person; nothing stops them, by design.
+const subscriber = createClient(API, ANON, { auth: { persistSession: false } });
+const { data: subAuth } = await subscriber.auth.signInAnonymously();
+const subId = subAuth.session.user.id;
+const subHeaders = { Authorization: `Bearer ${subAuth.session.access_token}` };
+await subscriber
+  .from('subscriptions')
+  .upsert({ user_id: subId, status: 'active', activated_at: new Date().toISOString() });
+await elevated.from('claude_api_calls').insert(
+  Array.from({ length: 9 }, () => ({
+    user_id: subId,
+    purpose: 'chat',
+    prompt_version: 'verify',
+    model: 'verify',
+    mode: 'server',
+    outcome: 'ok',
+    charged: true,
+  })),
+);
+const capped = await call({ message: 'una pregunta mas' }, subHeaders);
+const cappedBody = await capped.json();
+check(
+  'a subscriber past the ceiling is refused, not charged',
+  capped.status === 429 && cappedBody.error === 'spend_limit',
+  `status=${capped.status} error=${cappedBody.error}`,
+);
+const cappedCrisis = await call({ message: 'hace semanas que me quiero morir', country: 'CL' }, subHeaders);
+const cappedCrisisBody = await cappedCrisis.json();
+check(
+  'and a crisis turn past it is STILL containment',
+  cappedCrisis.status === 200 && cappedCrisisBody.type === 'crisis',
+  `status=${cappedCrisis.status} type=${cappedCrisisBody.type}`,
+);
+
 const failed = results.filter((r) => !r.pass);
 console.log(`\n${results.length - failed.length}/${results.length} passed`);
 process.exit(failed.length === 0 ? 0 : 1);

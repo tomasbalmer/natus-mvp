@@ -1,5 +1,11 @@
 import type { SupabaseClient } from 'jsr:@supabase/supabase-js@2';
-import { quotaState, type QuotaState } from './lib/quota.ts';
+import {
+  FREE_QUESTIONS,
+  SUBSCRIBED_QUESTIONS,
+  SUBSCRIBED_WINDOW_HOURS,
+  quotaState,
+  type QuotaState,
+} from './lib/quota.ts';
 
 /**
  * The quota, counted where the person cannot reach it.
@@ -31,4 +37,34 @@ export async function currentQuota(
   ]);
 
   return quotaState(count ?? 0, subscription?.status === 'active');
+}
+
+/**
+ * Whether a subscriber has used what a simulated subscription buys.
+ *
+ * `quotaState` calls a subscriber unlimited, and while the subscription is a
+ * free button that means unlimited model calls on somebody else's key. The
+ * ceiling counts every charged turn in the window — the free three included —
+ * because that total is what `budget.test.ts` prices. Fails open, like the
+ * other spend ceilings in `spend.ts`, and for the reason given there.
+ */
+export async function overSubscribedLimit(
+  elevated: SupabaseClient,
+  userId: string,
+  now = Date.now(),
+): Promise<boolean> {
+  const since = new Date(now - SUBSCRIBED_WINDOW_HOURS * 3_600_000).toISOString();
+  try {
+    const { count, error } = await elevated
+      .from('claude_api_calls')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('purpose', 'chat')
+      .eq('charged', true)
+      .gte('created_at', since);
+    if (error) return false;
+    return (count ?? 0) >= FREE_QUESTIONS + SUBSCRIBED_QUESTIONS;
+  } catch {
+    return false;
+  }
 }

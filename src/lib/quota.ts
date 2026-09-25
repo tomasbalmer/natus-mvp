@@ -40,6 +40,26 @@ export function quotaState(used: number, subscribed: boolean): QuotaState {
   return { used, remaining: Math.max(0, FREE_QUESTIONS - used), unlimited: false };
 }
 
+/**
+ * What a subscription buys, while the subscription is simulated.
+ *
+ * The paywall's button activates it for free — there is no payment provider —
+ * and `quotaState` reads it as unlimited. Every question past the free three
+ * is a real model call paid for by whoever holds the Anthropic key, so
+ * "unlimited" was one person's way to spend the whole deployment budget.
+ *
+ * The number is not a product choice; it is what fits. `budget.test.ts` holds
+ * one person's worst month under a third of the deployment budget, and with
+ * every other purpose at its ceiling that leaves room for nine chat turns at
+ * the output maximum: the three free ones and these six. Offering more means
+ * raising the budget or lowering another ceiling, and that test says which.
+ *
+ * Thirty days, like every other ceiling: `budget.ts` records why daily
+ * windows were a mistake.
+ */
+export const SUBSCRIBED_QUESTIONS = 6;
+export const SUBSCRIBED_WINDOW_HOURS = 720;
+
 export function hasQuestionsLeft(used: number, subscribed: boolean): boolean {
   return quotaState(used, subscribed).remaining > 0;
 }

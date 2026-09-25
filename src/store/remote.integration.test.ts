@@ -111,6 +111,7 @@ async function edgeShared(): Promise<{
   currentQuota: (client: unknown, userId: string) => Promise<{ used: number }>;
   logCall: (client: unknown, record: Record<string, unknown>) => Promise<void>;
   overDeploymentBudget: (client: unknown) => Promise<boolean>;
+  overSubscribedLimit: (client: unknown, userId: string) => Promise<boolean>;
 }> {
   const base = '../../supabase/functions/_shared';
   const [quota, log, spend] = await Promise.all([
@@ -122,6 +123,7 @@ async function edgeShared(): Promise<{
     currentQuota: quota.currentQuota,
     logCall: log.logCall,
     overDeploymentBudget: spend.overDeploymentBudget,
+    overSubscribedLimit: quota.overSubscribedLimit,
   };
 }
 
@@ -304,6 +306,18 @@ describe.skipIf(!configured)('adapters against Postgres', () => {
     expect(user.user).toBeNull();
   });
 
+  it('a simulated subscription is bounded, counting the free turns too', async () => {
+    const { userId } = await person();
+    const { logCall, overSubscribedLimit } = await edgeShared();
+    const turn = { userId, purpose: 'chat', promptVersion: 'test', model: 'test', latencyMs: 0 };
+
+    for (let i = 0; i < 8; i++) await logCall(admin(), { ...turn, mode: 'server', outcome: 'ok', charged: true });
+    expect(await overSubscribedLimit(admin(), userId)).toBe(false);
+
+    await logCall(admin(), { ...turn, mode: 'server', outcome: 'ok', charged: true });
+    expect(await overSubscribedLimit(admin(), userId)).toBe(true);
+  });
+
   it('the chat quota cannot be given back by the person it limits', async () => {
     const { client, userId } = await person();
     const { currentQuota, logCall } = await edgeShared();
@@ -324,6 +338,97 @@ describe.skipIf(!configured)('adapters against Postgres', () => {
     await client.from('claude_api_calls').update({ charged: false }).eq('user_id', userId);
 
     expect(await currentQuota(admin(), userId)).toEqual(before);
+  });
+});
+
+describe.skipIf(!configured)('the clinical exclusion, server-side', () => {
+  type Clinical = {
+    callerIsClinicallyVulnerable: (caller: unknown, userId: string) => Promise<boolean>;
+    withoutClinicalExclusions: (slugs: string[], vulnerable: boolean) => { kept: string[]; excluded: string[] };
+  };
+  const clinical = (): Promise<Clinical> =>
+    import(/* @vite-ignore */ `${'../../supabase/functions/match'}/clinical.ts`) as Promise<Clinical>;
+
+  async function withAnswers(
+    ideation: string | null,
+    options: { account?: string | null; crisis?: boolean } = {},
+  ): Promise<Person> {
+    const p = await signIn();
+    const draft = emptyDraft();
+    if (ideation) draft.clinical_basics = { ideation_6m: ideation as never };
+    await ADAPTERS.anonymous_session.save(p.client, p.userId, {
+      id: crypto.randomUUID(),
+      created_at: NOW,
+      expires_at: NOW + 3_600_000,
+      step: 4,
+      draft,
+      soul_map_id: null,
+      claimed_by: null,
+    });
+    if (options.account !== undefined) {
+      const profile = emptyDraft();
+      if (options.account) profile.clinical_basics = { ideation_6m: options.account as never };
+      await ADAPTERS.client.save(p.client, p.userId, {
+        id: crypto.randomUUID(),
+        email: 'ana@example.com',
+        created_at: NOW,
+        profile,
+        soul_map_id: null,
+        claimed_session_id: null,
+      });
+    }
+    if (options.crisis) {
+      await ADAPTERS.crisis_events.save(p.client, p.userId, [
+        {
+          id: crypto.randomUUID(),
+          severity: 'high',
+          category: 'ideacion',
+          layer: 'deterministic',
+          matched: ['x'],
+          excerpt: 'x',
+          source_surface: 'chat',
+          created_at: Date.now(),
+          admin_notified_at: null,
+          false_positive: null,
+        },
+      ]);
+    }
+    return p;
+  }
+
+  it('reads frequent ideation from the stored answers and excludes', async () => {
+    const { callerIsClinicallyVulnerable, withoutClinicalExclusions } = await clinical();
+    const p = await withAnswers('frecuentes');
+    const vulnerable = await callerIsClinicallyVulnerable(p.client, p.userId);
+    expect(vulnerable).toBe(true);
+    expect(withoutClinicalExclusions(['emdr', 'tcc', 'constelaciones-familiares'], vulnerable)).toEqual({
+      kept: ['tcc'],
+      excluded: ['emdr', 'constelaciones-familiares'],
+    });
+  });
+
+  it('leaves the pool alone for somebody who is not vulnerable', async () => {
+    const { callerIsClinicallyVulnerable } = await clinical();
+    const p = await withAnswers('no');
+    expect(await callerIsClinicallyVulnerable(p.client, p.userId)).toBe(false);
+  });
+
+  it('reads the account before the session, as activeProfile does', async () => {
+    const { callerIsClinicallyVulnerable } = await clinical();
+    const p = await withAnswers('no', { account: 'plan_o_intencion' });
+    expect(await callerIsClinicallyVulnerable(p.client, p.userId)).toBe(true);
+  });
+
+  it('counts a crisis in the last thirty days', async () => {
+    const { callerIsClinicallyVulnerable } = await clinical();
+    const p = await withAnswers('no', { crisis: true });
+    expect(await callerIsClinicallyVulnerable(p.client, p.userId)).toBe(true);
+  });
+
+  it('fails closed when there are no answers to read', async () => {
+    const { callerIsClinicallyVulnerable } = await clinical();
+    const p = await signIn();
+    expect(await callerIsClinicallyVulnerable(p.client, p.userId)).toBe(true);
   });
 });
 

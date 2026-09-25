@@ -8,6 +8,7 @@ import {
   monthlyBudgetUsd,
   type Purpose,
 } from './budget.ts';
+import { FREE_QUESTIONS, SUBSCRIBED_QUESTIONS, SUBSCRIBED_WINDOW_HOURS } from './quota.ts';
 
 const PURPOSES: Purpose[] = ['soul_map', 'match', 'chat', 'meditation', 'comparison'];
 
@@ -154,6 +155,7 @@ describe('per-person limits', () => {
     for (const limit of Object.values(PURPOSE_LIMITS)) {
       expect(limit.windowHours).toBe(720);
     }
+    expect(SUBSCRIBED_WINDOW_HOURS).toBe(720);
   });
 
   it('bounds one person to a fraction of the deployment budget', () => {
@@ -168,7 +170,13 @@ describe('per-person limits', () => {
           costUsd({ inputTokens: 4_000, outputTokens: MAX_OUTPUT_TOKENS[purpose as Purpose] }),
       0,
     );
-    expect(worst).toBeLessThan(DEFAULT_MONTHLY_BUDGET_USD / 3);
+    // The chat was left out of this sum on the reasoning that FREE_QUESTIONS
+    // bounds it — true until the simulated subscription, which is one tap
+    // away on the paywall, made it unbounded. Both counts are in now.
+    const chat =
+      (FREE_QUESTIONS + SUBSCRIBED_QUESTIONS) *
+      costUsd({ inputTokens: 4_000, outputTokens: MAX_OUTPUT_TOKENS.chat });
+    expect(worst + chat).toBeLessThan(DEFAULT_MONTHLY_BUDGET_USD / 3);
   });
 
   it('leaves room for a fifty-person pilot inside the budget', () => {
