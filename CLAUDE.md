@@ -94,7 +94,7 @@ nothing and the free questions become unlimited.
   a pnpm workspace package — the shape `waterplan-frontend` already uses.
 - `crisis-keywords.json` is `"status": "preliminary"` and wants a clinician.
 
-**Two product calls for the owner, found in the data layer:**
+**A product call for the owner, found in the data layer:**
 
 - **What a subscription buys.** The paywall's button activates a simulated
   subscription for free, and every question after it is a real model call on
@@ -104,12 +104,6 @@ nothing and the free questions become unlimited.
   month under a third of `MONTHLY_BUDGET_USD`, and the other purposes already
   use most of it. Offering more is raising the budget or lowering another
   ceiling; the test fails until the sum is true.
-- **Whether a reading outlives its consent.** A comparison made under a
-  consent later revoked or expired stays in `chart_comparisons`, unreadable by
-  policy, until its profile or the account goes. This was seen and accepted
-  when the demo was built; why it is kept rather than deleted was never
-  written down. Deleting it at revocation is a one-line change in
-  `revokeConsent` — and a decision about the other person's data.
 
 **Two open questions with the data now being collected for them:** whether the
 prompt cache is worth its 25% write surcharge on the once-per-account surfaces
@@ -240,6 +234,10 @@ licence to reverse.
   calculated anywhere.
 - **No match percentages, ever.** The ranking orders; it does not score.
 - **No facilitator names.** The MVP recommends modalities, not people.
+- **A revoked consent hides the reading; it does not delete it.** The row
+  stays in `chart_comparisons`, unreadable by policy, until its profile or
+  the account is deleted. Seen and accepted when the demo was built, and
+  confirmed by the product owner on 2026-09-25 when asked outright.
 - **Safety runs in front of the model, deterministically.** Clinical
   exclusions are a predicate, not a prompt instruction — applied in the
   browser for the screen and again in `supabase/functions/match/clinical.ts`
