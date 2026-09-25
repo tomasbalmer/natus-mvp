@@ -142,20 +142,13 @@ export function ClinicalBasics({
           />
         </Question>
 
-        <div>
-          <label
-            className="mb-2.5 block text-[length:var(--fs-body-13)] leading-snug text-blanco"
-            htmlFor="clinical-notes"
-          >
-            ¿Hay algo más que quieras que tengamos en cuenta?
-          </label>
-          <textarea
-            id="clinical-notes"
-            rows={2}
-            className="field w-full resize-none text-[length:var(--fs-body-14)] leading-5 placeholder:text-crema/55"
-            placeholder="Opcional"
-          />
-        </div>
+        {/*
+          There was a free-text "¿Hay algo más…?" here, bound to nothing: what
+          people typed was dropped on the next step. Keeping it means storing
+          clinical free text, scanning it with Layer 1 and keeping it out of
+          every model payload — a product decision, not a wiring fix — so the
+          field is gone until that decision is made.
+        */}
       </div>
     </StepBody>
   );

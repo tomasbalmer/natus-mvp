@@ -62,13 +62,22 @@ export function App() {
   //
   // It resolves either way: a paused project or a missing configuration lands
   // on localStorage rather than on an error.
+  // Below `sm` the document itself scrolls, and the router keeps its offset:
+  // leaving a scrolled screen through the navigation landed mid-page on the
+  // next one.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   const [ready, setReady] = useState(false);
   const [admitted, setAdmitted] = useState(false);
+  const [offline, setOffline] = useState(false);
   useEffect(() => {
     let live = true;
     void hydrate().then((result) => {
       if (!live) return;
       setAdmitted(result.kind === 'remote');
+      setOffline(result.kind === 'local' && result.reason === 'failed');
       setReady(true);
     });
     return () => {
@@ -109,7 +118,7 @@ export function App() {
     <PhoneFrame>
       <div className="absolute inset-x-0 top-0 z-50 flex flex-col gap-1.5 p-2">
         <DemoBanner />
-        <SaveFailureNotice />
+        <SaveFailureNotice offline={offline} />
       </div>
       {/*
         Keyed by pathname so navigating away clears a caught error. Without the
