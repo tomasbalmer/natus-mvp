@@ -3,7 +3,7 @@ import { PHOTO, Screen } from '@/design/Screen';
 import { AuthError, signInWithGoogle } from '@/supabase/session.ts';
 
 /**
- * The door, for a closed pilot. `DECISIONS.md` §13.
+ * The door, for a closed pilot.
  *
  * PDR section 3 asks for the account *after* the Soul Map, because before it
  * an account is a toll gate on a product the person has not seen the value of.

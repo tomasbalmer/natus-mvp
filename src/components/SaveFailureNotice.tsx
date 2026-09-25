@@ -6,7 +6,7 @@ import { setWriteFailureHandler, type WriteFailure } from '@/store/hydrate.ts';
  *
  * `store/db.ts` swallows a `localStorage` quota error deliberately — the demo
  * should degrade rather than break in front of whoever is watching. A dropped
- * network write is a different thing and `DECISIONS.md` §12 says so: the
+ * network write is a different thing: the
  * person believes their answers were saved, and they are sitting in one
  * browser tab that will forget them.
  *

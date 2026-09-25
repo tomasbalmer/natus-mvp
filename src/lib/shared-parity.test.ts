@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 /**
  * `supabase/functions/_shared/lib` is a copy of this directory, and
- * `docs/MIGRATION.md` says it is copied *unchanged*. That sentence is a
+ * it is copied *unchanged*. That is a
  * promise about the boundary: nothing in here may reach for React, for
  * `localStorage`, or for anything else the server does not have.
  *
@@ -134,8 +134,7 @@ describe('the boundary itself', () => {
     const specifiers = [...source.matchAll(/from '([^']+)'/g)].map((m) => m[1]!);
 
     for (const specifier of specifiers) {
-      // The rule docs/MIGRATION.md states: "If anything in there ever imports
-      // from src/store, this document stops being true." Extended to React
+      // Nothing in here may import from src/store. Extended to React
       // and to @/ generally, since neither exists on the other side.
       expect(specifier).not.toMatch(/^@\/store\//);
       expect(specifier).not.toMatch(/^react/);

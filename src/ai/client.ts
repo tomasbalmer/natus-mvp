@@ -16,7 +16,6 @@ import { isBackendConfigured, supabase } from '@/supabase/client';
  * its cost the moment all five surfaces had a server: it put a working
  * credential in `localStorage`, it was the one path whose spend nobody could
  * account for, and it answered from a place the banner had to keep explaining.
- * `docs/DECISIONS.md` §14 records the removal.
  */
 
 /**

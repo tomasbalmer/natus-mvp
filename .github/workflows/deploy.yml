@@ -129,7 +129,7 @@ jobs:
           # public value as a secret would mislead whoever reads this next.
           VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
-          # The door. DECISIONS.md section 13.
+          # The door.
           #
           # 'false' opens it, and it is open for the preview: the people trying
           # the tool know each other and the data is invented. Set it to 'true'

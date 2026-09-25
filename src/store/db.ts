@@ -2,15 +2,12 @@
  * The store's single frontier.
  *
  * One namespace per table from PDR section 5, so the call sites read like the
- * queries they became. `docs/MIGRATION.md` promised that this file is replaced
- * and its callers are not, and the reason that promise survives contact with a
- * network database is here: `read` and `write` are still synchronous.
+ * queries they became. The backend replaced this file's storage and not its
+ * callers, because `read` and `write` are still synchronous.
  *
  * They can be because the reads never touch the network. The user's whole
  * dataset — one synthesis, a handful of matches, some messages, some
  * meditations — is loaded once at session start and held in memory.
- * `DECISIONS.md` section 12 records why, what was rejected, and the signal to
- * change approach.
  *
  * Three layers, in the order `read` consults them:
  *

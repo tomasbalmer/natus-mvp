@@ -32,8 +32,8 @@ import {
  * **Safety precedes the quota and that ordering is load-bearing.** PDR 1.6
  * forbids meeting someone in crisis with a commercial fallback. If the quota
  * ran first, a person at zero remaining who typed something desperate would be
- * shown a payment screen instead of a hotline. `DECISIONS.md` §5 makes safety
- * deterministic and in front of everything; this is what "in front" means when
+ * shown a payment screen instead of a hotline. Safety is deterministic and in
+ * front of everything; this is what "in front" means when
  * there is a paywall behind it.
  *
  * A crisis turn also costs nothing, enforced here rather than trusted to the

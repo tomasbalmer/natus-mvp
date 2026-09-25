@@ -6,7 +6,7 @@
     "to src/lib. Those files were written for Vite and use two conventions Deno does",
     "not share by default: the @data/ alias, and extensionless relative imports",
     "(./schemas rather than ./schemas/index.ts). Both are resolution concerns, not",
-    "code concerns — mapping them here keeps the promise docs/MIGRATION.md makes,",
+    "code concerns — mapping them here keeps the promise,",
     "which is that the library crosses the boundary unchanged.",
     "",
     "The same mapping now carries src/ai/prompts: a prompt that reaches @/lib/schemas",

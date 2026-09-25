@@ -4,8 +4,8 @@
  * and a crisis reply of its own and does not use the shared handler.
  *
  * The assertion this exists for is the second block: **a crisis is refused
- * before the key is checked.** `DECISIONS.md` §5 puts the deterministic scan
- * in front of the model, and "in front" has to survive a deployment that has
+ * before the key is checked.** The deterministic scan sits in front of the
+ * model, and "in front" has to survive a deployment that has
  * no model at all — otherwise the ordering silently reverses the moment
  * somebody forgets to set a secret, and nothing anywhere would say so.
  *

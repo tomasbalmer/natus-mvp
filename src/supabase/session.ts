@@ -28,7 +28,7 @@ export class AuthError extends Error {}
  * The session, if there is one. Never creates one.
  *
  * It used to sign in anonymously here, and for one day that was the whole auth
- * model. `DECISIONS.md` §13 put a door in front of the product, so an identity
+ * model. A door now sits in front of the product, so an identity
  * now arrives only by walking through it — creating one silently would be a
  * second way in, past the allow-list.
  *
@@ -107,7 +107,7 @@ export async function upgradeToEmail(email: string): Promise<void> {
 }
 
 /**
- * The door. See `DECISIONS.md` §13.
+ * The door.
  *
  * Sends the person to Google and back. Who is allowed through is not decided
  * here and not decided in this repository: it is the test-user list on the

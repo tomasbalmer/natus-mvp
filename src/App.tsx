@@ -79,8 +79,7 @@ export function App() {
   // The screens below call the store from their render bodies —
   // `activeProfile()`, `currentSynthesis()` — so rendering before the mirror
   // is filled would paint an empty account and then flip. Gating here is what
-  // buys those twenty-eight call sites the right to stay synchronous, which is
-  // the trade DECISIONS.md section 12 records.
+  // buys those twenty-eight call sites the right to stay synchronous.
   //
   // It resolves either way: a paused project or a missing configuration lands
   // on localStorage rather than on an error.
@@ -122,7 +121,7 @@ export function App() {
     );
   }
 
-  // The door. DECISIONS.md section 13.
+  // The door.
   //
   // Only when a backend is configured: without one there is nothing to protect
   // and nothing to sign in to, so the fixture demo runs untouched and offline.

@@ -6,10 +6,8 @@ import { addUsage, type Usage } from './lib/budget.ts';
 /**
  * The model call, held where the key is.
  *
- * `DECISIONS.md` §3 rejected a server-side proxy on two grounds. §10 answered
- * the first — a Supabase function is not an unauthenticated proxy, it is an
- * authenticated one behind a JWT check. This file is the second half of the
- * answer: the key never leaves the deployment, and every call is validated,
+ * A Supabase function is not an unauthenticated proxy, it is an authenticated
+ * one behind a JWT check. And here the key never leaves the deployment, and every call is validated,
  * linted and logged before its text reaches a person.
  *
  * The validation is deliberately the *same* validation the browser runs. Both

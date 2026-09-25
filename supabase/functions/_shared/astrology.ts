@@ -19,7 +19,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  *
  * Open-Meteo rather than a second astrology credential: the chart provider
  * would geocode too, through GeoNames, which is another account to hold and
- * another thing to be down. `DECISIONS.md` §11.
+ * another thing to be down.
  *
  * Returns null rather than throwing. Every caller has the same recovery — say
  * the place could not be found and carry on without a chart — and an

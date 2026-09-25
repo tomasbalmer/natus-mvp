@@ -7,7 +7,7 @@ import { REMOTE_NAMESPACES } from './namespaces.ts';
 /**
  * One round trip, at the start, and then the store is synchronous again.
  *
- * This is the whole of approach A from `DECISIONS.md` section 12. The screens
+ * The screens
  * call `activeProfile()` and `currentSynthesis()` from their render bodies, and
  * a React component cannot await; rather than rewrite twenty-eight files into
  * hooks, the dataset is small enough to load once and hold.
@@ -143,8 +143,8 @@ export async function hydrate(): Promise<HydrationResult> {
  *
  * `store/db.ts` swallows a `localStorage` quota error on purpose: the demo
  * should degrade rather than break. A dropped network write is a different
- * thing — the person believes their data was saved. `DECISIONS.md` section 12
- * records that these surface, and this is where.
+ * thing — the person believes their data was saved. These surface, and this
+ * is where.
  *
  * Serialised per namespace. Two writes to the same namespace in flight at once
  * can land out of order, and the later value is a whole-array replacement, so

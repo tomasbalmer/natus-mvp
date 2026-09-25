@@ -128,7 +128,7 @@ select is(
   'The draft carries the same answers before signup, and is equally unreachable'
 );
 
--- A join is the route docs/MIGRATION.md calls out by name.
+-- A join is the route most likely to leak.
 select is(
   (select count(*)::int
    from public.clients c

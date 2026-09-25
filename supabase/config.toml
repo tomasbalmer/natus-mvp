@@ -190,7 +190,7 @@ enable_signup = true
 #
 # On, and gated by VITE_REQUIRE_INVITE on the client rather than here.
 #
-# DECISIONS.md section 13 put a door in front of the product for the fifty-person
+# There is a door in front of the product for the fifty-person
 # pilot. Before that pilot there is a preview, where the people trying the tool
 # are known to each other and the data is invented — and there, an anonymous
 # session is exactly right: each device gets its own identity and its own rows
@@ -358,7 +358,7 @@ skip_nonce_check = false
 email_optional = false
 
 [auth.external.google]
-# The door. See DECISIONS.md section 13.
+# The door.
 #
 # Who may enter is NOT configured here — it is the test-user list on the OAuth
 # consent screen in Google Cloud, which admits up to 100 people while the app

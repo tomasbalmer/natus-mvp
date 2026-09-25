@@ -10,10 +10,8 @@ import {
 /**
  * The quota, counted where the person cannot reach it.
  *
- * `DECISIONS.md` §3 rejected a server-side proxy partly because it "puts a
- * spend-anything endpoint on a public URL". §10 supersedes the first half of
- * that objection and explicitly does not supersede this one — this file is the
- * answer to it, and the chat does not open to users until it exists.
+ * A server-side model call must not be a spend-anything endpoint on a public
+ * URL; this file is what stops the chat from being one.
  *
  * Counted from `claude_api_calls`, which only the functions write. It used to
  * count `messages where counted` — rows the browser writes and may delete, so

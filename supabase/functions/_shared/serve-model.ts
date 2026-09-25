@@ -36,7 +36,7 @@ export type ModelRoute<I, O> = {
   /**
    * Free prose the person typed, if this surface has any.
    *
-   * `DECISIONS.md` §5: the deterministic scan runs in front of the model,
+   * The deterministic scan runs in front of the model,
    * everywhere a person writes in their own words. Two of these four do —
    * the Soul Map's presenting need and the meditation's intent — and both
    * are read by the model, so both are scanned before a token is spent.

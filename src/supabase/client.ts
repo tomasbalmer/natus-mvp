@@ -35,7 +35,7 @@ const anonKey = import.meta.env['VITE_SUPABASE_ANON_KEY'];
 export const isBackendConfigured = Boolean(url && anonKey);
 
 /**
- * Whether the door is closed. `DECISIONS.md` §13.
+ * Whether the door is closed.
  *
  * Default is closed, so forgetting to set this errs towards refusing people
  * rather than admitting them — the safe direction for a product holding

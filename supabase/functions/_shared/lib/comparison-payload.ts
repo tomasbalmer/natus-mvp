@@ -61,8 +61,8 @@ export type ComparisonBirth = {
  *
  * There is no score here and there will not be. `/chart-data/synastry` can
  * return a Ciro Discepolo compatibility number and the request that fetches
- * these asks it not to — `DECISIONS.md` §7 forbids match percentages, and §11
- * wrote the warning down because the wrong endpoint is the better-named one.
+ * these asks it not to — match percentages are a non-negotiable, and the wrong
+ * endpoint is the better-named one.
  */
 export type SynastryAspect = {
   a_body: string;
