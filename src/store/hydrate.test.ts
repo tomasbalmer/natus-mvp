@@ -96,3 +96,66 @@ describe('purgeRemote', () => {
     expect(hasRemoteIdentity()).toBe(true);
   });
 });
+
+describe('hydrate', () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.doUnmock('./remote.ts');
+    vi.doUnmock('@/supabase/client.ts');
+    vi.doUnmock('@/supabase/session.ts');
+    vi.resetModules();
+  });
+
+  function mockLoads(failures: number) {
+    let calls = 0;
+    const ADAPTERS = Object.fromEntries(
+      REMOTE_NAMESPACES.map((ns, i) => [
+        ns,
+        {
+          load: async () => {
+            // The first namespace is the one that goes out first, which is
+            // the one PostgREST refuses with PGRST303 "JWT issued at future"
+            // when the token was minted a moment ago in the same second.
+            if (i === 0 && calls++ < failures) throw new Error('JWT issued at future');
+            return null;
+          },
+          save: async () => {},
+        },
+      ]),
+    );
+    vi.doMock('./remote.ts', () => ({ ADAPTERS }));
+    vi.doMock('@/supabase/client.ts', () => ({ supabase: { from: () => ({}) } }));
+    vi.doMock('@/supabase/session.ts', () => ({
+      currentSession: async () => ({ user: { id: 'u1' } }),
+    }));
+  }
+
+  it('survives one refused load, which is what a freshly refreshed token gets', async () => {
+    mockLoads(1);
+    const { hydrate, hasRemoteIdentity } = await import('./hydrate.ts');
+
+    const result = hydrate();
+    await vi.runAllTimersAsync();
+
+    expect(await result).toMatchObject({ kind: 'remote' });
+    // The identity is what lets a write reach Postgres and "borrar todo"
+    // reach the server. Without it the whole visit is local-only.
+    expect(hasRemoteIdentity()).toBe(true);
+  });
+
+  it('still gives up, whole, when the retry fails too', async () => {
+    mockLoads(2);
+    const { hydrate, hasRemoteIdentity } = await import('./hydrate.ts');
+
+    const result = hydrate();
+    await vi.runAllTimersAsync();
+
+    expect(await result).toEqual({ kind: 'local', reason: 'failed' });
+    expect(hasRemoteIdentity()).toBe(false);
+  });
+});

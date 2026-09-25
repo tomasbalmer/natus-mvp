@@ -183,7 +183,7 @@ pnpm verify:chat && pnpm verify:models
 
 ```
 pnpm typecheck      tsc --noEmit
-pnpm test           vitest, 772 tests
+pnpm test           vitest, 774 tests
 pnpm test:db        pgTAP policies + the adapters and functions against a
                     real Postgres; needs `supabase start`
 pnpm build          production build

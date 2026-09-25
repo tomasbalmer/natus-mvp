@@ -76,6 +76,9 @@ export function setWriteFailureHandler(handler: (failure: WriteFailure) => void)
   onWriteFailure = handler;
 }
 
+/** Past the next whole second, which is all a just-minted token needs. */
+const RETRY_AFTER_MS = 1_100;
+
 export async function hydrate(): Promise<HydrationResult> {
   if (!supabase) {
     markHydrationFailed();
@@ -92,16 +95,33 @@ export async function hydrate(): Promise<HydrationResult> {
   const userId = session.user.id;
   const client = supabase;
 
-  try {
-    // In parallel: fourteen small selects against one Postgres, none of which
-    // depends on another. Sequentially this would be fourteen round trips to
-    // São Paulo before the first screen painted.
-    const loaded = await Promise.all(
+  // In parallel: fourteen small selects against one Postgres, none of which
+  // depends on another. Sequentially this would be fourteen round trips to
+  // São Paulo before the first screen painted.
+  const loadAll = () =>
+    Promise.all(
       REMOTE_NAMESPACES.map(async (ns) => {
         const value: unknown = await ADAPTERS[ns].load(client, userId);
         return [ns, value] as [RemoteNamespace, unknown];
       }),
     );
+
+  try {
+    let loaded;
+    try {
+      loaded = await loadAll();
+    } catch {
+      // Once more, after the second has turned. Anybody returning after the
+      // access token lapsed gets a fresh one at load, and the first select
+      // goes out in the same second it was minted: PostgREST checks `iat`
+      // with no leeway and refuses it — PGRST303, "JWT issued at future" —
+      // while the thirteen behind it pass. Reproduced locally and seen on
+      // the deployed site. Without this the whole visit ran on
+      // localStorage: nothing written reached Postgres, and "borrar todo"
+      // deleted nothing on the server while saying it had.
+      await new Promise((resolve) => setTimeout(resolve, RETRY_AFTER_MS));
+      loaded = await loadAll();
+    }
 
     seedMirror(loaded);
     setPersister(makePersister(client, userId));
