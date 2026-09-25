@@ -7,6 +7,7 @@ import { detectCrisis, riskLevel } from '@/lib/safety';
 import { estimateDurationMs, parseSsml } from '@/lib/ssml';
 import { createPlayer, isPlaybackAvailable, type MeditationPlayer } from '@/audio/player';
 import { generateMeditation } from '@/ai/meditation';
+import { AiError } from '@/ai/client';
 import { MEDITATION_PROMPT_VERSION } from '@/ai/prompts/meditation';
 import { activeProfile } from '@/store/account';
 import { currentSynthesis } from '@/store/soulMap';
@@ -101,8 +102,14 @@ export function Meditation() {
           mode: result.mode,
         }),
       );
-    } catch {
-      setError('No pudimos armar la práctica esta vez. Lo que escribiste sigue acá.');
+    } catch (err) {
+      setError(
+        err instanceof AiError && err.kind === 'spend_limit'
+          ? 'Por hoy llegamos al límite de prácticas. Lo que escribiste sigue acá: probá más tarde.'
+          : err instanceof AiError && err.kind === 'crisis'
+            ? 'Por lo que escribiste, preferimos no armar una práctica automática. Si necesitás hablar con alguien, la ayuda sigue disponible desde el inicio.'
+            : 'No pudimos armar la práctica esta vez. Lo que escribiste sigue acá.',
+      );
     } finally {
       setGenerating(false);
     }

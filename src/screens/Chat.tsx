@@ -6,11 +6,12 @@ import { CrisisResourceList } from '@/components/CrisisResourceList';
 import { modalityBySlug } from '@/lib/catalog';
 import { detectCrisis, riskLevel } from '@/lib/safety';
 import { askChat } from '@/ai/chat';
+import { AiError } from '@/ai/client';
 import { activeProfile } from '@/store/account';
 import { currentSynthesis } from '@/store/soulMap';
 import { currentMatchFor } from '@/store/matches';
 import { activeHighSeverityEvent, markFalsePositive, recordCrisisEvent } from '@/store/crisis';
-import { simulateSubscribe } from '@/store/subscription';
+import { isSubscribed, simulateSubscribe } from '@/store/subscription';
 import {
   FREE_QUESTIONS,
   appendAssistantMessage,
@@ -137,13 +138,47 @@ export function Chat() {
       });
       appendAssistantMessage(conversation.id, result.value);
       setMessages(listMessages(conversation.id));
-    } catch {
+    } catch (err) {
+      // The server's Layer 1 disagreed with this one — a tab older than the
+      // keyword list, say. Containment, exactly as if it had fired here; the
+      // question stays in the thread because it was asked.
+      if (err instanceof AiError && err.kind === 'crisis' && err.crisis) {
+        const event = recordCrisisEvent(
+          { ...err.crisis, layer: 'deterministic', matched: [], excerpt: '' },
+          'chat',
+        );
+        appendAssistantMessage(conversation.id, {
+          type: 'crisis',
+          message_text: CONTAINMENT_TEXT,
+          linked_modality_slugs: [],
+        });
+        setMessages(listMessages(conversation.id));
+        if (err.crisis.severity === 'high') setContainment(event.id);
+        return;
+      }
+
       // A failed turn costs nothing: the half-exchange is removed and the text
       // comes back so retrying is one tap rather than retyping.
       dropMessage(user.id);
       setMessages(listMessages(conversation.id));
       setDraft(question);
-      setError('No pudimos responder esta vez. Lo que escribiste sigue acá.');
+
+      // The server's count is the one that charges. When it says the
+      // questions are spent and this screen thought otherwise — a turn charged
+      // whose answer never arrived — the paywall is the true answer.
+      if (err instanceof AiError && err.kind === 'quota') {
+        if (isSubscribed()) {
+          setError('Llegaste al máximo de preguntas de este mes. Lo que escribiste sigue acá.');
+        } else {
+          setShowPaywall(true);
+        }
+        return;
+      }
+      setError(
+        err instanceof AiError && err.kind === 'spend_limit'
+          ? 'Por hoy no podemos responder más. Lo que escribiste sigue acá: probá más tarde.'
+          : 'No pudimos responder esta vez. Lo que escribiste sigue acá.',
+      );
     } finally {
       setThinking(false);
     }

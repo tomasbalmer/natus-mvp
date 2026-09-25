@@ -1,5 +1,6 @@
 import type { ZodType } from 'zod';
 import { lintDeep } from '@/lib/copy-lint';
+import type { CrisisCategory, CrisisSeverity } from '@/lib/safety';
 import { isBackendConfigured, supabase } from '@/supabase/client';
 
 /**
@@ -50,14 +51,38 @@ export type AiResult<T> = {
   outputTokens: number | null;
 };
 
+/**
+ * `quota`, `spend_limit` and `crisis` are refusals the server declares, and
+ * each has a screen of its own — the paywall, an honest "not today", and
+ * containment. Folding them into `api_error` put a generic failure where the
+ * paywall and the hotlines belonged.
+ */
+export type AiErrorKind =
+  | 'invalid_json'
+  | 'api_error'
+  | 'timeout'
+  | 'copy_violation'
+  | 'quota'
+  | 'spend_limit'
+  | 'crisis';
+
 export class AiError extends Error {
   constructor(
     message: string,
-    readonly kind: 'invalid_json' | 'api_error' | 'timeout' | 'copy_violation',
+    readonly kind: AiErrorKind,
+    /** Set on `crisis`: the server's Layer 1 verdict. */
+    readonly crisis?: { severity: CrisisSeverity; category: CrisisCategory },
   ) {
     super(message);
   }
 }
+
+/**
+ * Past the longest generation seen, which is the Soul Map at about thirty
+ * seconds. Without a ceiling a hung function held "Pensando…" until the
+ * platform's own wall clock gave up, minutes later.
+ */
+const EDGE_TIMEOUT_MS = 90_000;
 
 /**
  * PDR 6.5 step 6: validate, and on failure retry exactly once before showing
@@ -108,11 +133,17 @@ async function runOnEdge<T>(call: AiCall<T>, started: number): Promise<AiResult<
 
   const { data, error } = await supabase.functions.invoke<Record<string, unknown>>(edge.fn, {
     body: edge.body,
+    timeout: EDGE_TIMEOUT_MS,
   });
 
   if (error) {
-    // `FunctionsHttpError` carries the response; anything else is transport.
-    const status = (error as { context?: { status?: number } }).context?.status;
+    // `FunctionsHttpError` carries the response; `FunctionsFetchError` carries
+    // what `fetch` threw, which is an `AbortError` when the timeout fired.
+    const context = (error as { context?: unknown }).context;
+    if (context instanceof Error && context.name === 'AbortError') {
+      throw new AiError(`The ${edge.fn} function did not answer in time.`, 'timeout');
+    }
+    const status = context instanceof Response ? context.status : undefined;
     // Two absences rather than faults. 503 is a deployment saying it has no
     // key; 404 is a function that was never deployed — which is the state
     // every purpose is in until the first push that carries it, and briefly
@@ -122,6 +153,14 @@ async function runOnEdge<T>(call: AiCall<T>, started: number): Promise<AiResult<
     // used to be, for the window between shipping a caller and shipping the
     // function it calls.
     if (status === 503 || status === 404) return null;
+    if (status === 402) throw new AiError(`The ${edge.fn} quota is exhausted.`, 'quota');
+    if (status === 429) throw new AiError(`The ${edge.fn} spend limit was reached.`, 'spend_limit');
+    if (status === 403 && (await errorCode(context)) === 'refused_crisis') {
+      throw new AiError(`The ${edge.fn} function saw a crisis the caller did not.`, 'crisis', {
+        severity: 'high',
+        category: 'indirecto',
+      });
+    }
     throw new AiError(`The ${edge.fn} function returned ${status ?? 'no status'}.`, 'api_error');
   }
 
@@ -131,11 +170,15 @@ async function runOnEdge<T>(call: AiCall<T>, started: number): Promise<AiResult<
   }
 
   // The server runs the same Layer 1 the caller already ran. If it fires here
-  // the two disagreed about the same text, which is a fault worth surfacing
-  // rather than papering over — the screen has its own containment path and
-  // reaches it by way of this throw.
+  // the two disagreed about the same text — a tab older than the keyword
+  // list, say — and the screen owes the person containment, not an error.
   if (data && typeof data === 'object' && data['type'] === 'crisis') {
-    throw new AiError(`The ${edge.fn} function saw a crisis the caller did not.`, 'api_error');
+    throw new AiError(`The ${edge.fn} function saw a crisis the caller did not.`, 'crisis', {
+      severity: data['severity'] === 'low' ? 'low' : 'high',
+      category: CATEGORIES.has(data['category'] as CrisisCategory)
+        ? (data['category'] as CrisisCategory)
+        : 'indirecto',
+    });
   }
 
   const parsed = call.schema.parse(data?.['result']);
@@ -147,6 +190,26 @@ async function runOnEdge<T>(call: AiCall<T>, started: number): Promise<AiResult<
     inputTokens: numberOrNull(data?.['input_tokens']),
     outputTokens: numberOrNull(data?.['output_tokens']),
   };
+}
+
+const CATEGORIES = new Set<CrisisCategory>([
+  'ideacion',
+  'autolesion',
+  'abuso',
+  'psicosis',
+  'panico',
+  'indirecto',
+]);
+
+/** The `error` field of a refusal's JSON body, or null if there is none. */
+async function errorCode(context: unknown): Promise<string | null> {
+  if (!(context instanceof Response)) return null;
+  try {
+    const body: unknown = await context.clone().json();
+    return body && typeof body === 'object' && 'error' in body ? String(body.error) : null;
+  } catch {
+    return null;
+  }
 }
 
 function numberOrNull(value: unknown): number | null {
