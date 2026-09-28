@@ -121,6 +121,13 @@ async function edgeShared(): Promise<{
     promptVersion: string,
     model: string,
   ) => Promise<string | null>;
+  reserveModelCall: (
+    client: unknown,
+    userId: string,
+    purpose: string,
+    promptVersion: string,
+    model: string,
+  ) => Promise<string | null>;
 }> {
   const base = '../../supabase/functions/_shared';
   const [quota, log, spend] = await Promise.all([
@@ -134,6 +141,7 @@ async function edgeShared(): Promise<{
     overDeploymentBudget: spend.overDeploymentBudget,
     overSubscribedLimit: quota.overSubscribedLimit,
     reserveChatTurn: quota.reserveChatTurn,
+    reserveModelCall: spend.reserveModelCall,
   };
 }
 
@@ -354,6 +362,17 @@ describe.skipIf(!configured)('adapters against Postgres', () => {
     );
 
     expect(reserved.filter((id) => id !== null)).toHaveLength(3);
+  });
+
+  it('parallel generations cannot pass the per-purpose ceiling', async () => {
+    const { userId } = await person();
+    const { reserveModelCall } = await edgeShared();
+
+    const reserved = await Promise.all(
+      Array.from({ length: 15 }, () => reserveModelCall(admin(), userId, 'soul_map', 'test', 'test')),
+    );
+
+    expect(reserved.filter((id) => id !== null)).toHaveLength(10);
   });
 
   it('the chat quota cannot be given back by the person it limits', async () => {

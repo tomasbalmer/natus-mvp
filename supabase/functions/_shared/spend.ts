@@ -104,6 +104,27 @@ export async function overDeploymentBudget(elevated: SupabaseClient): Promise<bo
 }
 
 /** Both checks, in the order they get cheaper to be wrong about. */
+export async function reserveModelCall(
+  elevated: SupabaseClient,
+  userId: string,
+  purpose: Purpose,
+  promptVersion: string,
+  model: string,
+): Promise<string | null> {
+  const limit = PURPOSE_LIMITS[purpose as Exclude<Purpose, 'chat'>];
+  if (!limit) throw new Error(`reserve_model_call: no limit for ${purpose}`);
+  const { data, error } = await elevated.rpc('reserve_model_call', {
+    p_user: userId,
+    p_purpose: purpose,
+    p_limit: limit.calls,
+    p_since: new Date(Date.now() - limit.windowHours * 3_600_000).toISOString(),
+    p_prompt_version: promptVersion,
+    p_model: model,
+  });
+  if (error) throw new Error(`reserve_model_call: ${error.message}`);
+  return (data as string | null) ?? null;
+}
+
 export async function refuseForSpend(
   elevated: SupabaseClient,
   userId: string,

@@ -6,7 +6,7 @@ import { logCall, type CallRecord } from './log.ts';
 import { MODEL, ModelError, generate, hasKey } from './anthropic.ts';
 import { scanText } from './lib/safety.ts';
 import { MAX_OUTPUT_TOKENS } from './lib/budget.ts';
-import { refuseForSpend } from './spend.ts';
+import { refuseForSpend, reserveModelCall } from './spend.ts';
 
 /**
  * The shape four of the five functions share.
@@ -135,6 +135,14 @@ export function serveModel<I, O>(route: ModelRoute<I, O>): (request: Request) =>
       return json(request, { error: 'spend_limit', scope: refusal.reason }, 429);
     }
 
+    let reservedId: string | null;
+    try {
+      reservedId = await reserveModelCall(elevated, userId, route.purpose, route.promptVersion, MODEL);
+    } catch {
+      return json(request, { error: 'quota_unavailable' }, 500);
+    }
+    if (reservedId === null) return json(request, { error: 'spend_limit', scope: 'person' }, 429);
+
     try {
       const input = route.enrich
         ? await route.enrich(parsed.data, { caller: auth.caller, userId })
@@ -158,7 +166,7 @@ export function serveModel<I, O>(route: ModelRoute<I, O>): (request: Request) =>
         cacheWriteTokens: generated.cacheWriteTokens,
         cacheReadTokens: generated.cacheReadTokens,
         latencyMs: Date.now() - started,
-      });
+      }, reservedId);
 
       return json(request, {
         result: generated.value,
@@ -186,7 +194,7 @@ export function serveModel<I, O>(route: ModelRoute<I, O>): (request: Request) =>
               cacheReadTokens: error.usage.cacheReadTokens,
             }
           : {}),
-      });
+      }, reservedId);
       // The provider's *message* does not travel — it can quote the request
       // back, and the request is what these functions exist to keep from
       // leaking. Its error *class* does: `authentication_error` describes the
