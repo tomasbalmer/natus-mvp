@@ -116,7 +116,7 @@ the owner's call).
 **The prompts are reconstructed, not the author's.** Every version string
 carries `-reconstructed` because `07 - System Prompt IA.md` was never
 available. Swapping in the real text is a change to constants in
-`src/ai/prompts/shared.ts` and the five version strings. Do not edit prompt
+`src/ai/prompts/shared.ts` and the five version strings in `versions.ts`. Do not edit prompt
 text for any other reason without asking — the design is somebody's work.
 
 Keep this section current. It is now the only handover there is: when one of
