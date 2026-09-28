@@ -57,12 +57,11 @@ both edges, which the app's portrait crop hides; the card zooms past them.
 
 ## Typography
 
-Cormorant Garamond and DM Sans, loaded from Google Fonts in `index.html`.
+Cormorant Garamond and DM Sans, self-hosted from `src/styles/fonts/`: the
+Latin subset of each variable font, as Google Fonts serves it (v21 and v17),
+declared in `src/styles/index.css`. The upright faces are preloaded at build.
 
-Both are licensed under the SIL Open Font License. They are currently linked
-rather than self-hosted, which means the demo falls back to system serif and
-sans when offline. Self-hosting is worth doing before any presentation that
-cannot rely on a network.
+Both are licensed under the SIL Open Font License.
 
 ## Audio
 

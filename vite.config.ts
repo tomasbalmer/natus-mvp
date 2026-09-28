@@ -42,9 +42,29 @@ function linkPreview(): Plugin {
 // change of environment rather than a change of source. It is set in one
 // place: the `Build` step of `.github/workflows/deploy.yml`. `BrowserRouter`
 // reads the same value through `import.meta.env.BASE_URL`, so routing follows.
+function preloadFonts(): Plugin {
+  let base = '/';
+  return {
+    name: 'natus-preload-fonts',
+    configResolved(config) {
+      base = config.base;
+    },
+    transformIndexHtml(_html, ctx) {
+      if (!ctx.bundle) return [];
+      return Object.keys(ctx.bundle)
+        .filter((file) => /\/(cormorant-garamond|dm-sans)-[\w-]+\.woff2$/.test(file) && !file.includes('-italic-'))
+        .map((file) => ({
+          tag: 'link',
+          attrs: { rel: 'preload', href: `${base}${file}`, as: 'font', type: 'font/woff2', crossorigin: '' },
+          injectTo: 'head' as const,
+        }));
+    },
+  };
+}
+
 export default defineConfig({
   base: process.env['VITE_BASE'] ?? '/',
-  plugins: [react(), tailwindcss(), linkPreview()],
+  plugins: [react(), tailwindcss(), linkPreview(), preloadFonts()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
