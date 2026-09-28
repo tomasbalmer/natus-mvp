@@ -1,3 +1,4 @@
+import { COMPARISON_PROMPT_VERSION } from './versions.ts';
 import { JSON_DISCIPLINE, TONE_RULES } from './shared.ts';
 import type { ComparisonPayload } from '@/lib/comparison-payload.ts';
 
@@ -16,7 +17,7 @@ import type { ComparisonPayload } from '@/lib/comparison-payload.ts';
  * conclusion about the relationship.
  */
 
-export const COMPARISON_PROMPT_VERSION = 'comparison-v1.0-reconstructed';
+export { COMPARISON_PROMPT_VERSION };
 
 export const COMPARISON_SYSTEM_PROMPT = `
 ${TONE_RULES}

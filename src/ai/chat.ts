@@ -1,10 +1,5 @@
 import { runAi, type AiResult } from './client';
-import {
-  CHAT_PROMPT_VERSION,
-  CHAT_SYSTEM_PROMPT,
-  buildChatUserMessage,
-  type ChatTurn,
-} from './prompts/chat';
+import type { ChatTurn } from './prompts/chat';
 import { buildChatFixture } from './fixtures/chat';
 import { chatResponseSchema, type ChatResponse, type Numerology, type SoulMapSynthesis } from '@/lib/schemas';
 
@@ -28,10 +23,6 @@ export async function askChat(input: ChatAsk): Promise<AiResult<ChatResponse>> {
   const history = input.history.slice(-HISTORY_TURNS);
 
   const result = await runAi({
-    purpose: 'chat',
-    promptVersion: CHAT_PROMPT_VERSION,
-    system: CHAT_SYSTEM_PROMPT,
-    user: buildChatUserMessage({ ...input, history }),
     schema: chatResponseSchema,
     // The server builds the prompt from its own copy of `prompts/chat.ts`,
     // so what crosses is the context and not the text. `risk` is a derived

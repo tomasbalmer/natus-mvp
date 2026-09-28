@@ -16,7 +16,7 @@ import type { BedTrack, SoulMapSynthesis } from '@/lib/schemas/index.ts';
  * alike — the same arrangement as the copy lint, for the same reason.
  */
 
-export const MEDITATION_PROMPT_VERSION = 'meditation-v1.0-reconstructed';
+export { MEDITATION_PROMPT_VERSION } from './versions.ts';
 
 export const MEDITATION_SYSTEM_PROMPT = `
 ${TONE_RULES}

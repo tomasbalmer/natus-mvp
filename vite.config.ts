@@ -73,7 +73,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: false,
     rolldownOptions: {
       output: {
         // Split by how often the code changes, not by route.

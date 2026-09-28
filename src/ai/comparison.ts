@@ -1,9 +1,4 @@
 import { runAi, AiError, type AiResult } from './client';
-import {
-  COMPARISON_PROMPT_VERSION,
-  COMPARISON_SYSTEM_PROMPT,
-  buildComparisonUserMessage,
-} from './prompts/comparison';
 import { buildComparisonFixture } from './fixtures/comparison';
 import { comparisonResultSchema, type ComparisonResult } from '@/lib/schemas';
 import { canComputeSynastry, isScopeUsable, type ComparisonPayload } from '@/lib/comparison-payload';
@@ -16,10 +11,6 @@ export async function compareCharts(payload: ComparisonPayload): Promise<AiResul
   }
 
   const result = await runAi({
-    purpose: 'comparison',
-    promptVersion: COMPARISON_PROMPT_VERSION,
-    system: COMPARISON_SYSTEM_PROMPT,
-    user: buildComparisonUserMessage(payload),
     schema: comparisonResultSchema,
     // The payload crosses as it was built. `buildComparisonPayload` decided
     // what may leave this browser; `comparisonInputSchema` decides again on

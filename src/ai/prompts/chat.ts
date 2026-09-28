@@ -15,7 +15,7 @@ import type { Numerology, SoulMapSynthesis } from '@/lib/schemas/index.ts';
  * repeat back to the person about answers they gave a form weeks ago.
  */
 
-export const CHAT_PROMPT_VERSION = 'chat-v1.0-reconstructed';
+export { CHAT_PROMPT_VERSION } from './versions.ts';
 
 export const CHAT_SYSTEM_PROMPT = `
 ${TONE_RULES}

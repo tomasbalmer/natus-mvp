@@ -12,7 +12,7 @@ import { attachSoulMapToClient } from '@/store/account';
 import { AiError } from '@/ai/client';
 import type { Numerology } from '@/lib/schemas';
 import type { OnboardingDraft } from '@/store/session';
-import { SOUL_MAP_PROMPT_VERSION } from '@/ai/prompts/soul-map';
+import { SOUL_MAP_PROMPT_VERSION } from '@/ai/prompts/versions';
 
 /**
  * PDR 6.1 screen 7 and PDR 6.5.

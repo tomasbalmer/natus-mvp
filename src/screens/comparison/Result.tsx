@@ -5,7 +5,7 @@ import { ComparisonGate } from './Gate';
 import { computeNumerology, NumerologyInputError } from '@/lib/numerology';
 import { buildComparisonPayload, toComparisonBirth } from '@/lib/comparison-payload';
 import { compareCharts } from '@/ai/comparison';
-import { COMPARISON_PROMPT_VERSION } from '@/ai/prompts/comparison';
+import { COMPARISON_PROMPT_VERSION } from '@/ai/prompts/versions';
 import { activeProfile } from '@/store/account';
 import { currentSynthesis } from '@/store/soulMap';
 import {

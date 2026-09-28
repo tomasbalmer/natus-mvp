@@ -13,7 +13,7 @@ import type { SoulMapDraft } from '@/lib/model-input.ts';
  * narrative and keeps the eval set clean.
  */
 
-export const SOUL_MAP_PROMPT_VERSION = 'soul-map-v2.0-reconstructed';
+export { SOUL_MAP_PROMPT_VERSION } from './versions.ts';
 
 export const SOUL_MAP_SYSTEM_PROMPT = `
 ${TONE_RULES}

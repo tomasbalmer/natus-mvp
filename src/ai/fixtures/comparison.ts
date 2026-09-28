@@ -1,4 +1,4 @@
-import { COMPARISON_PROMPT_VERSION } from '../prompts/comparison';
+import { COMPARISON_PROMPT_VERSION } from '../prompts/versions';
 import { topicName } from '@/lib/catalog';
 import type { ComparisonPayload } from '@/lib/comparison-payload';
 import type { ComparisonResult } from '@/lib/schemas';

@@ -1,9 +1,4 @@
 import { runAi, type AiResult } from './client';
-import {
-  MEDITATION_PROMPT_VERSION,
-  MEDITATION_SYSTEM_PROMPT,
-  buildMeditationUserMessage,
-} from './prompts/meditation';
 import { buildMeditationFixture } from './fixtures/meditation';
 import { parseSsml, validateMeditation } from '@/lib/ssml';
 import { AiError } from './client';
@@ -19,10 +14,6 @@ export async function generateMeditation(input: {
   risk: 'none' | 'elevated' | 'high';
 }): Promise<AiResult<MeditationScript>> {
   const result = await runAi({
-    purpose: 'meditation',
-    promptVersion: MEDITATION_PROMPT_VERSION,
-    system: MEDITATION_SYSTEM_PROMPT,
-    user: buildMeditationUserMessage({ ...input, beds: ACTIVE_BEDS }),
     schema: meditationScriptSchema,
     // The beds are absent on purpose: the function offers the model its own
     // catalogue, so a caller cannot name a track the player cannot load.

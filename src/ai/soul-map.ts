@@ -1,5 +1,4 @@
 import { runAi, type AiResult } from './client';
-import { SOUL_MAP_PROMPT_VERSION, SOUL_MAP_SYSTEM_PROMPT, buildSoulMapUserMessage } from './prompts/soul-map';
 import { selectSoulMapFixture } from './fixtures/soul-map';
 import { soulMapSynthesisSchema, type Numerology, type SoulMapSynthesis } from '@/lib/schemas';
 import { soulMapDraftSchema } from '@/lib/model-input';
@@ -15,10 +14,6 @@ export async function generateSoulMap(input: {
   numerology: Numerology | null;
 }): Promise<AiResult<SoulMapSynthesis>> {
   return runAi({
-    purpose: 'soul_map',
-    promptVersion: SOUL_MAP_PROMPT_VERSION,
-    system: SOUL_MAP_SYSTEM_PROMPT,
-    user: buildSoulMapUserMessage(input),
     schema: soulMapSynthesisSchema,
     // Narrowed through the schema rather than forwarded. `OnboardingDraft`
     // carries `clinical_basics`; §7 says it never enters a model payload, and

@@ -1,5 +1,5 @@
 import { runAi, type AiResult } from './client';
-import { MATCH_PROMPT_VERSION, MATCH_SYSTEM_PROMPT, buildMatchUserMessage } from './prompts/match';
+import { MATCH_PROMPT_VERSION } from './prompts/versions';
 import { buildMatchFixture } from './fixtures/match';
 import { fallbackRanking, type FilterOutcome } from '@/lib/matching';
 import { matchResultSchema, type MatchResult, type SoulMapSynthesis } from '@/lib/schemas';
@@ -14,10 +14,6 @@ export async function matchModalities(input: {
 }): Promise<AiResult<MatchResult> & { usedFallback: boolean }> {
   try {
     const result = await runAi({
-      purpose: 'match',
-      promptVersion: MATCH_PROMPT_VERSION,
-      system: MATCH_SYSTEM_PROMPT,
-      user: buildMatchUserMessage(input),
       schema: matchResultSchema,
       // Slugs, not modalities. The server rehydrates them from its own
       // catalogue so the descriptions the model reads out are ours.

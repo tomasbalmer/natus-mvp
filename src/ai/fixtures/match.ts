@@ -1,4 +1,4 @@
-import { MATCH_PROMPT_VERSION } from '../prompts/match';
+import { MATCH_PROMPT_VERSION } from '../prompts/versions';
 import { fallbackRanking, type FilterOutcome } from '@/lib/matching';
 import type { MatchResult, SoulMapSynthesis } from '@/lib/schemas';
 

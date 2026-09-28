@@ -1,3 +1,4 @@
+import { MATCH_PROMPT_VERSION } from './versions.ts';
 import { JSON_DISCIPLINE, TONE_RULES } from './shared.ts';
 import type { FilterOutcome } from '@/lib/matching.ts';
 import type { SoulMapSynthesis } from '@/lib/schemas/index.ts';
@@ -20,7 +21,7 @@ import type { SoulMapSynthesis } from '@/lib/schemas/index.ts';
  * what it feels like".
  */
 
-export const MATCH_PROMPT_VERSION = 'match-v1.0-reconstructed';
+export { MATCH_PROMPT_VERSION };
 
 export const MATCH_SYSTEM_PROMPT = `
 ${TONE_RULES}

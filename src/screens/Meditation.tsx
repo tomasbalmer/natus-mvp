@@ -8,7 +8,7 @@ import { estimateDurationMs, parseSsml } from '@/lib/ssml';
 import { createPlayer, isPlaybackAvailable, type MeditationPlayer } from '@/audio/player';
 import { generateMeditation } from '@/ai/meditation';
 import { AiError } from '@/ai/client';
-import { MEDITATION_PROMPT_VERSION } from '@/ai/prompts/meditation';
+import { MEDITATION_PROMPT_VERSION } from '@/ai/prompts/versions';
 import { activeProfile } from '@/store/account';
 import { currentSynthesis } from '@/store/soulMap';
 import { markFalsePositive, recordCrisisEvent } from '@/store/crisis';

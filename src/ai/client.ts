@@ -26,10 +26,6 @@ import { isBackendConfigured, supabase } from '@/supabase/client';
 export type AiRunMode = 'fixture' | 'server';
 
 export type AiCall<T> = {
-  purpose: 'soul_map' | 'match' | 'chat' | 'meditation' | 'comparison';
-  promptVersion: string;
-  system: string;
-  user: string;
   schema: ZodType<T>;
   /** Returned when no key is present. Chosen deterministically from input. */
   fixture: () => T;
