@@ -2,6 +2,7 @@ import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { CrisisResourceList } from '@/components/CrisisResourceList';
 import { activeHighSeverityEvent } from '@/store/crisis';
 import { activeProfile } from '@/store/account';
+import { reportError } from '@/supabase/report-error';
 
 /**
  * The last thing between a render error and a blank screen.
@@ -57,9 +58,8 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
-    // There is no error reporting service wired up. The console is the whole
-    // of the observability story, and saying so beats implying otherwise.
     console.error('[natus] render error', error, info.componentStack);
+    reportError('render', error);
   }
 
   private reset = (): void => {
