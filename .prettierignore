@@ -1,0 +1,8 @@
+dist/
+node_modules/
+pnpm-lock.yaml
+supabase/functions/_shared/lib/
+supabase/functions/_shared/prompts/
+supabase/functions/_shared/data/
+supabase/migrations/
+src/supabase/database.types.ts
